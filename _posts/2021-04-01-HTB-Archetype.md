@@ -173,15 +173,6 @@ PS C:\Windows\system32>
 ```
 Find the user.txt in Desktop folder
 ```bash
-
-    Directory: C:\Users\sql_svc\Desktop
-
-
-Mode                LastWriteTime         Length Name                                                                  
-----                -------------         ------ ----                                                                  
--ar---        2/25/2020   6:37 AM             32 user.txt                                                              
-
-
 PS C:\Users\sql_svc\Desktop> cat user.txt
 3e7b102e78218e935bf3f4951fec21a3
 ```
@@ -190,6 +181,7 @@ Let's check powershell history to view what were the user's recent actions
 ```powershell
 PS C:\Users\sql_svc\Desktop> (Get-PSReadlineOption).HistorySavePath
 C:\Users\sql_svc\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+
 PS C:\Users\sql_svc\Desktop> cat C:\Users\sql_svc\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 net.exe use T: \\Archetype\backups /user:administrator MEGACORP_4dm1n!!
 ```
@@ -217,12 +209,6 @@ C:\Windows\system32>
 ```
 Now we can find the root.txt file!
 ```bash
-01/20/2020  06:42 AM    <DIR>          .
-01/20/2020  06:42 AM    <DIR>          ..
-02/25/2020  07:36 AM                32 root.txt
-               1 File(s)             32 bytes
-               2 Dir(s)  33,833,758,720 bytes free
-
 C:\Users\Administrator\Desktop>type root.txt
 b91ccec3305e98240082d4474b848528
 ```

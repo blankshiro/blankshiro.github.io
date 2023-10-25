@@ -94,23 +94,10 @@ Alternatively, we can bruteforce the subdomains using `gobuster`!
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
 └─# gobuster dns -d cronos.htb -w /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Domain:     cronos.htb
-[+] Threads:    10
-[+] Timeout:    1s
-[+] Wordlist:   /usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt
-===============================================================
-2022/04/22 14:55:19 Starting gobuster in DNS enumeration mode
-===============================================================
+...
 Found: ns1.cronos.htb
 Found: admin.cronos.htb
-                                 
-===============================================================
-2022/04/22 15:18:15 Finished
-===============================================================
+...
 ```
 
 Let’s add all these domains and subdomain into our `/etc/hosts` file.
@@ -140,26 +127,11 @@ All the links in the webpage leads to something Lavarel related. Therefore, we s
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
 └─# gobuster dir -u http://cronos.htb -k -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://cronos.htb
-[+] Method:                  GET
-[+] Threads:                 10
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Timeout:                 10s
-===============================================================
-2022/04/22 14:18:06 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /css                  (Status: 301) [Size: 306] [--> http://cronos.htb/css/]
 /js                   (Status: 301) [Size: 305] [--> http://cronos.htb/js/] 
 /server-status        (Status: 403) [Size: 298]                           
-===============================================================
-2022/04/22 14:19:26 Finished
-===============================================================
+...
 ```
 
 It seems like nothing interesting was returned. Let’s move on to the `admin.cronos.htb` webpage instead.
@@ -225,10 +197,7 @@ information_schema
 available databases [2]:
 [*] admin
 [*] information_schema
-
-[14:41:01] [INFO] fetched data logged to text files under '/root/.local/share/sqlmap/output/admin.cronos.htb'
-
-[*] ending @ 14:41:01 /2022-04-22/
+...
 ```
 
 Now we know that there are 2 databases - `admin` and `information_schema`.
@@ -375,3 +344,4 @@ noulis
 1703b8a3c9a8dde879942c79d02fd3a0
 ```
 
+  

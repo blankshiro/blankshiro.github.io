@@ -229,59 +229,23 @@ C:\>dir
 29/12/2017  10:41 ��    <DIR>          Program Files
 07/02/2022  03:44 ��    <DIR>          WINDOWS
 07/02/2022  04:25 ��            73.802 Y3WFFT.exe
-               4 File(s)        147.604 bytes
-               3 Dir(s)   6.297.550.848 bytes free
 
 C:\>cd Documents and Settings
-
 C:\Documents and Settings>dir
 16/03/2017  08:07 ��    <DIR>          .
 16/03/2017  08:07 ��    <DIR>          ..
 16/03/2017  08:07 ��    <DIR>          Administrator
 16/03/2017  07:29 ��    <DIR>          All Users
 16/03/2017  07:33 ��    <DIR>          john
-               0 File(s)              0 bytes
-               5 Dir(s)   6.297.546.752 bytes free
 
 C:\Documents and Settings>cd john
-
-C:\Documents and Settings\john>dir
-16/03/2017  07:33 ��    <DIR>          .
-16/03/2017  07:33 ��    <DIR>          ..
-16/03/2017  08:19 ��    <DIR>          Desktop
-16/03/2017  07:33 ��    <DIR>          Favorites
-16/03/2017  07:33 ��    <DIR>          My Documents
-16/03/2017  07:20 ��    <DIR>          Start Menu
-               0 File(s)              0 bytes
-               6 Dir(s)   6.297.546.752 bytes free
-
 C:\Documents and Settings\john>cd Desktop
-
-C:\Documents and Settings\john\Desktop>dir
-16/03/2017  08:19 ��    <DIR>          .
-16/03/2017  08:19 ��    <DIR>          ..
-16/03/2017  08:19 ��                32 user.txt
-               1 File(s)             32 bytes
-               2 Dir(s)   6.297.546.752 bytes free
-
 C:\Documents and Settings\john\Desktop>type user.txt
 e69af0e4f443de7e36876fda4ec7644f
 
 C:\Documents and Settings\john\Desktop>cd ../../
-
-C:\Documents and Settings>dir 
-16/03/2017  08:07 ��    <DIR>          .
-16/03/2017  08:07 ��    <DIR>          ..
-16/03/2017  08:07 ��    <DIR>          Administrator
-16/03/2017  07:29 ��    <DIR>          All Users
-16/03/2017  07:33 ��    <DIR>          john
-               0 File(s)              0 bytes
-               5 Dir(s)   6.297.542.656 bytes free
-
 C:\Documents and Settings>cd Administrator
-
 C:\Documents and Settings\Administrator>cd Desktop
-
 C:\Documents and Settings\Administrator\Desktop>type root.txt
 993442d258b0e0ec917cae9e695d5713
 ```

