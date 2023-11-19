@@ -8,7 +8,7 @@ tags: [Study Notes, Antisyphon]
 >   Source: [Antisyphon Training](https://www.antisyphontraining.com/live-courses-catalog/regular-expressions-your-new-lifestyle-w-joff-thyer/)
 >
 
-# I. Regular Expressions (RegEx)
+# I. Vanilla Regular Expressions (RegEx)
 
 ### RegEx are like PACMAN
 
@@ -102,11 +102,13 @@ Our ReGex could be
 ### Examples of RegEx
 
 -   `0x[A-Fa-f0-9]+` matches any hexadecimal
+
 -   `^4[0-9]{12}(?:[0-9]{3})?$` matches any VISA credit card number
     -   -   Beginning and end assertation with `^` and `$`
         -   Must start with 4 followed by 12 required digits `4[0-9]{12}`
         -   Group of three digits at end is optional `([0-9]{3})?`
         -   Capture group behaviour is disabled `?:`
+
 -   `^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$` matches any MasterCard credit card number
     -   Beginning and end assertation with `^` and `$`
     -   Start with `51` - `55`, then 2 digits `5[1-5][0-9]{2}`
@@ -114,3 +116,34 @@ Our ReGex could be
     -   12 additional digits `[0-9]{12}`
     -   Capture group behaviour is disabled `?:`
 
+-   `(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)` matches any IPv4 address precisely
+
+    -   Matches `250` - `255`
+
+    -   Matches `200` - `249`
+
+    -   Matches `0` - `199`
+
+    -   Prior character match is optional
+
+    -   ```bash
+        # completely accurate match
+        (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}↵
+        (?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
+        ```
+
+
+
+
+# II. Linux RegEx
+
+
+
+`grep --color -Po "(?i)(?<=href=['\"])https?://[^'\"]+(?=['\"])”`
+
+disable case sensitivity
+look behind for “href=[‘\”]” (single or double quote)
+match anything that looks like a URL (with optional “s” for SSL/TLS)
+look ahead for single or double quote
+
+-   -o = show only nonempty parts of lines that match

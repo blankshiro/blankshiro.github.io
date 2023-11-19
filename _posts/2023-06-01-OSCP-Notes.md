@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Pentest Cheatsheet
+title: OSCP Notes
 date: 2023-06-01
-categories: [Cheatsheet, OSCP]
-tags: [Cheatsheet, OSCP]
+categories: [Cheatsheet, OSCP, OffSec]
+tags: [Cheatsheet, OSCP, OffSec]
 ---
 
 # Network
