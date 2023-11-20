@@ -5,7 +5,8 @@ date: 2023-10-01
 categories: [Research, LTE]
 tags: [Research, LTE]
 ---
->   Source: [NSE](https://nse.digital/pages/guides/Wireless/lte-hacking.html)
+>   Source: [NSE](https://nse.digital/pages/guides/Wireless/lte-hacking.html), [LTE is Vulnerable: Implementing Identity Spoofing and Denial-of-Service Attacks in LTE Networks](https://ieeexplore.ieee.org/abstract/document/9013397/)
+
 
 # I. What is LTE?
 LTE, or Long-Term Evolution, is a mobile telecommunication standard that represents the 4G generation of wireless technology. While it's commonly referred to as 4G LTE, it's essential to note that the original LTE doesn't fully meet the technical criteria of 4G and is sometimes called 3.95G. LTE Advanced is a significant improvement that aligns with the 4G standards and is widely used by carriers worldwide. It's crucial to recognize that LTE is an implementation of 4G standards.
@@ -27,8 +28,11 @@ The LTE network consists of three main components:
 4. Then these material will be contained in the authentication request message that will be sent to UE.
 5. After receiving the message, UE will send back an authentication response message to authenticate the network.
 6. If authentication is successful, then the UE will enter the security complete mode.
-7. With the message attachaccept arriving, the attach procedure is complete.
+7. With the message `attachaccept` arriving, the attach procedure is complete.
 > During initial attach, IMSI is transmitted through LTE air interface within plaintext messages. This gives an adversary a chance to receive these messages and IMSI inside.
+
+##### RPC Protocol
+
 
 # III. LTE Security
 LTE incorporates robust security measures to ensure the confidentiality, integrity, and authenticity of mobile communication. Key elements include a hardware-protected 128-bit key (K) stored in the SIM card and the carrier's network. The International Mobile Subscriber Identity (IMSI) number plays a crucial role in user authentication.
