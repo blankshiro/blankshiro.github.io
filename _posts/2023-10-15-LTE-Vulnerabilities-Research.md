@@ -14,6 +14,7 @@ LTE, or Long-Term Evolution, is a mobile telecommunication standard that represe
 The LTE network consists of three main components:
 - User Equipment (UE): Devices like mobile phones with SIM cards.
 - eNodeB (evolved NodeB): Base stations that connect UEs to the network.
+    - E-UTRAN is a geographical area which consists of several eNodeBs (base stations) which can provide LTE network services to UE within the cell. 
 - EPC (Evolved Packet Core): The core network responsible for routing and managing user sessions.
 
 ![LTE Architecture](https://nse.digital/pages/guides/images/lte-architecture.png)
