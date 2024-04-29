@@ -3,7 +3,7 @@ layout: post
 title: TryHackMe Principles of Security
 date: 2023-01-01
 categories: [TryHackMe, Methodology]
-tags: [TryHackMe, Methodology]
+tags: [TryHackMe, Methodology, CIA, Security Models]
 ---
 >   Source: [TryHackMe Principles of Security](https://tryhackme.com/room/principlesofsecurity)
 

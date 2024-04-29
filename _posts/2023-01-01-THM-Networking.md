@@ -3,7 +3,7 @@ layout: post
 title: TryHackMe Networking
 date: 2023-01-01
 categories: [TryHackMe, Methodology]
-tags: [TryHackMe, Methodology]
+tags: [TryHackMe, Methodology, OSI Model]
 ---
 >   Source: [TryHackMe Networking](https://tryhackme.com/room/introtonetworking)
 
