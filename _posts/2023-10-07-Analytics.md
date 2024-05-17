@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Template
+title: Analytics
 date: 2023-10-07
 categories: [HackTheBox, Linux, Easy]
 tags: [HackTheBox, Linux, Easy]
@@ -36,7 +36,7 @@ Here is the website.
 
 
 
-![webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Analytics/website.png?raw=true)
+![webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Analytics/webpage.png?raw=true)
 
 Here is the login page.
 
