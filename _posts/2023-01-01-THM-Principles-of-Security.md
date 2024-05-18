@@ -17,8 +17,6 @@ Confidentiality involves safeguarding data from unauthorized access and misuse. 
 
 Ensuring confidentiality means protecting this data from individuals or entities not intended to access it. Access controls, vetting procedures, and strict access management play a pivotal role in upholding confidentiality. 
 
-For instance, HR administrators should have exclusive access to employee records, while accounting documents may have less stringent access controls. Government entities often employ sensitivity classification systems to categorize data (e.g., top-secret, classified, unclassified).
-
 **Integrity**:
 
 Integrity pertains to maintaining the accuracy and consistency of information, barring authorized changes. Information can be inadvertently altered due to careless access, system errors, or unauthorized intrusion. Integrity is preserved when information remains unaltered during storage, transmission, and usage that doesn't involve authorized modifications. 
@@ -55,7 +53,7 @@ The Bell-La Padula Model is used to achieve confidentiality. This model has a fe
 
 | **Advantages**                                               | **Disadvantages**                                            |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Policies in this model can be replicated to real-life organisations hierarchies (and vice versa) | Even though a user may not have access to an object, they will know about its existence -- so it's not confidential in that aspect. |
+| Policies in this model can be replicated to real-life organisations hierarchies (and vice versa). | Even though a user may not have access to an object, they will know about its existence - so it's not confidential in that aspect. |
 | Simple to implement and understand, and has been proven to be successful. | The model relies on a large amount of trust within the organisation. |
 
 ![img](https://tryhackme-images.s3.amazonaws.com/user-uploads/5de96d9ca744773ea7ef8c00/room-content/0e6e5d9d80785fc287b4a67e1453b295.png)
