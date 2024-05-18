@@ -2,8 +2,8 @@
 layout: post
 title: Devvortex
 date: 2023-11-25
-categories: [HackTheBox, Windows]
-tags: [HackTheBox, Windows]
+categories: [HackTheBox, Linux]
+tags: [HackTheBox, Linux]
 ---
 
 # Machine Synopsis
@@ -116,13 +116,7 @@ $ curl "http://dev.devvortex.htb/api/index.php/v1/users?public=true" | jq .
         "name": "lewis",
         "username": "lewis",
         "email": "lewis@devvortex.htb",
-        "block": 0,
-        "sendEmail": 1,
-        "registerDate": "2023-09-25 16:44:24",
-        "lastvisitDate": "2023-10-29 16:18:50",
-        "lastResetTime": null,
-        "resetCount": 0,
-        "group_count": 1,
+		...
         "group_names": "Super Users"
       }
     },
@@ -134,13 +128,7 @@ $ curl "http://dev.devvortex.htb/api/index.php/v1/users?public=true" | jq .
         "name": "logan paul",
         "username": "logan",
         "email": "logan@devvortex.htb",
-        "block": 0,
-        "sendEmail": 0,
-        "registerDate": "2023-09-26 19:15:42",
-        "lastvisitDate": null,
-        "lastResetTime": null,
-        "resetCount": 0,
-        "group_count": 1,
+		...
         "group_names": "Registered"
       }
     }
@@ -162,102 +150,7 @@ $ curl "http://dev.devvortex.htb/api/index.php/v1/config/application?public=true
     "last": "http://dev.devvortex.htb/api/index.php/v1/config/application?public=true&page%5Boffset%5D=60&page%5Blimit%5D=20"
   },
   "data": [
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "offline": false,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "offline_message": "This site is down for maintenance.<br>Please check back again soon.",
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "display_offline_message": 1,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "offline_image": "",
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "sitename": "Development",
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "editor": "tinymce",
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "captcha": "0",
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "list_limit": 20,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "access": 1,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "debug": false,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "debug_lang": false,
-        "id": 224
-      }
-    },
-    {
-      "type": "application",
-      "id": "224",
-      "attributes": {
-        "debug_lang_const": true,
-        "id": 224
-      }
-    },
+  ...
     {
       "type": "application",
       "id": "224",
