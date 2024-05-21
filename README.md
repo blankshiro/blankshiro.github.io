@@ -14,17 +14,18 @@ able to enjoy the out-of-the-box experience when using feature-rich themes.
 To fully use all the features of **Chirpy**, you need to copy the other critical files from the theme's gem to your
 Jekyll site. The following is a list of targets:
 
-```shell
+```shell {"id":"01HYCRRBVE76EDQTGKH61F9XG3"}
 .
 ├── _config.yml
 ├── _plugins
 ├── _tabs
 └── index.html
 
+
 ```
 
 To save you time, and also in case you lose some files while copying, we extract those files/configurations of the
-latest version of the **Chirpy** theme and the [CD](https://en.wikipedia.org/wiki/Continuous_deployment) workflow to here, so that you can start writing in minutes.
+latest version of the __Chirpy__ theme and the [CD](https://en.wikipedia.org/wiki/Continuous_deployment) workflow to here, so that you can start writing in minutes.
 
 ## Prerequisites
 
@@ -38,8 +39,9 @@ Sign in to GitHub and [**use this template**](https://github.com/cotes2020/chirp
 
 Then clone it to your local machine and run:
 
-```console
+```console {"id":"01HYCRRBVE76EDQTGKH83VKY9Y"}
 $ bundle
+
 
 ```
 
