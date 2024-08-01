@@ -1,14 +1,14 @@
 ---
 layout: post
 title: Mobile Notes
-date: 2024-07-01
-tags: [Cheatsheet]
+date: 2024-08-01
+tags: [Mobile, Cheatsheet]
 ---
 
 # Mobile
 ## iOS
 ### Jailbreaking iOS device
-```shell
+```bash
 # https://canijailbreak.com/
 
 # checkra1n Jailbreak (https://aupsham98.medium.com/practical-ios-penetration-testing-a-step-by-step-guide-8214d35aaf3c)
@@ -25,7 +25,7 @@ checkra1n app> install Cydia
 ```
 
 ### Installing Tools on iOS device
-```shell
+```bash
 # Add Akemi and Frida repo to Cydia
 Cydia > Manage > Sources > Edit > Add Sources https://cydia.akemi.ai/ and https://build.frida.re
 
@@ -44,8 +44,17 @@ $ docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf:
 $ pip install frida-tools
 ```
 
+### Setting Up Burp Proxy
+```bash
+BurpSuite> Proxy > Options > Proxy Listeners > select "Bind to address: All interfaces"
+iOS device> Settings > Wi-Fi > Wi-Fi network connected > Configure Proxy >  Manual > Server = IP address of laptop > Port 8080 
+iOS device> open Safari browser > go to http://burp > download certificate and click Allow
+iOS device> Settings > General > Profile > Portswigger CA > Install
+iOS device> Settings > General > About > Certificate Trust Settings > Enable
+```
+
 ### Installing and Obtaining IPA files on jailbroken iOS device
-```shell
+```bash
 # Installing IPA file
 $ idevicename
 $ ideviceinstaller -i file.ipa
@@ -64,4 +73,9 @@ $ sudo pip install -r requirements.txt --upgrade
 $ frida-ps -Ua
 $ iproxy 2222 22
 $ ./dump.py APP_NAME -u root -P password
+```
+
+### Static Testing of iOS Application
+```bash
+MobSF> Drag and drop IPA file into interface and run static analysis
 ```
