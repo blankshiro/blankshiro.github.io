@@ -103,6 +103,25 @@ pacu> exec ec2__enum data EC2
 pacu> exec iam__privesc_scan
 ```
 
+##### Using automated tool `prowler`
+
+```bash
+AWS Dashboard> Click on Access Key and copy the aws_access_key_id, aws_secret_access_key and aws_session_token
+# Put the information into local config and credentials folder
+$ cd ~/.aws/
+$ cat config
+[accountID]
+aws_access_key_id=ASIA...
+aws_secret_access_key=<secret_key>
+aws_session_token=<token>
+$ cat credentials
+[accountID]
+aws_access_key_id=ASIA...
+aws_secret_access_key=<secret key>
+aws_session_token=<token>
+$ python3 prowler.py aws -R arn:aws:iam::accountID:role/roleName
+```
+
 ### Azure
 
 ```bash
