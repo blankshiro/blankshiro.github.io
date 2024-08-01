@@ -106,6 +106,11 @@ pacu> exec iam__privesc_scan
 ##### Using automated tool `prowler`
 
 ```bash
+$ git clone https://github.com/prowler-cloud/prowler
+$ cd prowler
+$ poetry shell
+$ poetry install
+
 AWS Dashboard> Click on Access Key and copy the aws_access_key_id, aws_secret_access_key and aws_session_token
 # Put the information into local config and credentials folder
 $ cd ~/.aws/
