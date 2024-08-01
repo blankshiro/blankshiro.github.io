@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox October
 date: 2017-04-20
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

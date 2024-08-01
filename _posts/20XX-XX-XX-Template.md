@@ -2,7 +2,6 @@
 layout: post
 title: Template
 date: 20XX-XX-XX
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

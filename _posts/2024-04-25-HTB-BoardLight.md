@@ -40,8 +40,6 @@ Nmap done: 1 IP address (1 host up) scanned in 6.76 seconds
 
 Add `board.htb` into our hosts file.
 
-
-
 ```bash
 $ ffuf -u "http://board.htb" -H "Host: FUZZ.board.htb" -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt
 ...
@@ -67,20 +65,11 @@ crm                     [Status: 200, Size: 6360, Words: 397, Lines: 150, Durati
 
 Add `crm.board.htb` to the hosts file.
 
-![crm_website](C:\Users\edwin\Documents\GitHub\blankshiro.github.io\assets\img\HackTheBox\BoardLight\crm_website.png)
+![crm_website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/BoardLight/crm_website.png?raw=true)
 
 The credentials `admin:admin` worked but the admin dashboard showed `Access is denied.`
 
-![admin_access_denied](C:\Users\edwin\Documents\GitHub\blankshiro.github.io\assets\img\HackTheBox\BoardLight\admin_access_denied.png)
-
-
-
-```
-# To use images
-![image](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/NAMEOFMACHINE/image.png?raw=true)
-```
-
-
+![admin_access_denied](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/BoardLight/admin_access_denied.png?raw=true)
 
 # Exploitation
 
@@ -150,10 +139,6 @@ Found the password `serverfun2$2023!!` and turns out this password is for `laris
 
 # Privilege Escalation
 
-
-
-
-
 ```bash
 $ cd /usr/share/peass/linpeas
 $ ls
@@ -189,8 +174,6 @@ CVE-2022-37706
 mount: /dev/../tmp/: can't find in /etc/fstab.
 # 
 ```
-
-
 
 
 
