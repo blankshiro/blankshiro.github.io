@@ -34,7 +34,7 @@ Nmap done: 1 IP address (1 host up) scanned in 6.76 seconds
 
 
 
-![website](C:\Users\edwin\Documents\GitHub\blankshiro.github.io\assets\img\HackTheBox\BoardLight\website.png)
+![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/BoardLight/website.png?raw=true)
 
 >   At the footer of the webpage: `© 2020 All Rights Reserved By Board.htb`.
 
