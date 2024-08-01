@@ -2,7 +2,6 @@
 layout: post
 title: TwoMillion
 date: 2023-06-07
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

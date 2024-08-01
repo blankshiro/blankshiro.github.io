@@ -2,7 +2,6 @@
 layout: post
 title: Regular Expressions
 date: 2023-11-01
-categories: [Study Notes, Antisyphon]
 tags: [Study Notes, Antisyphon]
 ---
 >   Source: [Antisyphon Training](https://www.antisyphontraining.com/live-courses-catalog/regular-expressions-your-new-lifestyle-w-joff-thyer/)

@@ -1,8 +1,7 @@
 ---
 layout: post
-title: Surveillance
+title: HackTheBox Surveillance
 date: 2024-12-09
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

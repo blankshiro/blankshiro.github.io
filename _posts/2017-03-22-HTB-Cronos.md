@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Cronos
 date: 2017-03-22
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

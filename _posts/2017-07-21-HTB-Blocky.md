@@ -2,9 +2,7 @@
 layout: post
 title: HackTheBox Blocky
 date: 2017-07-21
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
-image: https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/image_previews/htb-blocky.png?raw=true
 ---
 
 # Machine Synopsis

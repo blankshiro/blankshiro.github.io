@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Popcorn
 date: 2017-03-15
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

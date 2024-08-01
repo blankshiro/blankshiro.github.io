@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Sunday
 date: 2018-04-28
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

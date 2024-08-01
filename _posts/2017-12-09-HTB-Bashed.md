@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Bashed 
 date: 2017-12-09
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

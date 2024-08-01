@@ -2,9 +2,7 @@
 layout: post
 title: HackTheBox Legacy
 date: 2017-03-15
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
-image: https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/image_previews/htb-legacy.png?raw=true
 ---
 
 # Machine Synopsis

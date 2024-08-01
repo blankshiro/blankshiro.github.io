@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Brainfuck
 date: 2017-04-29
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux, Insane]
 ---
 

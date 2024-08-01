@@ -2,7 +2,6 @@
 layout: post
 title: OverTheWire Krypton
 date: 2017-02-01
-categories: [OverTheWire, Krypton]
 tags: [OverTheWire, Krypton]
 ---
 

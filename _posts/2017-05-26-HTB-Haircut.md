@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Haircut
 date: 2017-05-26
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

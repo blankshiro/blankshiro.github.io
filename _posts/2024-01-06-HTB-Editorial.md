@@ -1,8 +1,7 @@
 ---
 layout: post
-title: Editorial
+title: HackTheBox Editorial
 date: 2024-01-06
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

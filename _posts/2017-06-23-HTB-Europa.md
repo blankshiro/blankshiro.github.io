@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Europa
 date: 2017-06-23
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

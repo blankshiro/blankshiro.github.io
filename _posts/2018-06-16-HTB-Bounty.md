@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Bounty 
 date: 2018-06-16
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

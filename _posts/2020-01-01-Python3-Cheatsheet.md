@@ -2,7 +2,6 @@
 layout: post
 title: Python3 Cheatsheet
 date: 2020-01-01
-categories: [Cheatsheet, Python3]
 tags: [Cheatsheet, Python3]
 ---
 

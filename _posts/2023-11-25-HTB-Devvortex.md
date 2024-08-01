@@ -1,8 +1,7 @@
 ---
 layout: post
-title: Devvortex
+title: HackTheBox Devvortex
 date: 2023-11-25
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

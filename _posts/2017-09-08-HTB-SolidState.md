@@ -2,9 +2,7 @@
 layout: post
 title: HackTheBox SolidState
 date: 2017-09-08
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
-image: https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/image_previews/htb-solidstate.png?raw=true
 ---
 
 # Machine Synopsis

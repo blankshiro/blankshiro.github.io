@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Arctic 
 date: 2017-03-22
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

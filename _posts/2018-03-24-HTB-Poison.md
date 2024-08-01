@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Poison
 date: 2018-03-24
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

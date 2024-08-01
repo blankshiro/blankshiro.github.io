@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Nineveh
 date: 2017-08-04
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

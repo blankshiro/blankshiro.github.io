@@ -2,7 +2,6 @@
 layout: post
 title: OverTheWire Leviathan
 date: 2017-03-01
-categories: [OverTheWire, Leviathan]
 tags: [OverTheWire, Leviathan]
 ---
 

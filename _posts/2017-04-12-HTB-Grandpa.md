@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Grandpa
 date: 2017-04-12
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

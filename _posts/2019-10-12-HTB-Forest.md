@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Forest
 date: 2019-10-12
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

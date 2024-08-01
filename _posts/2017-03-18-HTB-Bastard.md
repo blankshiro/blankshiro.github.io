@@ -2,7 +2,6 @@
 layout: post
 title:  HackTheBox Bastard
 date: 2017-03-18
-categories: [HackTheBox, Windows]
 tags: [HackTheBox, Windows]
 ---
 

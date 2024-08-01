@@ -1,8 +1,7 @@
 ---
 layout: post
-title: Codify
+title: HackTheBox Codify
 date: 2023-11-04
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

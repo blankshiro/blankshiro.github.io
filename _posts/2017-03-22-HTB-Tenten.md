@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Tenten
 date: 2017-03-22
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

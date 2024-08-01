@@ -2,7 +2,6 @@
 layout: post
 title: CRTE Notes
 date: 2023-12-01
-categories: [Cheatsheet, Study Notes, Altered Security]
 tags: [Cheatsheet, Study Notes, Altered Security]
 ---
 >   Source: [Altered Security](https://www.alteredsecurity.com/redteamlab)

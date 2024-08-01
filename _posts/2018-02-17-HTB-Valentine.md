@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox Valentine
 date: 2018-02-17
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

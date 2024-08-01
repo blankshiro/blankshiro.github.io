@@ -2,7 +2,6 @@
 layout: post
 title: OverTheWire Bandit
 date: 2017-01-01
-categories: [OverTheWire, Bandit]
 tags: [OverTheWire, Bandit]
 ---
 

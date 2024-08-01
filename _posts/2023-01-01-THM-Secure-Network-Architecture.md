@@ -2,7 +2,6 @@
 layout: post
 title: TryHackMe Secure Network Architecture
 date: 2023-01-01
-categories: [TryHackMe, Methodology]
 tags: [TryHackMe, Methodology]
 ---
 >   Source: [Secure Network Architecture](https://tryhackme.com/room/introtosecurityarchitecture)

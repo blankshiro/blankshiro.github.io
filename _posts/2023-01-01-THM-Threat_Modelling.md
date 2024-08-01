@@ -2,7 +2,6 @@
 layout: post
 title: TryHackMe Threat Modelling
 date: 2023-01-01
-categories: [TryHackMe, Methodology]
 tags: [TryHackMe, Methodology, MITRE ATT&CK, DREAD, STRIDE, PASTA]
 ---
 >   Source: [TryHackMe Threat Modelling](https://tryhackme.com/room/threatmodelling)

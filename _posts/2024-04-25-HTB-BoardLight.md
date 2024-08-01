@@ -1,14 +1,13 @@
 ---
 layout: post
-title: Template
-date: 20XX-XX-XX
-categories: [HackTheBox, Windows]
+title: HackTheBox Template
+date: 2024-04-25
 tags: [HackTheBox, Windows]
 ---
 
 # Machine Synopsis
 
-ABC. ([Source](https://www.hackthebox.com/machines/abc))
+Currently Locked. ([Source](https://www.hackthebox.com/machines/boardlight))
 
 # Enumeration
 

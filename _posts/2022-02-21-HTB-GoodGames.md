@@ -2,7 +2,6 @@
 layout: post
 title: HackTheBox GoodGames
 date: 2022-02-21
-categories: [HackTheBox, Linux]
 tags: [HackTheBox, Linux]
 ---
 

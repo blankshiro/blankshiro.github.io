@@ -1,8 +1,7 @@
 ---
 layout: post
-title: Analytics
+title: HackTheBox Analytics
 date: 2023-10-07
-categories: [HackTheBox, Linux, Easy]
 tags: [HackTheBox, Linux, Easy]
 ---
 
