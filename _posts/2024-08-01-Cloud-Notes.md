@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Cloud Notes
-date: 2024-07-01
-tags: [Cheatsheet]
+date: 2024-08-01
+tags: [Cloud, Cheatsheet]
 ---
 
 # Cloud

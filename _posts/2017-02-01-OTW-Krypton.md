@@ -2,7 +2,7 @@
 layout: post
 title: OverTheWire Krypton
 date: 2017-02-01
-tags: [OverTheWire, Krypton]
+tags: [OverTheWire]
 ---
 
 # Level 0

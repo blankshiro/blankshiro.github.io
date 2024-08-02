@@ -2,7 +2,7 @@
 layout: post
 title: OverTheWire Bandit
 date: 2017-01-01
-tags: [OverTheWire, Bandit]
+tags: [OverTheWire]
 ---
 
 # Level 0

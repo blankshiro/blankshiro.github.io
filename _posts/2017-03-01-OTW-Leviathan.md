@@ -2,7 +2,7 @@
 layout: post
 title: OverTheWire Leviathan
 date: 2017-03-01
-tags: [OverTheWire, Leviathan]
+tags: [OverTheWire]
 ---
 
 # Level 0
