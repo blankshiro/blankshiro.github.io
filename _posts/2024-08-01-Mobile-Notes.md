@@ -50,6 +50,19 @@ $ docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf:
 $ pip install frida-tools
 ```
 
+### SSH Into iOS Device
+```bash
+! Make sure that your iOS device is in the same network as your computer !
+! Make sure that your iOS device has openSSH installed !
+iOS> go to WiFi settings and look for the ip address
+computer> ssh root@192.168.1.XXX
+```
+
+##### Copying files to iOS Device using SSH
+```bash
+ssh$ scp file root@192.168.1.XXX:/var/tmp/
+```
+
 ### Setting Up Burp Proxy
 ```bash
 BurpSuite> Proxy > Options > Proxy Listeners > select "Bind to address: All interfaces"
