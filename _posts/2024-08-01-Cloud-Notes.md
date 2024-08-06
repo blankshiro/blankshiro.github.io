@@ -94,7 +94,9 @@ pacu> ls
 # Run an AWS CLI command directly.
 pacu> aws <command>
 # Assume role as another user.
-pacu> assume_role arn:aws:iam::ACCOUNTIDHERE:role/u-vaptEngineer
+pacu> assume_role arn:aws:iam::ACCOUNTIDHERE:role/u-roleName
+# Set region to prevent bruteforce
+pacu> set_regions ap-southeast-1 # Singapore
 # Execute a module
 pacu> run/exec <module name>
 # Get the permission of current logged-in user 
