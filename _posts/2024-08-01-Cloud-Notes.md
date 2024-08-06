@@ -93,6 +93,8 @@ pacu> set_keys
 pacu> ls
 # Run an AWS CLI command directly.
 pacu> aws <command>
+# Assume role as another user.
+pacu> assume_role arn:aws:iam::ACCOUNTIDHERE:role/u-vaptEngineer
 # Execute a module
 pacu> run/exec <module name>
 # Get the permission of current logged-in user 
