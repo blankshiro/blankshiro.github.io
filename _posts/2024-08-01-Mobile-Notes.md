@@ -38,7 +38,14 @@ $ docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf:
 MOBSF> credentials are mobsf:mobsf
 
 # Frida
-$ pip install frida-tools
+$ pip install frida-tools # install frida-tools on computer
+iOS> add source https://build.frida.re
+$ wget https://github.com/frida/frida/releases/frida_16.1.8_iphoneos-arm64.deb
+$ scp frida_16.1.8_iphoneos-arm64.deb root@192.168.1.XXX:/var/tmp/
+ssh$ dpkg -i frida_16.1.8_iphoneos-arm64.deb
+ssh$ ps aux | grep frida # check if frida is running
+ssh$ /usr/sbin/frida-server -l 0.0.0.0 &
+$ frida-ps -H 192.168.1.XXX # check if frida commands can run
 
 # Objection
 $ pip3 install objection
@@ -80,7 +87,7 @@ $ idevicename
 $ ideviceinstaller -i file.ipa
 
 # Obtaining installed IPA file
-$ find /var/ -name "*.app"'
+$ find /var/ -name "*.app"
 $ cd /tmp
 $ mkdir Payload
 $ cp -r /location/of/AppName.app Payload/
