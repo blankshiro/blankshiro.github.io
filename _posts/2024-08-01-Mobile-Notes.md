@@ -35,6 +35,7 @@ $ ssh root@localhost 2222
 # MOBSF
 $ docker pull opensecurity/mobile-security-framework-mobsf:latest
 $ docker run -it --rm -p 8000:8000 opensecurity/mobile-security-framework-mobsf:latest
+MOBSF> credentials are mobsf:mobsf
 
 # Frida
 $ pip install frida-tools
