@@ -198,7 +198,7 @@ PS> $app= Get-MgApplication -ApplicationId [ApplicationObjectID]
 PS> $app.RequiredResourceAccess
 # Get the details of App Role for Microsoft Graph API
 PS> $res=Get-MgServicePrincipal -Filter "DisplayName eq 'Microsoft Graph'"
-PS> $res.AppRoles | Where-Object {$_.ID -eq 'AppRoleID’} | ConvertTo-Json
+PS> $res.AppRoles | Where-Object {$_.ID -eq 'AppRoleID’} | ConvertTo-Json}
 # Get the details about delegation permission for an application
 PS> $app= Get-MgApplication -ApplicationId [ApplicationObjectID]
 PS> $app.Oauth2RequirePostResponse | ConvertTo-Json
