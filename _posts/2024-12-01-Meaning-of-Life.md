@@ -49,10 +49,10 @@ It’s a wild idea, but it makes sense. If life is absurd, why not embrace the a
 
 ------
 
-## So, What Now?
+## A Brief Embrace of the Darkness
 
-*I don’t know*. Here’s the thing: if life is meaningless, that means it’s up to *you* to decide what matters. There’s no cosmic scoreboard. No one’s keeping track. You get to define your own purpose—or not. You can take it seriously or treat it like the weird game it is. Either way, the only thing that really matters is how *you* feel about it.
+Here’s the thing: if life is meaningless, that means it’s up to *you* to decide what matters. There’s no cosmic scoreboard. No one’s keeping track. You get to define your own purpose—or not. You can take it seriously or treat it like the weird game it is. Either way, the only thing that really matters is how *you* feel about it.
 
 Maybe the secret isn’t in finding some grand purpose but in learning to appreciate the absurdity of it all. Life doesn’t have to make sense to be worth living. It doesn’t have to be profound to be beautiful. Sometimes, it’s enough to just exist, to laugh, to love, and to push your boulder up the hill one more time.
 
-So, here’s to the absurd. Here’s to the chaos. And here’s to finding joy in the meaningless mess of it all.
+Eventually, the boulder will roll back down, and we’ll go after it again. No fanfare, no grand finale, just another day in the loop. And maybe that’s the real punchline of it all: we keep marching on, knowing nothing’s going to change. The universe won’t bend for us, and whatever meaning we cobble together is, in the end, as empty as the space we drift through.
