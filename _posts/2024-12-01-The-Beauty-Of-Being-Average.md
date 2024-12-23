@@ -5,34 +5,64 @@ date: 2024-12-01
 tags: [Nihilism, Absurdity, Philosophy]
 ---
 
-# The Beauty of Being Average: Rethinking the “Failure” Myth
+# The Tyranny of Greatness: How the Myth of "Average Is Failure" Corrupted Us
 
-We live in a world obsessed with greatness. From the moment we’re old enough to grasp a pencil, we’re fed a narrative that tells us to stand out, to excel, to be exceptional. In school, the word “average” is marked in red ink on report cards, a scarlet letter of mediocrity. In the workplace, being “average” means you’re replaceable. Social media amplifies this pressure, bombarding us with highlight reels of extraordinary achievements, as if to whisper, “Why aren’t you doing more?”
+From the moment we could grasp the world in language, a narrative was planted in our minds: **you must stand out.** Be extraordinary. Win. Innovate. Excel. Average is failure, and mediocrity is a fate worse than death. This is the gospel we inherited, preached by well-meaning parents, ambitious educators, and the endless cacophony of a world obsessed with greatness.
 
-Somewhere along the way, we internalized the idea that being average is a failure. But what if we’ve misunderstood what it means to live a fulfilling life? What if being average isn’t a failure but a celebration of being human?
+And we believed it. How could we not?
 
-------
+We internalized the idea that life is a ladder, every rung a competition for worth. Anything short of brilliance—whether academic, professional, or personal—was cast as insignificance. Being average wasn't just undesirable; it was synonymous with being invisible.
 
-## The Myth of Greatness
+And who wants to be invisible?
 
-The narrative begins young. “Aim for the stars,” they say, “Be the best.” On the surface, these aspirations sound noble. After all, ambition isn’t inherently bad. But the shadow side of this ideology is the toxic implication that anything less than greatness is a waste of potential. It’s a cruel calculus: if you’re not the best athlete, the most brilliant scholar, the wealthiest entrepreneur, or the most attractive person in the room, then you’ve somehow fallen short.
-
-This belief isn’t just unrealistic—it’s unsustainable. In a society where only a fraction of people can be in the top 1%, the pursuit of constant exceptionalism leaves the majority feeling inadequate. And the irony is that the very systems built to reward “greatness” often rely on the contributions of those who embody the so-called “average.”
+But beneath the surface of this relentless pursuit of "more," "better," and "best," a question festers like a wound: **What if we were wrong? What if average is not failure—but freedom?**
 
 ------
 
-## The Quiet Dignity of an Ordinary Life
+## The Poison in the Promise of Perfection
 
-What’s wrong with being average? Think about it. Most of us will live ordinary lives. We’ll have jobs that provide stability rather than fame. We’ll love people deeply, form families or communities, and leave small but meaningful legacies. We’ll enjoy simple pleasures—a sunset, a good book, a laugh with friends. Is this truly a failure?
+To strive for greatness is, on the surface, an admirable thing. Ambition drives progress; it builds skyscrapers, sends us to the stars, and sculpts symphonies out of silence. But there’s a darker side to this pursuit, one we rarely acknowledge: when greatness is demanded, worth is conditional.
 
-In reality, the things that make life worthwhile are often found in the realm of the ordinary. There’s beauty in the mundane rituals of daily existence, in finding joy not in comparison but in presence. Loving someone well, raising a kind child, being a dependable friend, or showing up every day with integrity—these are not failures. They’re triumphs that rarely make headlines.
+Think about it. What does this culture of exceptionalism teach us? That our value is tied to how much we achieve. That being “enough” is contingent on a constant proving of ourselves. We’re told to hustle, to grind, to optimize every waking second. Rest becomes laziness. Contentment morphs into complacency. And the crushing weight of it all whispers, **If you are not special, you are nothing.**
+
+This is the poison: the belief that to be human is to transcend humanity. That we must constantly climb, endlessly innovate, and ceaselessly distinguish ourselves to justify our existence. The promise of perfection dangles like a carrot we’ll never quite reach.
+
+And what does it leave in its wake? Burnout. Anxiety. Depression. A society of people convinced they’re not good enough because they’re not extraordinary.
 
 ------
 
-## A Darker Truth
+## What We Lost When We Stopped Embracing “Enough”
 
-And yet, no matter how much we tell ourselves to embrace this ordinariness, a quiet despair lingers. Society doesn’t just value greatness—it demands it. The world runs on hierarchies, and the average often sinks to the bottom, ignored, overshadowed, or dismissed. You can embrace your average life, but you can’t escape the reality that others will always view it as less than enough. There’s a painful isolation in being part of the unnoticed masses, in knowing that the world has little room for those who choose simplicity over spectacle.
+This narrative of greatness robs us of something sacred: the ability to find meaning in the mundane. We’ve been trained to dismiss the quiet, unremarkable aspects of life as trivial. But isn’t the everyday—the morning coffee, the laughter of friends, the softness of dusk—where life truly happens?
 
-Even in finding comfort in ordinariness, there’s a gnawing fear: the fear that the quiet dignity of your average life will fade into obscurity, unremarked and forgotten. We tell ourselves stories about the value of small joys, of quiet lives, but deep down, we know that most people die unremembered, their contributions swallowed by the endless tide of time.
+When was the last time you felt peace in being *average*? In being a speck in the universe, a piece of the grand, chaotic puzzle? We resist this because it feels like surrender. But what if it’s not?
 
-To be average is to live in the shadow of a system that doesn’t celebrate you. It’s to exist with the bittersweet knowledge that your life, while deeply meaningful to you and your loved ones, may not matter much to the world at large. And maybe that’s the hardest truth of all: being average isn’t a failure—but it doesn’t mean the world will care.
+What if embracing “enough” is the rebellion? To reject the tyranny of greatness is to reclaim the joy in simplicity. It is to step off the ladder and say, **I exist, and that is sufficient.**
+
+------
+
+## The Psychological Toll of Believing “Average Is Failure”
+
+When we bought into the idea that being average is failure, we didn’t just set ourselves up for disappointment—we fractured our sense of self. We began to see our identity not as a fluid, multifaceted being but as a measurable performance. Success became our compass, even when the map it offered led us into emotional deserts.
+
+This belief taught us to fear mediocrity. But worse, it made us fear ourselves—our true selves. The self that is not always productive, not always brilliant, not always “on.” The self that stumbles, that rests, that sometimes just exists.
+
+When we reject our ordinariness, we reject our humanity.
+
+------
+
+## Reclaiming the Beauty of Being Human
+
+Here’s the truth no one tells us: most of us will be average. By definition, we must be. There will always be those brighter, faster, richer, stronger. But this is not a failure; it is balance. To be human is not to be exceptional in everything—it is to exist in the spectrum of the ordinary.
+
+What if we stopped running from this? What if we embraced our averageness as a testament to our shared humanity? Average is not failure—it’s connection. It’s the bond of knowing that we, like everyone else, are striving, hurting, laughing, and loving. It’s the quiet beauty of living, not as a spectacle, but as a symphony of small, meaningful moments.
+
+------
+
+## The Radical Act of Letting Go
+
+Letting go of the myth that average is failure isn’t easy. It requires unlearning years of conditioning. It demands that we confront the emptiness we’ve filled with accolades, productivity, and status. But in that void, something profound waits: **freedom.**
+
+Freedom to simply exist without the crushing weight of expectations. Freedom to love yourself not for what you achieve, but for who you are. Freedom to define your own version of success—not based on greatness, but on wholeness.
+
+So here’s my challenge to you: dare to be average. Dare to be ordinary. In a world screaming for greatness, this might be the most radical, freeing act of all.
